@@ -1,0 +1,26 @@
+Third-party material in this directory and its licences
+=======================================================
+
+1. Stephen2011_ICALEPCS_FRAAULT04_CC-BY-3.0.pdf  (unmodified copy)
+   Stephen2011_FRAAULT04.txt                       (plain-text extraction of the same paper; derivative work)
+   A. V. Stephen et al., "Centralised Coordinated Control to Protect the JET ITER-like Wall",
+   Proc. ICALEPCS 2011, Grenoble, paper FRAAULT04, pp. 1293-1296. ISSN 2226-0358. No DOI (JACoW 2011).
+   https://accelconf.web.cern.ch/icalepcs2011/papers/fraault04.pdf
+   Copyright (c) 2011 by the respective authors. Licence: CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+
+2. Alves2011_ICALEPCS_WEPMN014_CC-BY-3.0.pdf  (unmodified copy)
+   D. Alves, A. Neto, D. F. Valcarcel, S. Jachmich et al., "The Software and Hardware Architectural Design of the
+   Vessel Thermal Map Real-Time System in JET", Proc. ICALEPCS 2011, paper WEPMN014, pp. 905-908.
+   https://accelconf.web.cern.ch/icalepcs2011/papers/wepmn014.pdf
+   Copyright (c) 2011 by the respective authors. Licence: CC BY 3.0.
+
+3. Waterhouse2025_sec3-4_excerpt_CC-BY-4.0.txt  (verbatim excerpt of section 3.4 and one sentence of section 3.3)
+   J. Waterhouse, M. Wheatley, A. Stephen, C. Hogben, G. Jones, A. Goodyear, T. Farmer, P. McCullen,
+   "JET CODAS - the final status", Fusion Engineering and Design 210 (2025) 114737.
+   https://doi.org/10.1016/j.fusengdes.2024.114737
+   Crown Copyright 2024, published by Elsevier B.V. Licence: CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
+
+Not copied (linked only, quoted within fair-quotation limits): Edwards et al. 2019 (FED 146, 277-280, DOI
+10.1016/j.fusengdes.2018.12.045; UKAEA preprint CP(19)30), Reux et al. 2013 (FED 88, 1101-1104, DOI
+10.1016/j.fusengdes.2012.12.026; EFDA-JET preprint CP(12)05/22), Jouve et al. 2011 (ICALEPCS WEPMU018, CC BY 3.0),
+Stuart et al. 2021 (FED 168, 112412).
