@@ -5,301 +5,302 @@
 
 import Base
 import ./jetprot.bend as S
+import ./spec_jetprot.bend as Spec
 import ./enum_jetprot.bend as E
 
 law pub_Breakdown_Slow:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
 
 law pub_IpRise_Slow:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Limiter_Slow:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Xpoint_Slow:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Heating1_Slow:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.Slow{}), S.LRtps{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.Slow{}), S.LRtps{}) == True{} : Bool}
 
 law pub_Heating2_Slow:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.Slow{}), S.LRtps{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.Slow{}), S.LRtps{}) == True{} : Bool}
 
 law pub_Termination_Slow:
-  {S.lvl_eq(S.table1(S.Termination{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.Slow{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Breakdown_Mhd:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_IpRise_Mhd:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_Limiter_Mhd:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_Xpoint_Mhd:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_Heating1_Mhd:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_Heating2_Mhd:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_Termination_Mhd:
-  {S.lvl_eq(S.table1(S.Termination{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law pub_Breakdown_Mchs:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
 
 law pub_IpRise_Mchs:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
 
 law pub_Limiter_Mchs:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
 
 law pub_Xpoint_Mchs:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.Mchs{}), S.LNone{}) == True{} : Bool}
 
 law pub_Heating1_Mchs:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.Mchs{}), S.LRtps{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.Mchs{}), S.LRtps{}) == True{} : Bool}
 
 law pub_Heating2_Mchs:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.Mchs{}), S.LRtps{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.Mchs{}), S.LRtps{}) == True{} : Bool}
 
 law pub_Termination_Mchs:
-  {S.lvl_eq(S.table1(S.Termination{}, S.Mchs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.Mchs{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Breakdown_Dhs:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
 
 law pub_IpRise_Dhs:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Limiter_Dhs:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Xpoint_Dhs:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Heating1_Dhs:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
 
 law pub_Heating2_Dhs:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.Dhs{}), S.LJtt{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.Dhs{}), S.LJtt{}) == True{} : Bool}
 
 law pub_Termination_Dhs:
-  {S.lvl_eq(S.table1(S.Termination{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.Dhs{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Breakdown_Fast:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_IpRise_Fast:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Limiter_Fast:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Xpoint_Fast:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Heating1_Fast:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Heating2_Fast:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Termination_Fast:
-  {S.lvl_eq(S.table1(S.Termination{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.Fast{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Breakdown_MhdB:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_IpRise_MhdB:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_Limiter_MhdB:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_Xpoint_MhdB:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_Heating1_MhdB:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_Heating2_MhdB:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_Termination_MhdB:
-  {S.lvl_eq(S.table1(S.Termination{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law asm_Breakdown_BothHs:
-  {S.lvl_eq(S.table1(S.Breakdown{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
 
 law asm_IpRise_BothHs:
-  {S.lvl_eq(S.table1(S.IpRise{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Limiter_BothHs:
-  {S.lvl_eq(S.table1(S.Limiter{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Xpoint_BothHs:
-  {S.lvl_eq(S.table1(S.Xpoint{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Heating1_BothHs:
-  {S.lvl_eq(S.table1(S.Heating1{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
 
 law asm_Heating2_BothHs:
-  {S.lvl_eq(S.table1(S.Heating2{}, S.BothHs{}), S.LRtps{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.BothHs{}), S.LRtps{}) == True{} : Bool}
 
 law asm_Termination_BothHs:
-  {S.lvl_eq(S.table1(S.Termination{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.BothHs{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Breakdown_Mhd:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law inst2_IpRise_Mhd:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law inst2_Limiter_Mhd:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.Mhd{}), S.LNone{}) == True{} : Bool}
 
 law inst2_Xpoint_Mhd:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Heating1_Mhd:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Heating2_Mhd:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Termination_Mhd:
-  {S.lvl_eq(S.table2(S.Termination{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.Mhd{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Breakdown_MhdB:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law inst2_IpRise_MhdB:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law inst2_Limiter_MhdB:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.MhdB{}), S.LNone{}) == True{} : Bool}
 
 law inst2_Xpoint_MhdB:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Heating1_MhdB:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Heating2_MhdB:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_Termination_MhdB:
-  {S.lvl_eq(S.table2(S.Termination{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.MhdB{}), S.LPtn{}) == True{} : Bool}
 
 law inst2_same_Breakdown_Slow:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.Slow{}), S.table1(S.Breakdown{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.Slow{}), S.table1(S.Breakdown{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_IpRise_Slow:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.Slow{}), S.table1(S.IpRise{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.Slow{}), S.table1(S.IpRise{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_Limiter_Slow:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.Slow{}), S.table1(S.Limiter{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.Slow{}), S.table1(S.Limiter{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_Xpoint_Slow:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.Slow{}), S.table1(S.Xpoint{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.Slow{}), S.table1(S.Xpoint{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_Heating1_Slow:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.Slow{}), S.table1(S.Heating1{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.Slow{}), S.table1(S.Heating1{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_Heating2_Slow:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.Slow{}), S.table1(S.Heating2{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.Slow{}), S.table1(S.Heating2{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_Termination_Slow:
-  {S.lvl_eq(S.table2(S.Termination{}, S.Slow{}), S.table1(S.Termination{}, S.Slow{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.Slow{}), S.table1(S.Termination{}, S.Slow{})) == True{} : Bool}
 
 law inst2_same_Breakdown_Fast:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.Fast{}), S.table1(S.Breakdown{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.Fast{}), S.table1(S.Breakdown{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_IpRise_Fast:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.Fast{}), S.table1(S.IpRise{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.Fast{}), S.table1(S.IpRise{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_Limiter_Fast:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.Fast{}), S.table1(S.Limiter{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.Fast{}), S.table1(S.Limiter{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_Xpoint_Fast:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.Fast{}), S.table1(S.Xpoint{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.Fast{}), S.table1(S.Xpoint{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_Heating1_Fast:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.Fast{}), S.table1(S.Heating1{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.Fast{}), S.table1(S.Heating1{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_Heating2_Fast:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.Fast{}), S.table1(S.Heating2{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.Fast{}), S.table1(S.Heating2{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_Termination_Fast:
-  {S.lvl_eq(S.table2(S.Termination{}, S.Fast{}), S.table1(S.Termination{}, S.Fast{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.Fast{}), S.table1(S.Termination{}, S.Fast{})) == True{} : Bool}
 
 law inst2_same_Breakdown_Mchs:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.Mchs{}), S.table1(S.Breakdown{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.Mchs{}), S.table1(S.Breakdown{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_IpRise_Mchs:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.Mchs{}), S.table1(S.IpRise{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.Mchs{}), S.table1(S.IpRise{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_Limiter_Mchs:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.Mchs{}), S.table1(S.Limiter{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.Mchs{}), S.table1(S.Limiter{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_Xpoint_Mchs:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.Mchs{}), S.table1(S.Xpoint{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.Mchs{}), S.table1(S.Xpoint{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_Heating1_Mchs:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.Mchs{}), S.table1(S.Heating1{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.Mchs{}), S.table1(S.Heating1{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_Heating2_Mchs:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.Mchs{}), S.table1(S.Heating2{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.Mchs{}), S.table1(S.Heating2{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_Termination_Mchs:
-  {S.lvl_eq(S.table2(S.Termination{}, S.Mchs{}), S.table1(S.Termination{}, S.Mchs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.Mchs{}), S.table1(S.Termination{}, S.Mchs{})) == True{} : Bool}
 
 law inst2_same_Breakdown_Dhs:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.Dhs{}), S.table1(S.Breakdown{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.Dhs{}), S.table1(S.Breakdown{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_IpRise_Dhs:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.Dhs{}), S.table1(S.IpRise{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.Dhs{}), S.table1(S.IpRise{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_Limiter_Dhs:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.Dhs{}), S.table1(S.Limiter{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.Dhs{}), S.table1(S.Limiter{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_Xpoint_Dhs:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.Dhs{}), S.table1(S.Xpoint{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.Dhs{}), S.table1(S.Xpoint{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_Heating1_Dhs:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.Dhs{}), S.table1(S.Heating1{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.Dhs{}), S.table1(S.Heating1{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_Heating2_Dhs:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.Dhs{}), S.table1(S.Heating2{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.Dhs{}), S.table1(S.Heating2{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_Termination_Dhs:
-  {S.lvl_eq(S.table2(S.Termination{}, S.Dhs{}), S.table1(S.Termination{}, S.Dhs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.Dhs{}), S.table1(S.Termination{}, S.Dhs{})) == True{} : Bool}
 
 law inst2_same_Breakdown_BothHs:
-  {S.lvl_eq(S.table2(S.Breakdown{}, S.BothHs{}), S.table1(S.Breakdown{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.BothHs{}), S.table1(S.Breakdown{}, S.BothHs{})) == True{} : Bool}
 
 law inst2_same_IpRise_BothHs:
-  {S.lvl_eq(S.table2(S.IpRise{}, S.BothHs{}), S.table1(S.IpRise{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.BothHs{}), S.table1(S.IpRise{}, S.BothHs{})) == True{} : Bool}
 
 law inst2_same_Limiter_BothHs:
-  {S.lvl_eq(S.table2(S.Limiter{}, S.BothHs{}), S.table1(S.Limiter{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.BothHs{}), S.table1(S.Limiter{}, S.BothHs{})) == True{} : Bool}
 
 law inst2_same_Xpoint_BothHs:
-  {S.lvl_eq(S.table2(S.Xpoint{}, S.BothHs{}), S.table1(S.Xpoint{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.BothHs{}), S.table1(S.Xpoint{}, S.BothHs{})) == True{} : Bool}
 
 law inst2_same_Heating1_BothHs:
-  {S.lvl_eq(S.table2(S.Heating1{}, S.BothHs{}), S.table1(S.Heating1{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.BothHs{}), S.table1(S.Heating1{}, S.BothHs{})) == True{} : Bool}
 
 law inst2_same_Heating2_BothHs:
-  {S.lvl_eq(S.table2(S.Heating2{}, S.BothHs{}), S.table1(S.Heating2{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.BothHs{}), S.table1(S.Heating2{}, S.BothHs{})) == True{} : Bool}
 
 law inst2_same_Termination_BothHs:
-  {S.lvl_eq(S.table2(S.Termination{}, S.BothHs{}), S.table1(S.Termination{}, S.BothHs{})) == True{} : Bool}
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.BothHs{}), S.table1(S.Termination{}, S.BothHs{})) == True{} : Bool}
 
 law dms_trig_Fast:
   {S.dms_trig(S.Fast{}) == True{} : Bool}

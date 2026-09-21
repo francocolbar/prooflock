@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 # NEGATIVE 3 (regression of H2) - a communication fault that latches PTN without
@@ -13,7 +14,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.Off{}}
 
 law ptn_deenergizes_on_commfault:
-  {S.pr_p2(witness(), to_ptn_bug(witness())) == True{} : Bool}
+  {Spec.pr_p2(witness(), to_ptn_bug(witness())) == True{} : Bool}
 
 def ptn_deenergizes_on_commfault():
   {==}

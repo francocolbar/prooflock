@@ -28,7 +28,7 @@ sys.path.insert(0, HERE)
 import jetprot_prod as prod  # noqa: E402
 from bridge_client import Bridge  # noqa: E402
 
-PROOFS = ["PROOF_JETPROT.bend", "PROOF_JETPROT_CONF.bend"]   # FIN, FIN_ALT and COR are imported by PROOF_JETPROT
+PROOFS = ["PROOF_JETPROT.bend", "PROOF_JETPROT_CONF.bend", "PROOF_JETPROT_SOUND.bend"]   # FIN, FIN_ALT and COR are imported by PROOF_JETPROT
 SMOKE_LINES = 6            # verdict lines the runtime smoke must print
 
 

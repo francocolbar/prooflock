@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 # NEGATIVE 1 - de-escalation: a soft request replaces the level without the comparison.
@@ -16,7 +17,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating2{}, S.LRtps{}, S.DmsIdle{}, True{}, S.Ramping{}, S.Off{}}
 
 law latched_survives_deescalation:
-  {S.pr_p1(S.Ord1{}, witness(), S.Stop{S.LJtt{}, False{}}, stop_fin_bug(witness(), S.LJtt{}, False{})) == True{} : Bool}
+  {Spec.pr_p1(S.Ord1{}, witness(), S.Stop{S.LJtt{}, False{}}, stop_fin_bug(witness(), S.LJtt{}, False{})) == True{} : Bool}
 
 def latched_survives_deescalation():
   {==}

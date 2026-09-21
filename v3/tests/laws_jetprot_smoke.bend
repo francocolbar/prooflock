@@ -3,6 +3,7 @@
 # a sample run through both configuration instances.
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 def line(name: String, ok: Bool) -> String:
@@ -13,7 +14,7 @@ def line(name: String, ok: Bool) -> String:
       "FALSE " ++ name ++ "\n"
 
 def lvl_is(a: S.Level, b: S.Level) -> Bool:
-  S.lvl_eq(a, b)
+  Spec.lvl_eq(a, b)
 
 # a few printed cells of Table 1 (the full 28 + 21 are laws in LAWS_JETPROT_CONF.bend)
 def table_cells() -> Bool:

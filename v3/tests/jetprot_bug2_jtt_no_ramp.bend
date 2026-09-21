@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 # NEGATIVE 2 (regression of H2/H16) - a JTT that moves the phase to Termination without
@@ -14,7 +15,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating2{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.Off{}}
 
 law inv_survives_jtt_without_ramp:
-  {S.pr_pres(witness(), soft_apply_bug(S.LJtt{}, witness())) == True{} : Bool}
+  {Spec.pr_pres(witness(), soft_apply_bug(S.LJtt{}, witness())) == True{} : Bool}
 
 def inv_survives_jtt_without_ramp():
   {==}

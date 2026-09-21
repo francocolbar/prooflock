@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 # NEGATIVE 7 (H15) - an RTPS stop with no effect on the heating (the principal hazard
@@ -13,7 +14,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.Off{}}
 
 law rtps_stop_reduces_power:
-  {S.pr_p3(witness(), soft_apply_bug(S.LRtps{}, witness())) == True{} : Bool}
+  {Spec.pr_p3(witness(), soft_apply_bug(S.LRtps{}, witness())) == True{} : Bool}
 
 def rtps_stop_reduces_power():
   {==}

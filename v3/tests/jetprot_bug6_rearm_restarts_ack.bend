@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 # NEGATIVE 6 (H6/H14) - a repeated stop request that restarts the acknowledgement wait: the
@@ -13,7 +14,7 @@ def upd_tack_bug(f: S.Fin, e: S.Ev, bt: Bool, bh: Bool) -> S.Upd:
       S.upd_tack(f, e2, bt, bh)
 
 def pr_p18_bug(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> Bool:
-  S.implies(Bool.and(S.is_armed(S.dms_of(f)), Bool.and(Bool.not(S.is_tick(e)), Bool.not(S.is_reset(e)))),
+  S.implies(Bool.and(S.is_armed(S.dms_of(f)), Bool.and(Bool.not(Spec.is_tick(e)), Bool.not(Spec.is_reset(e)))),
             S.is_keep(upd_tack_bug(f, e, bt, bh)))
 
 def witness() -> S.Fin:

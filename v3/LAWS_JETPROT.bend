@@ -9,6 +9,7 @@
 
 import Base
 import ./jetprot.bend as S
+import ./spec_jetprot.bend as Spec
 import ./enum_jetprot.bend as E
 
 # --- certificates decided by computation ---
@@ -76,7 +77,7 @@ law latched:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P2: the step that reaches PTN leaves no unit powered
 law ptn_deenergizes:
@@ -85,7 +86,7 @@ law ptn_deenergizes:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p2(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p2(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P3: the step that starts a soft stop takes every unit out of full power
 law stop_reduces_power:
@@ -94,7 +95,7 @@ law stop_reduces_power:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p3(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p3(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P4: a ramping unit never returns to full power
 law ramping_never_returns:
@@ -103,7 +104,7 @@ law ramping_never_returns:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P5: HeatOn turns a unit on iff Off, in the window, with plasma and no stop
 law heat_permissive:
@@ -112,7 +113,7 @@ law heat_permissive:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p5(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p5(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P6: with a stop in force nothing switches on
 law stop_overrides_heat:
@@ -121,7 +122,7 @@ law stop_overrides_heat:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p6(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p6(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P7: no unit energizes without its command
 law heat_frame:
@@ -130,7 +131,7 @@ law heat_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p7(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p7(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P8: a local inhibit lasts the pulse
 law inhibit_latched:
@@ -139,7 +140,7 @@ law inhibit_latched:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p8(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p8(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P9: a local alarm inhibits its unit and changes nothing else (control and counters)
 law local_is_local:
@@ -148,7 +149,7 @@ law local_is_local:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p9(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p9(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P10: the level changes only on Stop, CommFault, Reset, or a Tick with the watchdog expired
 law no_spurious_stop:
@@ -157,7 +158,7 @@ law no_spurious_stop:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p10(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p10(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P12: a communication fault is a PTN stop from any state
 law commfault_ptn:
@@ -166,7 +167,7 @@ law commfault_ptn:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p12(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p12(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P14: the program never rewinds
 law phase_monotone:
@@ -175,7 +176,7 @@ law phase_monotone:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P15: the DMS never disarms or un-fires
 law dms_monotone:
@@ -184,7 +185,7 @@ law dms_monotone:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p15(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p15(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P16: a stop wired to the DMS that reaches PTN arms it
 law dms_armed_on_demand:
@@ -193,7 +194,7 @@ law dms_armed_on_demand:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p16(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p16(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P17: nothing else arms the DMS
 law dms_frame:
@@ -202,7 +203,7 @@ law dms_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p17(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p17(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P18: while armed, only Tick and Reset touch the wait counter
 law tack_frame:
@@ -211,7 +212,7 @@ law tack_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p18(f, e, bt, bh) == True{} : Bool}
+  {Spec.pr_p18(f, e, bt, bh) == True{} : Bool}
 
 # P19: under PTN, Advance is the identity
 law advance_frozen:
@@ -220,7 +221,7 @@ law advance_frozen:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p19(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p19(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P20: an end of pulse is accepted (to init, counters reset) or refused (identity)
 law reset_guarded:
@@ -229,7 +230,7 @@ law reset_guarded:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p20(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p20(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # P21: a Reset while the DMS is armed, or before the pulse ended (no PTN and not in
 # Termination), leaves the control AND both counter commands unchanged
@@ -239,7 +240,7 @@ law reset_refused_mid_pulse:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_p21(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_p21(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # --- the DEMAND and FRAME laws (D1..D18, audit #4): the sequencer does its job ---
 
@@ -250,7 +251,7 @@ law d1_stop_honoured:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D2: an accepted soft stop takes every unit at full power into ramp-down
 law d2_soft_stop_ramps:
@@ -259,7 +260,7 @@ law d2_soft_stop_ramps:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d2(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d2(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D3: the natural end of the programme (Advance out of Heating 2) also ramps down
 law d3_advance_to_termination_ramps:
@@ -268,7 +269,7 @@ law d3_advance_to_termination_ramps:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d3(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d3(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D4: an expired watchdog latches the PTN, whatever the instance wires to the DMS
 law d4_watchdog_latches:
@@ -277,7 +278,7 @@ law d4_watchdog_latches:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d4(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d4(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D5: the heartbeat counter counts while the PTN is not latched (positive dual of I6)
 law d5_hb_counts:
@@ -286,7 +287,7 @@ law d5_hb_counts:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d5(f, e, bh) == True{} : Bool}
+  {Spec.pr_d5(f, e, bh) == True{} : Bool}
 
 # D6: only a heartbeat, or an accepted end of pulse, may reset the watchdog counter
 law d6_hb_frame:
@@ -295,7 +296,7 @@ law d6_hb_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d6(f, e, bh) == True{} : Bool}
+  {Spec.pr_d6(f, e, bh) == True{} : Bool}
 
 # D7: the acknowledgement timeout fires the DMS
 law d7_ack_timeout_fires:
@@ -304,7 +305,7 @@ law d7_ack_timeout_fires:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d7(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d7(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D8: the acknowledgement wait counts up while below the limit (positive dual of I5)
 law d8_ack_counts:
@@ -313,7 +314,7 @@ law d8_ack_counts:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d8(f, e, bt, bh) == True{} : Bool}
+  {Spec.pr_d8(f, e, bt, bh) == True{} : Bool}
 
 # D9: the acknowledgement from the heating plant fires the DMS
 law d9_heatack_fires:
@@ -322,7 +323,7 @@ law d9_heatack_fires:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d9(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d9(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D10: an end of pulse IS accepted when the pulse has ended and no mitigation is armed
 law d10_reset_accepted_when_safe:
@@ -331,7 +332,7 @@ law d10_reset_accepted_when_safe:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d10(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d10(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D11: the programme advances exactly one phase
 law d11_advance_is_one_step:
@@ -340,7 +341,7 @@ law d11_advance_is_one_step:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D12: nothing but Advance, Reset or a JTT stop moves the phase
 law d12_phase_frame:
@@ -349,7 +350,7 @@ law d12_phase_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d12(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d12(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D13: the plasma conditions are an input -- Plasma{ok} writes ok
 law d13_plasma_is_input:
@@ -358,7 +359,7 @@ law d13_plasma_is_input:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d13(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d13(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D14: and only that input, or an accepted end of pulse, moves them
 law d14_plasma_frame:
@@ -367,7 +368,7 @@ law d14_plasma_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D15: a heating-off command de-energizes its own unit and touches nothing else
 law d15_heatoff_is_local:
@@ -376,7 +377,7 @@ law d15_heatoff_is_local:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d15(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d15(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D16: a heating-on command touches its own unit only
 law d16_heaton_is_local:
@@ -385,7 +386,7 @@ law d16_heaton_is_local:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d16(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d16(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D17: an acknowledgement moves the DMS and nothing else
 law d17_heatack_frame:
@@ -394,7 +395,7 @@ law d17_heatack_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d17(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d17(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # D18: a heartbeat touches the heartbeat counter and nothing else
 law d18_heartbeat_frame:
@@ -403,7 +404,7 @@ law d18_heartbeat_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_d18(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_d18(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # --- the remaining DEMAND and FRAME laws (E1..E11, audit #5) ---
 #
@@ -426,7 +427,7 @@ law e1_inhibit_source:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e1(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_e1(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # E2: the DMS fires only on the plant acknowledgement or on the acknowledgement timeout
 law e2_dms_fire_frame:
@@ -435,7 +436,7 @@ law e2_dms_fire_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e2(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_e2(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # E3: a stop moves the phase to Termination exactly when an accepted JTT asks for it
 law e3_stop_phase_exact:
@@ -444,7 +445,7 @@ law e3_stop_phase_exact:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e3(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_e3(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # E4: the units after an Advance are fully determined (all six advances, not just the last)
 law e4_advance_units:
@@ -453,7 +454,7 @@ law e4_advance_units:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_e4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # E5: a heartbeat ALWAYS restarts the watchdog counter
 law e5_heartbeat_resets_hb:
@@ -462,7 +463,7 @@ law e5_heartbeat_resets_hb:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e5(f, e, bh) == True{} : Bool}
+  {Spec.pr_e5(f, e, bh) == True{} : Bool}
 
 # E6: the watchdog counter on a Tick is exactly determined (two-sided D5)
 law e6_hb_tick_exact:
@@ -471,7 +472,7 @@ law e6_hb_tick_exact:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e6(f, e, bh) == True{} : Bool}
+  {Spec.pr_e6(f, e, bh) == True{} : Bool}
 
 # E7: only a Tick with the DMS armed and the wait below the limit may increment it
 law e7_tack_inc_frame:
@@ -480,7 +481,7 @@ law e7_tack_inc_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e7(f, e, bt, bh) == True{} : Bool}
+  {Spec.pr_e7(f, e, bt, bh) == True{} : Bool}
 
 # E8: only a demand that actually arms, or the accepted end of pulse, restarts the wait
 law e8_tack_reset_frame:
@@ -489,7 +490,7 @@ law e8_tack_reset_frame:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e8(f, e, bt, bh) == True{} : Bool}
+  {Spec.pr_e8(f, e, bt, bh) == True{} : Bool}
 
 # E11: the acknowledgement is two-sided (D9 is its positive half)
 law e11_heatack_exact:
@@ -498,7 +499,7 @@ law e11_heatack_exact:
   for +e: S.Ev
   for +bt: Bool
   for +bh: Bool
-  {S.pr_e11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+  {Spec.pr_e11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # --- V1: the verdict domain of the certificate (audit #5, H13 as a theorem) ---
 #
@@ -511,7 +512,7 @@ law verdict_frame_step:
   for +o: S.Ord
   for +f: S.Fin
   for +e: S.Ev
-  for +h: {S.is_tick(e) == False{} : Bool}
+  for +h: {Spec.is_tick(e) == False{} : Bool}
   for +bt: Bool
   for +bh: Bool
   {S.step_fin(o, f, e, bt, bh) == S.step_fin(o, f, e, True{}, True{}) : S.Fin}
@@ -520,7 +521,7 @@ law verdict_frame_hb:
   for +o: S.Ord
   for +f: S.Fin
   for +e: S.Ev
-  for +h: {S.is_tick(e) == False{} : Bool}
+  for +h: {Spec.is_tick(e) == False{} : Bool}
   for +bt: Bool
   for +bh: Bool
   {S.upd_hb(f, e, bh) == S.upd_hb(f, e, True{}) : S.Upd}
@@ -529,7 +530,7 @@ law verdict_frame_tack:
   for +o: S.Ord
   for +f: S.Fin
   for +e: S.Ev
-  for +h: {S.is_tick(e) == False{} : Bool}
+  for +h: {Spec.is_tick(e) == False{} : Bool}
   for +bt: Bool
   for +bh: Bool
   {S.upd_tack(f, e, bt, bh) == S.upd_tack(f, e, True{}, True{}) : S.Upd}

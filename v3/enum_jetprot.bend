@@ -18,6 +18,7 @@
 
 import Base
 import ./jetprot.bend as S
+import ./spec_jetprot.bend as Spec
 
 # ---------------------------------------------------------------------------
 # The property of one cell, in six named groups (for the projections in the proof)
@@ -25,36 +26,36 @@ import ./jetprot.bend as S
 
 # preservation of the control invariant and the two counter shapes
 def g_pres(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_pres(f, f2), Bool.and(S.pr_hb(f, e, bh, f2), S.pr_tack(f, e, bt, bh, f2)))
+  Bool.and(Spec.pr_pres(f, f2), Bool.and(Spec.pr_hb(f, e, bh, f2), Spec.pr_tack(f, e, bt, bh, f2)))
 
 # P1..P4
 def g_a(+o: S.Ord, +f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p1(o, f, e, f2), Bool.and(S.pr_p2(f, f2), Bool.and(S.pr_p3(f, f2), S.pr_p4(f, e, f2))))
+  Bool.and(Spec.pr_p1(o, f, e, f2), Bool.and(Spec.pr_p2(f, f2), Bool.and(Spec.pr_p3(f, f2), Spec.pr_p4(f, e, f2))))
 
 # P5..P9
 def g_b(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p5(f, e, f2), Bool.and(S.pr_p6(f, f2), Bool.and(S.pr_p7(f, e, f2), Bool.and(S.pr_p8(f, e, f2), S.pr_p9(f, e, bt, bh, f2)))))
+  Bool.and(Spec.pr_p5(f, e, f2), Bool.and(Spec.pr_p6(f, f2), Bool.and(Spec.pr_p7(f, e, f2), Bool.and(Spec.pr_p8(f, e, f2), Spec.pr_p9(f, e, bt, bh, f2)))))
 
 # P10, P12, P14..P21
 def g_c(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p10(f, e, bh, f2), Bool.and(S.pr_p12(e, f2), Bool.and(S.pr_p14(f, e, f2), Bool.and(S.pr_p15(f, e, f2),
-  Bool.and(S.pr_p16(f, e, bh, f2), Bool.and(S.pr_p17(f, e, bh, f2), Bool.and(S.pr_p18(f, e, bt, bh),
-  Bool.and(S.pr_p19(f, e, bt, bh, f2), Bool.and(S.pr_p20(f, e, bt, bh, f2), S.pr_p21(f, e, bt, bh, f2))))))))))
+  Bool.and(Spec.pr_p10(f, e, bh, f2), Bool.and(Spec.pr_p12(e, f2), Bool.and(Spec.pr_p14(f, e, f2), Bool.and(Spec.pr_p15(f, e, f2),
+  Bool.and(Spec.pr_p16(f, e, bh, f2), Bool.and(Spec.pr_p17(f, e, bh, f2), Bool.and(Spec.pr_p18(f, e, bt, bh),
+  Bool.and(Spec.pr_p19(f, e, bt, bh, f2), Bool.and(Spec.pr_p20(f, e, bt, bh, f2), Spec.pr_p21(f, e, bt, bh, f2))))))))))
 
 # D1..D18 (demand and frame): the sequencer does its job, and nothing else moves
 def g_d(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d1(o, f, e, f2), Bool.and(S.pr_d2(o, f, e, f2), Bool.and(S.pr_d3(f, e, f2),
-  Bool.and(S.pr_d4(f, e, bh, f2), Bool.and(S.pr_d5(f, e, bh), Bool.and(S.pr_d6(f, e, bh),
-  Bool.and(S.pr_d7(f, e, bt, f2), Bool.and(S.pr_d8(f, e, bt, bh), Bool.and(S.pr_d9(f, e, f2),
-  Bool.and(S.pr_d10(f, e, bt, bh, f2), Bool.and(S.pr_d11(f, e, f2), Bool.and(S.pr_d12(f, e, f2),
-  Bool.and(S.pr_d13(e, f2), Bool.and(S.pr_d14(f, e, f2), Bool.and(S.pr_d15(f, e, bt, bh, f2),
-  Bool.and(S.pr_d16(f, e, bt, bh, f2), Bool.and(S.pr_d17(f, e, bt, bh, f2), S.pr_d18(f, e, bt, bh, f2))))))))))))))))))
+  Bool.and(Spec.pr_d1(o, f, e, f2), Bool.and(Spec.pr_d2(o, f, e, f2), Bool.and(Spec.pr_d3(f, e, f2),
+  Bool.and(Spec.pr_d4(f, e, bh, f2), Bool.and(Spec.pr_d5(f, e, bh), Bool.and(Spec.pr_d6(f, e, bh),
+  Bool.and(Spec.pr_d7(f, e, bt, f2), Bool.and(Spec.pr_d8(f, e, bt, bh), Bool.and(Spec.pr_d9(f, e, f2),
+  Bool.and(Spec.pr_d10(f, e, bt, bh, f2), Bool.and(Spec.pr_d11(f, e, f2), Bool.and(Spec.pr_d12(f, e, f2),
+  Bool.and(Spec.pr_d13(e, f2), Bool.and(Spec.pr_d14(f, e, f2), Bool.and(Spec.pr_d15(f, e, bt, bh, f2),
+  Bool.and(Spec.pr_d16(f, e, bt, bh, f2), Bool.and(Spec.pr_d17(f, e, bt, bh, f2), Spec.pr_d18(f, e, bt, bh, f2))))))))))))))))))
 
 # E1..E11 (audit #5): the eight holes D1..D18 still left open
 def g_e(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e1(f, e, f2), Bool.and(S.pr_e2(f, e, bt, f2), Bool.and(S.pr_e3(o, f, e, f2),
-  Bool.and(S.pr_e4(f, e, f2), Bool.and(S.pr_e5(f, e, bh), Bool.and(S.pr_e6(f, e, bh),
-  Bool.and(S.pr_e7(f, e, bt, bh), Bool.and(S.pr_e8(f, e, bt, bh), S.pr_e11(f, e, f2)))))))))
+  Bool.and(Spec.pr_e1(f, e, f2), Bool.and(Spec.pr_e2(f, e, bt, f2), Bool.and(Spec.pr_e3(o, f, e, f2),
+  Bool.and(Spec.pr_e4(f, e, f2), Bool.and(Spec.pr_e5(f, e, bh), Bool.and(Spec.pr_e6(f, e, bh),
+  Bool.and(Spec.pr_e7(f, e, bt, bh), Bool.and(Spec.pr_e8(f, e, bt, bh), Spec.pr_e11(f, e, f2)))))))))
 
 def prop_at(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
   Bool.and(g_pres(f, e, bt, bh, f2), Bool.and(g_a(o, f, e, f2), Bool.and(g_b(f, e, bt, bh, f2),
@@ -253,8 +254,8 @@ def ev_who(e: S.Ev) -> S.Who:
 
 def ev_eq(+a: S.Ev, +b: S.Ev) -> Bool:
   Bool.and(Nat.is_eq(ev_tag(a), ev_tag(b)),
-  Bool.and(S.lvl_eq(ev_lvl(a), ev_lvl(b)),
-  Bool.and(S.beq(ev_bit(a), ev_bit(b)), S.who_eq(ev_who(a), ev_who(b)))))
+  Bool.and(Spec.lvl_eq(ev_lvl(a), ev_lvl(b)),
+  Bool.and(Spec.beq(ev_bit(a), ev_bit(b)), Spec.who_eq(ev_who(a), ev_who(b)))))
 
 # The configuration, transcribed a FOURTH time as its own function, so that the concrete-layer
 # check stops being self-referential: conc_expected used to build its expectation from the very

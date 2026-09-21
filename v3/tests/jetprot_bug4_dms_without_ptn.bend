@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 import ./../enum_jetprot.bend as E
 
 # NEGATIVE 4 - the DMS armed by a soft stop (no PTN). The next state has the DMS armed with
@@ -15,7 +16,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.Off{}, S.Off{}}
 
 law inv_survives_soft_arming:
-  {S.pr_pres(witness(), stop_fin_bug(witness(), S.LRtps{}, True{})) == True{} : Bool}
+  {Spec.pr_pres(witness(), stop_fin_bug(witness(), S.LRtps{}, True{})) == True{} : Bool}
 
 def inv_survives_soft_arming():
   {==}

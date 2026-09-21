@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 
 # NEGATIVE 9 (the adversarial audit's mutant M26, the worst survivor of the old law set) -
 # a stop request that reaches the PTN is IGNORED unless the instance also wires it to the
@@ -23,7 +24,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.Off{}}
 
 law stop_is_honoured_without_dms:
-  {S.pr_d1(S.Ord1{}, witness(), S.Stop{S.LPtn{}, False{}}, stop_fin_bug(S.Ord1{}, witness(), S.LPtn{}, False{})) == True{} : Bool}
+  {Spec.pr_d1(S.Ord1{}, witness(), S.Stop{S.LPtn{}, False{}}, stop_fin_bug(S.Ord1{}, witness(), S.LPtn{}, False{})) == True{} : Bool}
 
 def stop_is_honoured_without_dms():
   {==}

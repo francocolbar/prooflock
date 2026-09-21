@@ -1,5 +1,6 @@
 import Base
 import ./../jetprot.bend as S
+import ./../spec_jetprot.bend as Spec
 
 # NEGATIVE 10 (the adversarial audit's mutant M04) - a soft stop that TRIPS the heating units
 # to Off instead of ramping them down. It preserves every invariant (I1 and I2 constrain
@@ -16,7 +17,7 @@ def witness() -> S.Fin:
   S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.On{}}
 
 law soft_stop_ramps_when_it_trips:
-  {S.pr_d2(S.Ord1{}, witness(), S.Stop{S.LRtps{}, False{}}, soft_apply_bug(S.LRtps{}, witness())) == True{} : Bool}
+  {Spec.pr_d2(S.Ord1{}, witness(), S.Stop{S.LRtps{}, False{}}, soft_apply_bug(S.LRtps{}, witness())) == True{} : Bool}
 
 def soft_stop_ramps_when_it_trips():
   {==}

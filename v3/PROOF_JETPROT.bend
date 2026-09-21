@@ -6,6 +6,7 @@
 # step laws and the preservation laws. The only inductions are on the traces.
 import Base
 import ./jetprot.bend as S
+import ./spec_jetprot.bend as Spec
 import ./enum_jetprot.bend as E
 import ./LAWS_JETPROT.bend as Laws
 import ./PROOF_JETPROT_FIN.bend as PF
@@ -471,168 +472,168 @@ def c_e(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {E.g_e(o, f, e,
   and_r(E.g_d(o, f, e, bt, bh, f2), E.g_e(o, f, e, bt, bh, f2), c_de(o, f, e, bt, bh))
 
 # g_pres = and(pr_pres, and(pr_hb, pr_tack))
-def cp_pres(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_pres(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_pres(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_pres(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and3_1(S.pr_pres(f, f2), S.pr_hb(f, e, bh, f2), S.pr_tack(f, e, bt, bh, f2), c_pres(o, f, e, bt, bh))
+  and3_1(Spec.pr_pres(f, f2), Spec.pr_hb(f, e, bh, f2), Spec.pr_tack(f, e, bt, bh, f2), c_pres(o, f, e, bt, bh))
 
-def cp_hb(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_hb(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_hb(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_hb(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and3_2(S.pr_pres(f, f2), S.pr_hb(f, e, bh, f2), S.pr_tack(f, e, bt, bh, f2), c_pres(o, f, e, bt, bh))
+  and3_2(Spec.pr_pres(f, f2), Spec.pr_hb(f, e, bh, f2), Spec.pr_tack(f, e, bt, bh, f2), c_pres(o, f, e, bt, bh))
 
-def cp_tack(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_tack(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_tack(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_tack(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and3_3(S.pr_pres(f, f2), S.pr_hb(f, e, bh, f2), S.pr_tack(f, e, bt, bh, f2), c_pres(o, f, e, bt, bh))
+  and3_3(Spec.pr_pres(f, f2), Spec.pr_hb(f, e, bh, f2), Spec.pr_tack(f, e, bt, bh, f2), c_pres(o, f, e, bt, bh))
 
 # g_a = and(p1, and(p2, and(p3, p4)))
 def ta3(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p3(f, f2), S.pr_p4(f, e, f2))
+  Bool.and(Spec.pr_p3(f, f2), Spec.pr_p4(f, e, f2))
 
 def ta2(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p2(f, f2), ta3(f, e, f2))
+  Bool.and(Spec.pr_p2(f, f2), ta3(f, e, f2))
 
-def cp1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh))
+  and_l(Spec.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh))
 
-def cp2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p2(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p2(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p2(f, f2), ta3(f, e, f2), and_r(S.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh)))
+  and_l(Spec.pr_p2(f, f2), ta3(f, e, f2), and_r(Spec.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh)))
 
-def cp3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p3(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p3(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p3(f, f2), S.pr_p4(f, e, f2), and_r(S.pr_p2(f, f2), ta3(f, e, f2), and_r(S.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh))))
+  and_l(Spec.pr_p3(f, f2), Spec.pr_p4(f, e, f2), and_r(Spec.pr_p2(f, f2), ta3(f, e, f2), and_r(Spec.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh))))
 
-def cp4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p3(f, f2), S.pr_p4(f, e, f2), and_r(S.pr_p2(f, f2), ta3(f, e, f2), and_r(S.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh))))
+  and_r(Spec.pr_p3(f, f2), Spec.pr_p4(f, e, f2), and_r(Spec.pr_p2(f, f2), ta3(f, e, f2), and_r(Spec.pr_p1(o, f, e, f2), ta2(f, e, f2), c_a(o, f, e, bt, bh))))
 
 # g_b = and(p5, and(p6, and(p7, and(p8, p9))))
 def tb4(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p8(f, e, f2), S.pr_p9(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p8(f, e, f2), Spec.pr_p9(f, e, bt, bh, f2))
 
 def tb3(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2))
 
 def tb2(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p6(f, f2), tb3(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p6(f, f2), tb3(f, e, bt, bh, f2))
 
-def cp5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p5(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p5(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh))
+  and_l(Spec.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh))
 
-def cp6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p6(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p6(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(S.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh)))
+  and_l(Spec.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(Spec.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh)))
 
-def cp7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p7(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p7(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2), and_r(S.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(S.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh))))
+  and_l(Spec.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2), and_r(Spec.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(Spec.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh))))
 
-def cp8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p8(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p8(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p8(f, e, f2), S.pr_p9(f, e, bt, bh, f2), and_r(S.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2), and_r(S.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(S.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh)))))
+  and_l(Spec.pr_p8(f, e, f2), Spec.pr_p9(f, e, bt, bh, f2), and_r(Spec.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2), and_r(Spec.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(Spec.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh)))))
 
-def cp9(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p9(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp9(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p9(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p8(f, e, f2), S.pr_p9(f, e, bt, bh, f2), and_r(S.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2), and_r(S.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(S.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh)))))
+  and_r(Spec.pr_p8(f, e, f2), Spec.pr_p9(f, e, bt, bh, f2), and_r(Spec.pr_p7(f, e, f2), tb4(f, e, bt, bh, f2), and_r(Spec.pr_p6(f, f2), tb3(f, e, bt, bh, f2), and_r(Spec.pr_p5(f, e, f2), tb2(f, e, bt, bh, f2), c_b(o, f, e, bt, bh)))))
 
 # g_c = and(p10, and(p12, and(p14, and(p15, and(p16, and(p17, and(p18, and(p19, and(p20, p21)))))))))
 def tc9(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p20(f, e, bt, bh, f2), S.pr_p21(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p20(f, e, bt, bh, f2), Spec.pr_p21(f, e, bt, bh, f2))
 
 def tc8(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p19(f, e, bt, bh, f2), tc9(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p19(f, e, bt, bh, f2), tc9(f, e, bt, bh, f2))
 
 def tc7(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p18(f, e, bt, bh), tc8(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p18(f, e, bt, bh), tc8(f, e, bt, bh, f2))
 
 def tc6(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p17(f, e, bh, f2), tc7(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p17(f, e, bh, f2), tc7(f, e, bt, bh, f2))
 
 def tc5(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p16(f, e, bh, f2), tc6(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p16(f, e, bh, f2), tc6(f, e, bt, bh, f2))
 
 def tc4(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p15(f, e, f2), tc5(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p15(f, e, f2), tc5(f, e, bt, bh, f2))
 
 def tc3(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p14(f, e, f2), tc4(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p14(f, e, f2), tc4(f, e, bt, bh, f2))
 
 def tc2(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_p12(e, f2), tc3(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_p12(e, f2), tc3(f, e, bt, bh, f2))
 
 # the successive tails of g_c as facts
 def cc2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc2(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p10(f, e, bh, f2), tc2(f, e, bt, bh, f2), c_c(o, f, e, bt, bh))
+  and_r(Spec.pr_p10(f, e, bh, f2), tc2(f, e, bt, bh, f2), c_c(o, f, e, bt, bh))
 
 def cc3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc3(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p12(e, f2), tc3(f, e, bt, bh, f2), cc2(o, f, e, bt, bh))
+  and_r(Spec.pr_p12(e, f2), tc3(f, e, bt, bh, f2), cc2(o, f, e, bt, bh))
 
 def cc4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc4(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p14(f, e, f2), tc4(f, e, bt, bh, f2), cc3(o, f, e, bt, bh))
+  and_r(Spec.pr_p14(f, e, f2), tc4(f, e, bt, bh, f2), cc3(o, f, e, bt, bh))
 
 def cc5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc5(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p15(f, e, f2), tc5(f, e, bt, bh, f2), cc4(o, f, e, bt, bh))
+  and_r(Spec.pr_p15(f, e, f2), tc5(f, e, bt, bh, f2), cc4(o, f, e, bt, bh))
 
 def cc6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc6(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p16(f, e, bh, f2), tc6(f, e, bt, bh, f2), cc5(o, f, e, bt, bh))
+  and_r(Spec.pr_p16(f, e, bh, f2), tc6(f, e, bt, bh, f2), cc5(o, f, e, bt, bh))
 
 def cc7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc7(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p17(f, e, bh, f2), tc7(f, e, bt, bh, f2), cc6(o, f, e, bt, bh))
+  and_r(Spec.pr_p17(f, e, bh, f2), tc7(f, e, bt, bh, f2), cc6(o, f, e, bt, bh))
 
 def cc8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc8(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p18(f, e, bt, bh), tc8(f, e, bt, bh, f2), cc7(o, f, e, bt, bh))
+  and_r(Spec.pr_p18(f, e, bt, bh), tc8(f, e, bt, bh, f2), cc7(o, f, e, bt, bh))
 
-def cp10(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p10(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp10(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p10(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p10(f, e, bh, f2), tc2(f, e, bt, bh, f2), c_c(o, f, e, bt, bh))
+  and_l(Spec.pr_p10(f, e, bh, f2), tc2(f, e, bt, bh, f2), c_c(o, f, e, bt, bh))
 
-def cp12(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p12(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp12(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p12(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p12(e, f2), tc3(f, e, bt, bh, f2), cc2(o, f, e, bt, bh))
+  and_l(Spec.pr_p12(e, f2), tc3(f, e, bt, bh, f2), cc2(o, f, e, bt, bh))
 
-def cp14(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp14(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p14(f, e, f2), tc4(f, e, bt, bh, f2), cc3(o, f, e, bt, bh))
+  and_l(Spec.pr_p14(f, e, f2), tc4(f, e, bt, bh, f2), cc3(o, f, e, bt, bh))
 
-def cp15(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p15(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp15(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p15(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p15(f, e, f2), tc5(f, e, bt, bh, f2), cc4(o, f, e, bt, bh))
+  and_l(Spec.pr_p15(f, e, f2), tc5(f, e, bt, bh, f2), cc4(o, f, e, bt, bh))
 
-def cp16(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p16(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp16(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p16(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p16(f, e, bh, f2), tc6(f, e, bt, bh, f2), cc5(o, f, e, bt, bh))
+  and_l(Spec.pr_p16(f, e, bh, f2), tc6(f, e, bt, bh, f2), cc5(o, f, e, bt, bh))
 
-def cp17(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p17(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp17(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p17(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p17(f, e, bh, f2), tc7(f, e, bt, bh, f2), cc6(o, f, e, bt, bh))
+  and_l(Spec.pr_p17(f, e, bh, f2), tc7(f, e, bt, bh, f2), cc6(o, f, e, bt, bh))
 
-def cp18(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p18(f, e, bt, bh) == True{} : Bool}:
+def cp18(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p18(f, e, bt, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p18(f, e, bt, bh), tc8(f, e, bt, bh, f2), cc7(o, f, e, bt, bh))
+  and_l(Spec.pr_p18(f, e, bt, bh), tc8(f, e, bt, bh, f2), cc7(o, f, e, bt, bh))
 
-def cp19(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p19(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp19(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p19(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p19(f, e, bt, bh, f2), tc9(f, e, bt, bh, f2), cc8(o, f, e, bt, bh))
+  and_l(Spec.pr_p19(f, e, bt, bh, f2), tc9(f, e, bt, bh, f2), cc8(o, f, e, bt, bh))
 
 def cc9(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tc9(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p19(f, e, bt, bh, f2), tc9(f, e, bt, bh, f2), cc8(o, f, e, bt, bh))
+  and_r(Spec.pr_p19(f, e, bt, bh, f2), tc9(f, e, bt, bh, f2), cc8(o, f, e, bt, bh))
 
-def cp20(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p20(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp20(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p20(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_p20(f, e, bt, bh, f2), S.pr_p21(f, e, bt, bh, f2), cc9(o, f, e, bt, bh))
+  and_l(Spec.pr_p20(f, e, bt, bh, f2), Spec.pr_p21(f, e, bt, bh, f2), cc9(o, f, e, bt, bh))
 
-def cp21(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p21(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp21(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p21(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_p20(f, e, bt, bh, f2), S.pr_p21(f, e, bt, bh, f2), cc9(o, f, e, bt, bh))
+  and_r(Spec.pr_p20(f, e, bt, bh, f2), Spec.pr_p21(f, e, bt, bh, f2), cc9(o, f, e, bt, bh))
 
 # ---------------------------------------------------------------------------
 # The demand and frame conjuncts: g_d = and(pr_d1, and(pr_d2, ... and(pr_d17, pr_d18)...))
@@ -640,281 +641,281 @@ def cp21(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_p21(f, e
 
 # g_d = and(pr_d1, and(pr_d2, ... and(pr_d17, pr_d18)...)): the tails as named Bools
 def td17(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d17(f, e, bt, bh, f2), S.pr_d18(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d17(f, e, bt, bh, f2), Spec.pr_d18(f, e, bt, bh, f2))
 
 def td16(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d16(f, e, bt, bh, f2), td17(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d16(f, e, bt, bh, f2), td17(f, e, bt, bh, f2))
 
 def td15(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d15(f, e, bt, bh, f2), td16(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d15(f, e, bt, bh, f2), td16(f, e, bt, bh, f2))
 
 def td14(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d14(f, e, f2), td15(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d14(f, e, f2), td15(f, e, bt, bh, f2))
 
 def td13(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d13(e, f2), td14(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d13(e, f2), td14(f, e, bt, bh, f2))
 
 def td12(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d12(f, e, f2), td13(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d12(f, e, f2), td13(f, e, bt, bh, f2))
 
 def td11(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d11(f, e, f2), td12(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d11(f, e, f2), td12(f, e, bt, bh, f2))
 
 def td10(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d10(f, e, bt, bh, f2), td11(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d10(f, e, bt, bh, f2), td11(f, e, bt, bh, f2))
 
 def td9(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d9(f, e, f2), td10(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d9(f, e, f2), td10(f, e, bt, bh, f2))
 
 def td8(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d8(f, e, bt, bh), td9(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d8(f, e, bt, bh), td9(f, e, bt, bh, f2))
 
 def td7(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d7(f, e, bt, f2), td8(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d7(f, e, bt, f2), td8(f, e, bt, bh, f2))
 
 def td6(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d6(f, e, bh), td7(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d6(f, e, bh), td7(f, e, bt, bh, f2))
 
 def td5(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d5(f, e, bh), td6(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d5(f, e, bh), td6(f, e, bt, bh, f2))
 
 def td4(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d4(f, e, bh, f2), td5(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d4(f, e, bh, f2), td5(f, e, bt, bh, f2))
 
 def td3(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d3(f, e, f2), td4(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d3(f, e, f2), td4(f, e, bt, bh, f2))
 
 def td2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_d2(o, f, e, f2), td3(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_d2(o, f, e, f2), td3(f, e, bt, bh, f2))
 
 # the successive tails of g_d as facts
 def cd2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td2(o, f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d1(o, f, e, f2), td2(o, f, e, bt, bh, f2), c_d(o, f, e, bt, bh))
+  and_r(Spec.pr_d1(o, f, e, f2), td2(o, f, e, bt, bh, f2), c_d(o, f, e, bt, bh))
 
 def cd3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td3(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d2(o, f, e, f2), td3(f, e, bt, bh, f2), cd2(o, f, e, bt, bh))
+  and_r(Spec.pr_d2(o, f, e, f2), td3(f, e, bt, bh, f2), cd2(o, f, e, bt, bh))
 
 def cd4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td4(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d3(f, e, f2), td4(f, e, bt, bh, f2), cd3(o, f, e, bt, bh))
+  and_r(Spec.pr_d3(f, e, f2), td4(f, e, bt, bh, f2), cd3(o, f, e, bt, bh))
 
 def cd5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td5(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d4(f, e, bh, f2), td5(f, e, bt, bh, f2), cd4(o, f, e, bt, bh))
+  and_r(Spec.pr_d4(f, e, bh, f2), td5(f, e, bt, bh, f2), cd4(o, f, e, bt, bh))
 
 def cd6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td6(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d5(f, e, bh), td6(f, e, bt, bh, f2), cd5(o, f, e, bt, bh))
+  and_r(Spec.pr_d5(f, e, bh), td6(f, e, bt, bh, f2), cd5(o, f, e, bt, bh))
 
 def cd7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td7(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d6(f, e, bh), td7(f, e, bt, bh, f2), cd6(o, f, e, bt, bh))
+  and_r(Spec.pr_d6(f, e, bh), td7(f, e, bt, bh, f2), cd6(o, f, e, bt, bh))
 
 def cd8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td8(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d7(f, e, bt, f2), td8(f, e, bt, bh, f2), cd7(o, f, e, bt, bh))
+  and_r(Spec.pr_d7(f, e, bt, f2), td8(f, e, bt, bh, f2), cd7(o, f, e, bt, bh))
 
 def cd9(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td9(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d8(f, e, bt, bh), td9(f, e, bt, bh, f2), cd8(o, f, e, bt, bh))
+  and_r(Spec.pr_d8(f, e, bt, bh), td9(f, e, bt, bh, f2), cd8(o, f, e, bt, bh))
 
 def cd10(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td10(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d9(f, e, f2), td10(f, e, bt, bh, f2), cd9(o, f, e, bt, bh))
+  and_r(Spec.pr_d9(f, e, f2), td10(f, e, bt, bh, f2), cd9(o, f, e, bt, bh))
 
 def cd11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td11(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d10(f, e, bt, bh, f2), td11(f, e, bt, bh, f2), cd10(o, f, e, bt, bh))
+  and_r(Spec.pr_d10(f, e, bt, bh, f2), td11(f, e, bt, bh, f2), cd10(o, f, e, bt, bh))
 
 def cd12(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td12(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d11(f, e, f2), td12(f, e, bt, bh, f2), cd11(o, f, e, bt, bh))
+  and_r(Spec.pr_d11(f, e, f2), td12(f, e, bt, bh, f2), cd11(o, f, e, bt, bh))
 
 def cd13(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td13(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d12(f, e, f2), td13(f, e, bt, bh, f2), cd12(o, f, e, bt, bh))
+  and_r(Spec.pr_d12(f, e, f2), td13(f, e, bt, bh, f2), cd12(o, f, e, bt, bh))
 
 def cd14(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td14(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d13(e, f2), td14(f, e, bt, bh, f2), cd13(o, f, e, bt, bh))
+  and_r(Spec.pr_d13(e, f2), td14(f, e, bt, bh, f2), cd13(o, f, e, bt, bh))
 
 def cd15(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td15(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d14(f, e, f2), td15(f, e, bt, bh, f2), cd14(o, f, e, bt, bh))
+  and_r(Spec.pr_d14(f, e, f2), td15(f, e, bt, bh, f2), cd14(o, f, e, bt, bh))
 
 def cd16(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td16(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d15(f, e, bt, bh, f2), td16(f, e, bt, bh, f2), cd15(o, f, e, bt, bh))
+  and_r(Spec.pr_d15(f, e, bt, bh, f2), td16(f, e, bt, bh, f2), cd15(o, f, e, bt, bh))
 
 def cd17(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {td17(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d16(f, e, bt, bh, f2), td17(f, e, bt, bh, f2), cd16(o, f, e, bt, bh))
+  and_r(Spec.pr_d16(f, e, bt, bh, f2), td17(f, e, bt, bh, f2), cd16(o, f, e, bt, bh))
 
 # the eighteen demand and frame properties of one cell
-def cp_d1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d1(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d1(o, f, e, f2), td2(o, f, e, bt, bh, f2), c_d(o, f, e, bt, bh))
+  and_l(Spec.pr_d1(o, f, e, f2), td2(o, f, e, bt, bh, f2), c_d(o, f, e, bt, bh))
 
-def cp_d2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d2(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d2(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d2(o, f, e, f2), td3(f, e, bt, bh, f2), cd2(o, f, e, bt, bh))
+  and_l(Spec.pr_d2(o, f, e, f2), td3(f, e, bt, bh, f2), cd2(o, f, e, bt, bh))
 
-def cp_d3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d3(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d3(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d3(f, e, f2), td4(f, e, bt, bh, f2), cd3(o, f, e, bt, bh))
+  and_l(Spec.pr_d3(f, e, f2), td4(f, e, bt, bh, f2), cd3(o, f, e, bt, bh))
 
-def cp_d4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d4(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d4(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d4(f, e, bh, f2), td5(f, e, bt, bh, f2), cd4(o, f, e, bt, bh))
+  and_l(Spec.pr_d4(f, e, bh, f2), td5(f, e, bt, bh, f2), cd4(o, f, e, bt, bh))
 
-def cp_d5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d5(f, e, bh) == True{} : Bool}:
+def cp_d5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d5(f, e, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d5(f, e, bh), td6(f, e, bt, bh, f2), cd5(o, f, e, bt, bh))
+  and_l(Spec.pr_d5(f, e, bh), td6(f, e, bt, bh, f2), cd5(o, f, e, bt, bh))
 
-def cp_d6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d6(f, e, bh) == True{} : Bool}:
+def cp_d6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d6(f, e, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d6(f, e, bh), td7(f, e, bt, bh, f2), cd6(o, f, e, bt, bh))
+  and_l(Spec.pr_d6(f, e, bh), td7(f, e, bt, bh, f2), cd6(o, f, e, bt, bh))
 
-def cp_d7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d7(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d7(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d7(f, e, bt, f2), td8(f, e, bt, bh, f2), cd7(o, f, e, bt, bh))
+  and_l(Spec.pr_d7(f, e, bt, f2), td8(f, e, bt, bh, f2), cd7(o, f, e, bt, bh))
 
-def cp_d8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d8(f, e, bt, bh) == True{} : Bool}:
+def cp_d8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d8(f, e, bt, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d8(f, e, bt, bh), td9(f, e, bt, bh, f2), cd8(o, f, e, bt, bh))
+  and_l(Spec.pr_d8(f, e, bt, bh), td9(f, e, bt, bh, f2), cd8(o, f, e, bt, bh))
 
-def cp_d9(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d9(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d9(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d9(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d9(f, e, f2), td10(f, e, bt, bh, f2), cd9(o, f, e, bt, bh))
+  and_l(Spec.pr_d9(f, e, f2), td10(f, e, bt, bh, f2), cd9(o, f, e, bt, bh))
 
-def cp_d10(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d10(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d10(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d10(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d10(f, e, bt, bh, f2), td11(f, e, bt, bh, f2), cd10(o, f, e, bt, bh))
+  and_l(Spec.pr_d10(f, e, bt, bh, f2), td11(f, e, bt, bh, f2), cd10(o, f, e, bt, bh))
 
-def cp_d11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d11(f, e, f2), td12(f, e, bt, bh, f2), cd11(o, f, e, bt, bh))
+  and_l(Spec.pr_d11(f, e, f2), td12(f, e, bt, bh, f2), cd11(o, f, e, bt, bh))
 
-def cp_d12(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d12(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d12(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d12(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d12(f, e, f2), td13(f, e, bt, bh, f2), cd12(o, f, e, bt, bh))
+  and_l(Spec.pr_d12(f, e, f2), td13(f, e, bt, bh, f2), cd12(o, f, e, bt, bh))
 
-def cp_d13(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d13(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d13(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d13(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d13(e, f2), td14(f, e, bt, bh, f2), cd13(o, f, e, bt, bh))
+  and_l(Spec.pr_d13(e, f2), td14(f, e, bt, bh, f2), cd13(o, f, e, bt, bh))
 
-def cp_d14(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d14(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d14(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d14(f, e, f2), td15(f, e, bt, bh, f2), cd14(o, f, e, bt, bh))
+  and_l(Spec.pr_d14(f, e, f2), td15(f, e, bt, bh, f2), cd14(o, f, e, bt, bh))
 
-def cp_d15(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d15(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d15(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d15(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d15(f, e, bt, bh, f2), td16(f, e, bt, bh, f2), cd15(o, f, e, bt, bh))
+  and_l(Spec.pr_d15(f, e, bt, bh, f2), td16(f, e, bt, bh, f2), cd15(o, f, e, bt, bh))
 
-def cp_d16(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d16(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d16(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d16(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d16(f, e, bt, bh, f2), td17(f, e, bt, bh, f2), cd16(o, f, e, bt, bh))
+  and_l(Spec.pr_d16(f, e, bt, bh, f2), td17(f, e, bt, bh, f2), cd16(o, f, e, bt, bh))
 
-def cp_d17(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d17(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d17(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d17(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_d17(f, e, bt, bh, f2), S.pr_d18(f, e, bt, bh, f2), cd17(o, f, e, bt, bh))
+  and_l(Spec.pr_d17(f, e, bt, bh, f2), Spec.pr_d18(f, e, bt, bh, f2), cd17(o, f, e, bt, bh))
 
-def cp_d18(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_d18(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_d18(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d18(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_d17(f, e, bt, bh, f2), S.pr_d18(f, e, bt, bh, f2), cd17(o, f, e, bt, bh))
+  and_r(Spec.pr_d17(f, e, bt, bh, f2), Spec.pr_d18(f, e, bt, bh, f2), cd17(o, f, e, bt, bh))
 
 # ---------------------------------------------------------------------------
 # The E conjuncts: g_e = and(pr_e1, and(pr_e2, ... and(pr_e8, pr_e11)...))
 # ---------------------------------------------------------------------------
 
 def te8(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e8(f, e, bt, bh), S.pr_e11(f, e, f2))
+  Bool.and(Spec.pr_e8(f, e, bt, bh), Spec.pr_e11(f, e, f2))
 
 def te7(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e7(f, e, bt, bh), te8(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_e7(f, e, bt, bh), te8(f, e, bt, bh, f2))
 
 def te6(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e6(f, e, bh), te7(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_e6(f, e, bh), te7(f, e, bt, bh, f2))
 
 def te5(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e5(f, e, bh), te6(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_e5(f, e, bh), te6(f, e, bt, bh, f2))
 
 def te4(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e4(f, e, f2), te5(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_e4(f, e, f2), te5(f, e, bt, bh, f2))
 
 def te3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e3(o, f, e, f2), te4(f, e, bt, bh, f2))
+  Bool.and(Spec.pr_e3(o, f, e, f2), te4(f, e, bt, bh, f2))
 
 def te2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(S.pr_e2(f, e, bt, f2), te3(o, f, e, bt, bh, f2))
+  Bool.and(Spec.pr_e2(f, e, bt, f2), te3(o, f, e, bt, bh, f2))
 
 # the successive tails of g_e as facts
 def ce2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te2(o, f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e1(f, e, f2), te2(o, f, e, bt, bh, f2), c_e(o, f, e, bt, bh))
+  and_r(Spec.pr_e1(f, e, f2), te2(o, f, e, bt, bh, f2), c_e(o, f, e, bt, bh))
 
 def ce3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te3(o, f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e2(f, e, bt, f2), te3(o, f, e, bt, bh, f2), ce2(o, f, e, bt, bh))
+  and_r(Spec.pr_e2(f, e, bt, f2), te3(o, f, e, bt, bh, f2), ce2(o, f, e, bt, bh))
 
 def ce4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te4(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e3(o, f, e, f2), te4(f, e, bt, bh, f2), ce3(o, f, e, bt, bh))
+  and_r(Spec.pr_e3(o, f, e, f2), te4(f, e, bt, bh, f2), ce3(o, f, e, bt, bh))
 
 def ce5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te5(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e4(f, e, f2), te5(f, e, bt, bh, f2), ce4(o, f, e, bt, bh))
+  and_r(Spec.pr_e4(f, e, f2), te5(f, e, bt, bh, f2), ce4(o, f, e, bt, bh))
 
 def ce6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te6(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e5(f, e, bh), te6(f, e, bt, bh, f2), ce5(o, f, e, bt, bh))
+  and_r(Spec.pr_e5(f, e, bh), te6(f, e, bt, bh, f2), ce5(o, f, e, bt, bh))
 
 def ce7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te7(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e6(f, e, bh), te7(f, e, bt, bh, f2), ce6(o, f, e, bt, bh))
+  and_r(Spec.pr_e6(f, e, bh), te7(f, e, bt, bh, f2), ce6(o, f, e, bt, bh))
 
 def ce8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {te8(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e7(f, e, bt, bh), te8(f, e, bt, bh, f2), ce7(o, f, e, bt, bh))
+  and_r(Spec.pr_e7(f, e, bt, bh), te8(f, e, bt, bh, f2), ce7(o, f, e, bt, bh))
 
 # the nine E properties of one cell
-def cp_e1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e1(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_e1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e1(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e1(f, e, f2), te2(o, f, e, bt, bh, f2), c_e(o, f, e, bt, bh))
+  and_l(Spec.pr_e1(f, e, f2), te2(o, f, e, bt, bh, f2), c_e(o, f, e, bt, bh))
 
-def cp_e2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e2(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_e2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e2(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e2(f, e, bt, f2), te3(o, f, e, bt, bh, f2), ce2(o, f, e, bt, bh))
+  and_l(Spec.pr_e2(f, e, bt, f2), te3(o, f, e, bt, bh, f2), ce2(o, f, e, bt, bh))
 
-def cp_e3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e3(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_e3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e3(o, f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e3(o, f, e, f2), te4(f, e, bt, bh, f2), ce3(o, f, e, bt, bh))
+  and_l(Spec.pr_e3(o, f, e, f2), te4(f, e, bt, bh, f2), ce3(o, f, e, bt, bh))
 
-def cp_e4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_e4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e4(f, e, f2), te5(f, e, bt, bh, f2), ce4(o, f, e, bt, bh))
+  and_l(Spec.pr_e4(f, e, f2), te5(f, e, bt, bh, f2), ce4(o, f, e, bt, bh))
 
-def cp_e5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e5(f, e, bh) == True{} : Bool}:
+def cp_e5(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e5(f, e, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e5(f, e, bh), te6(f, e, bt, bh, f2), ce5(o, f, e, bt, bh))
+  and_l(Spec.pr_e5(f, e, bh), te6(f, e, bt, bh, f2), ce5(o, f, e, bt, bh))
 
-def cp_e6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e6(f, e, bh) == True{} : Bool}:
+def cp_e6(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e6(f, e, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e6(f, e, bh), te7(f, e, bt, bh, f2), ce6(o, f, e, bt, bh))
+  and_l(Spec.pr_e6(f, e, bh), te7(f, e, bt, bh, f2), ce6(o, f, e, bt, bh))
 
-def cp_e7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e7(f, e, bt, bh) == True{} : Bool}:
+def cp_e7(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e7(f, e, bt, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e7(f, e, bt, bh), te8(f, e, bt, bh, f2), ce7(o, f, e, bt, bh))
+  and_l(Spec.pr_e7(f, e, bt, bh), te8(f, e, bt, bh, f2), ce7(o, f, e, bt, bh))
 
-def cp_e8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e8(f, e, bt, bh) == True{} : Bool}:
+def cp_e8(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e8(f, e, bt, bh) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(S.pr_e8(f, e, bt, bh), S.pr_e11(f, e, f2), ce8(o, f, e, bt, bh))
+  and_l(Spec.pr_e8(f, e, bt, bh), Spec.pr_e11(f, e, f2), ce8(o, f, e, bt, bh))
 
-def cp_e11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+def cp_e11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e11(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(S.pr_e8(f, e, bt, bh), S.pr_e11(f, e, f2), ce8(o, f, e, bt, bh))
+  and_r(Spec.pr_e8(f, e, bt, bh), Spec.pr_e11(f, e, f2), ce8(o, f, e, bt, bh))
 
 # ---------------------------------------------------------------------------
 # From a cell to the counter bound: a Reset restarts at 0, a Keep inherits the old
@@ -922,7 +923,7 @@ def cp_e11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {S.pr_e11(f,
 # ---------------------------------------------------------------------------
 
 def cnt_of_shape(fl: Bool, u: S.Upd, was: Bool, v: Bool, -n: Nat, -lim: Nat,
-                 hs: {S.implies(fl, S.shape_ok(u, was, v)) == True{} : Bool},
+                 hs: {S.implies(fl, Spec.shape_ok(u, was, v)) == True{} : Bool},
                  hv: {Nat.is_lt(1n+n, lim) == v : Bool},
                  hz: {Nat.is_lt(0n, lim) == True{} : Bool},
                  hold: {S.cnt_go(was, n, lim) == True{} : Bool}) -> {S.cnt_go(fl, S.apply(u, n), lim) == True{} : Bool}:
@@ -966,7 +967,7 @@ def Laws.pres_i5(o, s, h, e):
     case S.St{+f, +hb, +tack}:
       +bt = Nat.is_lt(1n+tack, S.ack_max())
       +bh = Nat.is_lt(1n+hb, S.hb_max())
-      cnt_of_shape(S.tack_running(S.step_fin(o, f, e, bt, bh)), S.upd_tack(f, e, bt, bh), S.tack_running(f), bt, tack, S.ack_max(),
+      cnt_of_shape(Spec.tack_running(S.step_fin(o, f, e, bt, bh)), S.upd_tack(f, e, bt, bh), Spec.tack_running(f), bt, tack, S.ack_max(),
         cp_tack(o, f, e, bt, bh), {==}, {==},
         and_l(S.i5_ack(S.St{f, hb, tack}), S.i6_hb(S.St{f, hb, tack}),
           and_r(S.inv_fin(f), Bool.and(S.i5_ack(S.St{f, hb, tack}), S.i6_hb(S.St{f, hb, tack})), h)))
@@ -976,7 +977,7 @@ def Laws.pres_i6(o, s, h, e):
     case S.St{+f, +hb, +tack}:
       +bt = Nat.is_lt(1n+tack, S.ack_max())
       +bh = Nat.is_lt(1n+hb, S.hb_max())
-      cnt_of_shape(S.hb_running(S.step_fin(o, f, e, bt, bh)), S.upd_hb(f, e, bh), S.hb_running(f), bh, hb, S.hb_max(),
+      cnt_of_shape(Spec.hb_running(S.step_fin(o, f, e, bt, bh)), S.upd_hb(f, e, bh), Spec.hb_running(f), bh, hb, S.hb_max(),
         cp_hb(o, f, e, bt, bh), {==}, {==},
         and_r(S.i5_ack(S.St{f, hb, tack}), S.i6_hb(S.St{f, hb, tack}),
           and_r(S.inv_fin(f), Bool.and(S.i5_ack(S.St{f, hb, tack}), S.i6_hb(S.St{f, hb, tack})), h)))
