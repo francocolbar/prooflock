@@ -1,5 +1,7 @@
-"""mutants.py - the adversarial mutation suite: 62 defects a careless engineer could plausibly
-write, each one a patch over the reference model in jetprot_ref.py.
+"""mutants.py - the adversarial mutation suite: 73 defects a careless engineer could plausibly
+write, each one a patch over the reference model in jetprot_ref.py (62 from two adversarial
+reviews, plus 11 defects of the constants and of the oracle added on 2026-09-21, see the third
+batch at the end).
 
 Provenance, stated because it matters for what the score means: M01-M37 and N01-N25 were written
 by two INDEPENDENT adversarial reviews whose brief was to break the law set, not to match it. The
@@ -694,3 +696,72 @@ MUTANTS_N = [
 ]
 
 MUTANTS = MUTANTS_M + MUTANTS_N
+
+
+# ---------------------------------------------------------------------------
+# Third batch (2026-09-21, blocker 2 of docs/STATUS_2026-09-21.md): the CONSTANTS and the oracle
+# itself. The first two batches only ever patched functions; the laws read the model constants,
+# so a wrong constant dragged the oracle along with it and survived (HB_MAX = 4, ACK_MAX = 3, a
+# wrong initial state, a wider heating window: reproduced 2026-09-21 before spec_consts.py).
+# Same convention: (name, plausibility 1-5, description, patch) with patch() a dict of
+# jetprot_ref names, now constants as well as functions (recheck.c6 restores every public name).
+# ---------------------------------------------------------------------------
+O_RANK = R.RANK
+
+
+def _s67_heat_win(p):
+    return p in ("Xpoint", "Heating1", "Heating2")                  # <-- window one phase too wide
+
+
+def _s68_dms_req(p, t):
+    return t in ("Fast", "Mhd", "MhdB") and R.PHASES.index(p) in (3, 4, 5)   # <-- Termination dropped
+
+
+def _s70_step_c(inst, st, c):
+    if c[0] == "XHeatAck" and st[0][0] == "Termination":
+        return st                                                    # <-- the acknowledgement is ignored in Termination
+    return O_step_c(inst, st, c)
+
+
+def _s71_reset_ok(s):
+    p, l, d, pl, nb, rf = s
+    return (l == "LPtn" or p == "Termination") and d != "DmsArmed" and (d != "DmsFired" or not pl)   # <-- an extra guard
+
+
+def _s72_inv_all(st):
+    s, hb, tack = st
+    return R.inv_fin(s) and (s[2] != "DmsArmed" or tack < R.ACK_MAX) and (s[1] == "LPtn" or hb <= R.HB_MAX)   # <-- <= instead of <
+
+
+def _s73_table(inst, p, t):
+    if inst == 1 and p == "Xpoint" and t == "Slow":
+        return "LRtps"                                               # <-- one cell of the matrix wrong
+    return O_table(inst, p, t)
+
+
+MUTANTS_S = [
+ ("M63_hb_max_4", 5, "HB_MAX = 4: the watchdog tolerates one missed heartbeat more than A-11 allows",
+  lambda: {"HB_MAX": 4}),
+ ("M64_ack_max_3", 5, "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-13 allows",
+  lambda: {"ACK_MAX": 3}),
+ ("M65_init_plasma_true", 4, "the initial state has plasma_ok = True (R-5: no plasma at Breakdown)",
+  lambda: {"INIT": ("Breakdown", "LNone", "DmsIdle", True, "Off", "Off")}),
+ ("M66_init_iprise", 3, "the initial phase is IpRise instead of Breakdown",
+  lambda: {"INIT": ("IpRise", "LNone", "DmsIdle", False, "Off", "Off")}),
+ ("M67_heat_win_xpoint", 4, "the heating window also admits Xpoint (A-6: Heating1 and Heating2 only)",
+  lambda: {"heat_win": _s67_heat_win}),
+ ("M68_dms_window_no_term", 4, "the DMS arming window drops Termination (R-13 / [S6] include it)",
+  lambda: {"dms_req": _s68_dms_req}),
+ ("M69_rank2_jtt_ge_rtps", 4, "urgency order 2 ranks JTT and RTPS equal (a tie: neither pre-empts the other)",
+  lambda: {"RANK": {1: dict(O_RANK[1]), 2: {"LNone": 0, "LJtt": 1, "LRtps": 1, "LPtn": 3}}}),
+ ("M70_heatack_ignored_in_term", 3, "the concrete layer drops XHeatAck while the phase is Termination",
+  lambda: {"step_c": _s70_step_c}),
+ ("M71_reset_fired_needs_plasma_false", 3, "the end of pulse with the DMS Fired is accepted only once the plasma is gone",
+  lambda: {"reset_ok": _s71_reset_ok}),
+ ("M72_inv_all_hb_le", 4, "the MODEL invariant reads hb <= HB_MAX instead of hb < HB_MAX (the oracle side is what is mutated)",
+  lambda: {"inv_all": _s72_inv_all}),
+ ("M73_table_one_cell", 5, "one wrong cell in the alarm matrix (instance 1, Xpoint, Slow: RTPS for PTN), concretize wired correctly",
+  lambda: {"table": _s73_table}),
+]
+
+MUTANTS = MUTANTS_M + MUTANTS_N + MUTANTS_S
