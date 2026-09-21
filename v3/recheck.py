@@ -205,7 +205,9 @@ def c2(results):
     # so every cell was trivially "covered"). A law set that admits many successors proves little,
     # however many laws it has: before the demand laws this number was 15 successors on average.
     rng = random.Random(TIGHTNESS_SEED)
-    cells = [(s, e, bt, bh) for s in reach[1] for e in R.EVENTS for bt, bh in R.verdicts_for(e)]
+    # sorted: `reach[1]` is a set of tuples of str, whose iteration order changes with Python's
+    # per-process hash seed, so the seeded sample was not reproducible across runs before
+    cells = [(s, e, bt, bh) for s in sorted(reach[1]) for e in R.EVENTS for bt, bh in R.verdicts_for(e)]
     sample = rng.sample(cells, min(TIGHTNESS_SAMPLE, len(cells)))
     pinned, admissible = 0, 0
     cmd_pinned, cmd_admissible = 0, 0

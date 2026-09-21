@@ -1,0 +1,2967 @@
+{
+ "C5": {
+  "cells_compared": 209664,
+  "mismatches": 0,
+  "law_failures_on_bend_cells": 0,
+  "concretize_mismatches": 0,
+  "concrete_reachability": {
+   "1": {
+    "states": 921,
+    "max_hb": 2,
+    "max_tack": 1,
+    "all_inv_all": true,
+    "phase_level_pairs": [
+     [
+      "Breakdown",
+      "LNone"
+     ],
+     [
+      "Breakdown",
+      "LPtn"
+     ],
+     [
+      "Heating1",
+      "LNone"
+     ],
+     [
+      "Heating1",
+      "LPtn"
+     ],
+     [
+      "Heating1",
+      "LRtps"
+     ],
+     [
+      "Heating2",
+      "LNone"
+     ],
+     [
+      "Heating2",
+      "LPtn"
+     ],
+     [
+      "Heating2",
+      "LRtps"
+     ],
+     [
+      "IpRise",
+      "LNone"
+     ],
+     [
+      "IpRise",
+      "LPtn"
+     ],
+     [
+      "Limiter",
+      "LNone"
+     ],
+     [
+      "Limiter",
+      "LPtn"
+     ],
+     [
+      "Termination",
+      "LJtt"
+     ],
+     [
+      "Termination",
+      "LNone"
+     ],
+     [
+      "Termination",
+      "LPtn"
+     ],
+     [
+      "Termination",
+      "LRtps"
+     ],
+     [
+      "Xpoint",
+      "LNone"
+     ],
+     [
+      "Xpoint",
+      "LPtn"
+     ]
+    ],
+    "dms_reached": [
+     "DmsArmed",
+     "DmsFired",
+     "DmsIdle"
+    ],
+    "alarm_cells_exercised": [
+     [
+      "Breakdown",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LJtt",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ]
+    ],
+    "dms_armed_by": [
+     "Fast"
+    ]
+   },
+   "2": {
+    "states": 921,
+    "max_hb": 2,
+    "max_tack": 1,
+    "all_inv_all": true,
+    "phase_level_pairs": [
+     [
+      "Breakdown",
+      "LNone"
+     ],
+     [
+      "Breakdown",
+      "LPtn"
+     ],
+     [
+      "Heating1",
+      "LNone"
+     ],
+     [
+      "Heating1",
+      "LPtn"
+     ],
+     [
+      "Heating1",
+      "LRtps"
+     ],
+     [
+      "Heating2",
+      "LNone"
+     ],
+     [
+      "Heating2",
+      "LPtn"
+     ],
+     [
+      "Heating2",
+      "LRtps"
+     ],
+     [
+      "IpRise",
+      "LNone"
+     ],
+     [
+      "IpRise",
+      "LPtn"
+     ],
+     [
+      "Limiter",
+      "LNone"
+     ],
+     [
+      "Limiter",
+      "LPtn"
+     ],
+     [
+      "Termination",
+      "LJtt"
+     ],
+     [
+      "Termination",
+      "LNone"
+     ],
+     [
+      "Termination",
+      "LPtn"
+     ],
+     [
+      "Termination",
+      "LRtps"
+     ],
+     [
+      "Xpoint",
+      "LNone"
+     ],
+     [
+      "Xpoint",
+      "LPtn"
+     ]
+    ],
+    "dms_reached": [
+     "DmsArmed",
+     "DmsFired",
+     "DmsIdle"
+    ],
+    "alarm_cells_exercised": [
+     [
+      "Breakdown",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LJtt",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ]
+    ],
+    "dms_armed_by": [
+     "Fast",
+     "Mhd",
+     "MhdB"
+    ]
+   }
+  },
+  "seconds": 4.2,
+  "ok": true
+ },
+ "C2": {
+  "reachable_abstract_states": {
+   "1": 323,
+   "2": 323
+  },
+  "laws": {
+   "pres": {
+    "cert_cells": 13377,
+    "reachable_cells": 12597,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "hb_shape": {
+    "cert_cells": 52192,
+    "reachable_cells": 4323,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "tack_shape": {
+    "cert_cells": 40320,
+    "reachable_cells": 3902,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P1_latched": {
+    "cert_cells": 94080,
+    "reachable_cells": 11305,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P2_ptn_deenergizes": {
+    "cert_cells": 28224,
+    "reachable_cells": 2170,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P3_stop_reduces_power": {
+    "cert_cells": 2688,
+    "reachable_cells": 284,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P4_ramping_never_returns": {
+    "cert_cells": 41160,
+    "reachable_cells": 875,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P5_heat_permissive": {
+    "cert_cells": 5376,
+    "reachable_cells": 646,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P6_stop_overrides_heat": {
+    "cert_cells": 78624,
+    "reachable_cells": 9828,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P7_heat_frame": {
+    "cert_cells": 48,
+    "reachable_cells": 12,
+    "vacuous": false,
+    "below_threshold": true
+   },
+   "P8_inhibit_latched": {
+    "cert_cells": 41160,
+    "reachable_cells": 8050,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P9_local_is_local": {
+    "cert_cells": 5376,
+    "reachable_cells": 646,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P10_no_spurious_stop": {
+    "cert_cells": 34560,
+    "reachable_cells": 3032,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P12_commfault_ptn": {
+    "cert_cells": 13440,
+    "reachable_cells": 1615,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P14_phase_monotone": {
+    "cert_cells": 94080,
+    "reachable_cells": 11305,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P15_dms_monotone": {
+    "cert_cells": 94080,
+    "reachable_cells": 11305,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P16_dms_armed_on_demand": {
+    "cert_cells": 8512,
+    "reachable_cells": 1998,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P17_dms_frame": {
+    "cert_cells": 8512,
+    "reachable_cells": 1998,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P18_tack_frame": {
+    "cert_cells": 24192,
+    "reachable_cells": 1512,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P19_advance_frozen": {
+    "cert_cells": 672,
+    "reachable_cells": 168,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P20_reset_guarded": {
+    "cert_cells": 10752,
+    "reachable_cells": 1292,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P21_reset_refused_mid_pulse": {
+    "cert_cells": 8192,
+    "reachable_cells": 688,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D1_stop_honoured": {
+    "cert_cells": 29568,
+    "reachable_cells": 3553,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D2_soft_stop_ramps": {
+    "cert_cells": 1764,
+    "reachable_cells": 40,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D3_advance_to_termination_ramps": {
+    "cert_cells": 126,
+    "reachable_cells": 5,
+    "vacuous": false,
+    "below_threshold": true
+   },
+   "D4_watchdog_latches": {
+    "cert_cells": 8064,
+    "reachable_cells": 620,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D5_hb_counts": {
+    "cert_cells": 8064,
+    "reachable_cells": 620,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D6_hb_frame": {
+    "cert_cells": 5248,
+    "reachable_cells": 927,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D7_ack_timeout_fires": {
+    "cert_cells": 896,
+    "reachable_cells": 224,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D8_ack_counts": {
+    "cert_cells": 896,
+    "reachable_cells": 224,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D9_heatack_fires": {
+    "cert_cells": 896,
+    "reachable_cells": 56,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D10_reset_accepted_when_safe": {
+    "cert_cells": 2560,
+    "reachable_cells": 604,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D11_advance_is_one_step": {
+    "cert_cells": 1728,
+    "reachable_cells": 116,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D12_phase_frame": {
+    "cert_cells": 5184,
+    "reachable_cells": 772,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D13_plasma_is_input": {
+    "cert_cells": 5376,
+    "reachable_cells": 646,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D14_plasma_frame": {
+    "cert_cells": 3968,
+    "reachable_cells": 655,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D15_heatoff_is_local": {
+    "cert_cells": 5376,
+    "reachable_cells": 646,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D16_heaton_is_local": {
+    "cert_cells": 5376,
+    "reachable_cells": 646,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D17_heatack_frame": {
+    "cert_cells": 2688,
+    "reachable_cells": 323,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D18_heartbeat_frame": {
+    "cert_cells": 2688,
+    "reachable_cells": 323,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E1_inhibit_source": {
+    "cert_cells": 99456,
+    "reachable_cells": 11951,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E2_dms_fire_frame": {
+    "cert_cells": 3136,
+    "reachable_cells": 280,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E3_stop_phase_exact": {
+    "cert_cells": 29568,
+    "reachable_cells": 3553,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E4_advance_units": {
+    "cert_cells": 1728,
+    "reachable_cells": 116,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E5_heartbeat_resets_hb": {
+    "cert_cells": 2688,
+    "reachable_cells": 323,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E6_hb_tick_exact": {
+    "cert_cells": 21504,
+    "reachable_cells": 2584,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E7_tack_inc_frame": {
+    "cert_cells": 2240,
+    "reachable_cells": 224,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E8_tack_reset_frame": {
+    "cert_cells": 11072,
+    "reachable_cells": 2602,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "E11_heatack_exact": {
+    "cert_cells": 2688,
+    "reachable_cells": 323,
+    "vacuous": false,
+    "below_threshold": false
+   }
+  },
+  "corollaries": {
+   "ptn_no_heat": {
+    "states": 168,
+    "reachable_states": 168,
+    "vacuous": false
+   },
+   "dms_no_heat": {
+    "states": 112,
+    "reachable_states": 112,
+    "vacuous": false
+   },
+   "stop_no_full_power": {
+    "states": 272,
+    "reachable_states": 252,
+    "vacuous": false
+   },
+   "termination_no_full_power": {
+    "states": 63,
+    "reachable_states": 63,
+    "vacuous": false
+   }
+  },
+  "tightness": {
+   "sample": 400,
+   "pinned": 371,
+   "pinned_fraction": 0.927,
+   "mean_admissible_successors": 1.13,
+   "of_states": 2688,
+   "counter_commands_pinned": 195,
+   "counter_commands_pinned_fraction": 0.487,
+   "mean_admissible_command_pairs": 1.51,
+   "of_command_pairs": 9
+  },
+  "identity_events_on_reachable": [
+   [
+    "Heartbeat"
+   ],
+   [
+    "Stop",
+    "LNone",
+    true
+   ],
+   [
+    "Stop",
+    "LNone",
+    false
+   ]
+  ],
+  "warnings_below_threshold": [
+   "P7_heat_frame",
+   "D3_advance_to_termination_ramps"
+  ],
+  "laws_that_refute_nothing_in_the_sample": [
+   "D2_soft_stop_ramps",
+   "D3_advance_to_termination_ramps"
+  ],
+  "seconds": 12.8,
+  "ok": true
+ },
+ "C3": {
+  "cells_differing": 2688,
+  "reachable_cells_differing": 168,
+  "reachable_examples": [
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Off"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     true
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Off"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Off",
+     "Off"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Off"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     false
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Off"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Off",
+     "Off"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Inhibited"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     true
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Inhibited"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Off",
+     "Inhibited"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Inhibited"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     false
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Off",
+     "Inhibited"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Off",
+     "Inhibited"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Off"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     true
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Off"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Off"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Off"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     false
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Off"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Off"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Inhibited"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     true
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Inhibited"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Inhibited"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Inhibited"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     false
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Inhibited"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     true,
+     "Inhibited",
+     "Inhibited"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     false,
+     "Off",
+     "Off"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     true
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     false,
+     "Off",
+     "Off"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     false,
+     "Off",
+     "Off"
+    ]
+   },
+   {
+    "state": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     false,
+     "Off",
+     "Off"
+    ],
+    "event": [
+     "Stop",
+     "LJtt",
+     false
+    ],
+    "ord1": [
+     "Breakdown",
+     "LRtps",
+     "DmsIdle",
+     false,
+     "Off",
+     "Off"
+    ],
+    "ord2": [
+     "Termination",
+     "LJtt",
+     "DmsIdle",
+     false,
+     "Off",
+     "Off"
+    ]
+   }
+  ]
+ },
+ "C6": {
+  "bank": {
+   "M01_tick_ack_before_watchdog": {
+    "plausibility": 5,
+    "description": "Tick: the ack timeout is evaluated BEFORE the watchdog (order of the two if-arms swapped)",
+    "caught_by": [
+     "D4_watchdog_latches"
+    ],
+    "caught_by_all": [
+     "D4_watchdog_latches"
+    ]
+   },
+   "M02_advance_term_no_ramp": {
+    "plausibility": 4,
+    "description": "Advance into Termination forgets to ramp the units down",
+    "caught_by": [
+     "pres"
+    ],
+    "caught_by_all": [
+     "D3_advance_to_termination_ramps",
+     "E4_advance_units",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M03_advance_term_deenergize": {
+    "plausibility": 4,
+    "description": "Advance into Termination de-energizes (Off) instead of ramping",
+    "caught_by": [
+     "E4_advance_units"
+    ],
+    "caught_by_all": [
+     "D3_advance_to_termination_ramps",
+     "E4_advance_units"
+    ]
+   },
+   "M04_soft_stop_deenergize": {
+    "plausibility": 5,
+    "description": "a soft stop (JTT/RTPS) trips the units to Off instead of ramping them down",
+    "caught_by": [
+     "D2_soft_stop_ramps"
+    ],
+    "caught_by_all": [
+     "D2_soft_stop_ramps"
+    ]
+   },
+   "M05_heatoff_clears_inhibit": {
+    "plausibility": 4,
+    "description": "HeatOff on an Inhibited unit clears the local inhibit",
+    "caught_by": [
+     "P8_inhibit_latched"
+    ],
+    "caught_by_all": [
+     "D15_heatoff_is_local",
+     "P8_inhibit_latched"
+    ]
+   },
+   "M06_dms_arms_on_second_demand": {
+    "plausibility": 4,
+    "description": "the DMS arms on the SECOND PTN demand (guard 'level already LPtn')",
+    "caught_by": [],
+    "caught_by_all": []
+   },
+   "M07_plasma_true_clears_stop": {
+    "plausibility": 3,
+    "description": "Plasma{True} clears a soft stop (level back to LNone)",
+    "caught_by": [
+     "P1_latched"
+    ],
+    "caught_by_all": [
+     "P10_no_spurious_stop",
+     "P1_latched",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M08_plasma_true_rearms_heat": {
+    "plausibility": 3,
+    "description": "Plasma{True} puts a Ramping unit back to On",
+    "caught_by": [
+     "P4_ramping_never_returns"
+    ],
+    "caught_by_all": [
+     "P4_ramping_never_returns",
+     "P6_stop_overrides_heat",
+     "P7_heat_frame",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M09_stop_lnone_resets_hb": {
+    "plausibility": 3,
+    "description": "a Stop{LNone} (no-response alarm) is treated as proof of life: resets hb",
+    "caught_by": [
+     "D6_hb_frame"
+    ],
+    "caught_by_all": [
+     "D6_hb_frame"
+    ]
+   },
+   "M10_advance_resets_hb": {
+    "plausibility": 4,
+    "description": "Advance resets the heartbeat counter ('the sequencer is alive')",
+    "caught_by": [
+     "D6_hb_frame"
+    ],
+    "caught_by_all": [
+     "D6_hb_frame",
+     "P19_advance_frozen"
+    ]
+   },
+   "M11_heaton_resets_hb": {
+    "plausibility": 3,
+    "description": "HeatOn resets the heartbeat counter",
+    "caught_by": [
+     "D6_hb_frame"
+    ],
+    "caught_by_all": [
+     "D16_heaton_is_local",
+     "D6_hb_frame"
+    ]
+   },
+   "M12_reset_rejects_fired": {
+    "plausibility": 4,
+    "description": "the reset guard also refuses when the DMS has Fired (stricter)",
+    "caught_by": [
+     "D10_reset_accepted_when_safe"
+    ],
+    "caught_by_all": [
+     "D10_reset_accepted_when_safe"
+    ]
+   },
+   "M13_reset_accepts_term_armed": {
+    "plausibility": 5,
+    "description": "the reset guard accepts Termination even with the DMS Armed",
+    "caught_by": [
+     "P21_reset_refused_mid_pulse"
+    ],
+    "caught_by_all": [
+     "E8_tack_reset_frame",
+     "P21_reset_refused_mid_pulse"
+    ]
+   },
+   "M14_counters_swapped": {
+    "plausibility": 4,
+    "description": "the hb and t_ack command functions are wired to the wrong counters",
+    "caught_by": [
+     "D18_heartbeat_frame"
+    ],
+    "caught_by_all": [
+     "D18_heartbeat_frame",
+     "D5_hb_counts",
+     "D6_hb_frame",
+     "D8_ack_counts",
+     "E5_heartbeat_resets_hb",
+     "E6_hb_tick_exact",
+     "E7_tack_inc_frame",
+     "E8_tack_reset_frame",
+     "P18_tack_frame",
+     "pres_fin/pres_i5/pres_i6",
+     "tack_shape",
+     "traces_safe_concrete"
+    ]
+   },
+   "M15_ack_max_off_by_one": {
+    "plausibility": 5,
+    "description": "bt = t_ack+1 <= ack_max (off-by-one in the ack timeout)",
+    "caught_by": [
+     "traces_safe_concrete"
+    ],
+    "caught_by_all": [
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M16_hb_verdict_off_by_one_other_way": {
+    "plausibility": 4,
+    "description": "bh = hb < hb_max (watchdog verdict reads the old count)",
+    "caught_by": [
+     "traces_safe_concrete"
+    ],
+    "caught_by_all": [
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M17_concretize_mchs_as_slow": {
+    "plausibility": 5,
+    "description": "concretize: the MCHS trigger reads the SLOW column",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "M18_concretize_dhs_as_mchs": {
+    "plausibility": 5,
+    "description": "concretize: the DHS trigger reads the MCHS column",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "M19_concretize_heaton_to_heatoff": {
+    "plausibility": 3,
+    "description": "concretize: XHeatOn is wired to the abstract HeatOff",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "M20_concretize_tick_arms_dms": {
+    "plausibility": 4,
+    "description": "concretize: XTick carries dms=True (dms_on_watchdog silently on)",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "M21_heatoff_hits_both_units": {
+    "plausibility": 4,
+    "description": "HeatOff{u} de-energizes BOTH units (copy-paste)",
+    "caught_by": [
+     "D15_heatoff_is_local"
+    ],
+    "caught_by_all": [
+     "D15_heatoff_is_local"
+    ]
+   },
+   "M22_local_inhibits_both_units": {
+    "plausibility": 4,
+    "description": "Local{u} inhibits BOTH units",
+    "caught_by": [
+     "P9_local_is_local"
+    ],
+    "caught_by_all": [
+     "P9_local_is_local"
+    ]
+   },
+   "M23_advance_skips_a_phase": {
+    "plausibility": 4,
+    "description": "Advance jumps two phases (index+2)",
+    "caught_by": [
+     "D11_advance_is_one_step"
+    ],
+    "caught_by_all": [
+     "D11_advance_is_one_step",
+     "E4_advance_units"
+    ]
+   },
+   "M24_rtps_jumps_to_termination": {
+    "plausibility": 4,
+    "description": "an RTPS stop also forces phase := Termination (the JTT rule applied too widely)",
+    "caught_by": [
+     "D12_phase_frame"
+    ],
+    "caught_by_all": [
+     "D12_phase_frame",
+     "E3_stop_phase_exact"
+    ]
+   },
+   "M25_heatack_never_fires": {
+    "plausibility": 4,
+    "description": "HeatAck does not fire the DMS (only the timeout does)",
+    "caught_by": [
+     "D9_heatack_fires"
+    ],
+    "caught_by_all": [
+     "D9_heatack_fires",
+     "E11_heatack_exact"
+    ]
+   },
+   "M26_stop_ptn_without_dms_is_noop": {
+    "plausibility": 5,
+    "description": "Stop{LPtn, False} is the identity: PTN latches only when the stop is wired to the DMS",
+    "caught_by": [
+     "D1_stop_honoured"
+    ],
+    "caught_by_all": [
+     "D1_stop_honoured"
+    ]
+   },
+   "M27_watchdog_never_latches_ptn": {
+    "plausibility": 5,
+    "description": "the heartbeat watchdog never latches PTN; hb simply stops counting",
+    "caught_by": [
+     "D5_hb_counts"
+    ],
+    "caught_by_all": [
+     "D4_watchdog_latches",
+     "D5_hb_counts",
+     "E6_hb_tick_exact",
+     "P16_dms_armed_on_demand"
+    ]
+   },
+   "M28_plasma_false_keeps_flag": {
+    "plausibility": 3,
+    "description": "Plasma{False} de-energizes but leaves plasma_ok True",
+    "caught_by": [
+     "D13_plasma_is_input"
+    ],
+    "caught_by_all": [
+     "D13_plasma_is_input"
+    ]
+   },
+   "M29_heaton_ignores_plasma": {
+    "plausibility": 4,
+    "description": "HeatOn does not check plasma_ok",
+    "caught_by": [
+     "pres"
+    ],
+    "caught_by_all": [
+     "P5_heat_permissive",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M30_commfault_ignores_dms_flag": {
+    "plausibility": 4,
+    "description": "CommFault never arms the DMS (the dms payload is dropped)",
+    "caught_by": [
+     "P16_dms_armed_on_demand"
+    ],
+    "caught_by_all": [
+     "P16_dms_armed_on_demand"
+    ]
+   },
+   "M31_ptn_clears_inhibit": {
+    "plausibility": 4,
+    "description": "to_ptn on a PTN stop drives both units to Off, clearing a local inhibit",
+    "caught_by": [
+     "P8_inhibit_latched"
+    ],
+    "caught_by_all": [
+     "P8_inhibit_latched"
+    ]
+   },
+   "M32_tack_counts_while_idle": {
+    "plausibility": 3,
+    "description": "t_ack increments on every Tick even with the DMS Idle",
+    "caught_by": [
+     "E7_tack_inc_frame"
+    ],
+    "caught_by_all": [
+     "E7_tack_inc_frame",
+     "pres_fin/pres_i5/pres_i6",
+     "tack_shape"
+    ]
+   },
+   "M33_dms_arms_on_second_demand_v2": {
+    "plausibility": 4,
+    "description": "the DMS arms only if the PTN was already latched before the stop (second demand)",
+    "caught_by": [
+     "P16_dms_armed_on_demand"
+    ],
+    "caught_by_all": [
+     "P16_dms_armed_on_demand"
+    ]
+   },
+   "M34_watchdog_acts_only_if_wired_to_dms": {
+    "plausibility": 5,
+    "description": "the watchdog latches PTN only when dms_on_watchdog is set; in BOTH certified instances it does nothing",
+    "caught_by": [
+     "D4_watchdog_latches"
+    ],
+    "caught_by_all": [
+     "D4_watchdog_latches"
+    ]
+   },
+   "M35_soft_stop_is_noop": {
+    "plausibility": 5,
+    "description": "a JTT/RTPS stop request is the identity (only PTN is implemented)",
+    "caught_by": [
+     "D1_stop_honoured"
+    ],
+    "caught_by_all": [
+     "D1_stop_honoured",
+     "D2_soft_stop_ramps",
+     "E3_stop_phase_exact"
+    ]
+   },
+   "M36_heatack_fires_from_idle": {
+    "plausibility": 3,
+    "description": "HeatAck fires the DMS even when it was never armed",
+    "caught_by": [
+     "pres"
+    ],
+    "caught_by_all": [
+     "E11_heatack_exact",
+     "P17_dms_frame",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M37_no_rearm_after_commfault_ptn": {
+    "plausibility": 4,
+    "description": "a DMS-wired PTN stop arriving when PTN is already latched does nothing (rule 1 parenthetical dropped)",
+    "caught_by": [
+     "P16_dms_armed_on_demand"
+    ],
+    "caught_by_all": [
+     "P16_dms_armed_on_demand"
+    ]
+   },
+   "N01_advance_nonheat_keeps_power": {
+    "plausibility": 4,
+    "description": "Advance into a non-heating phase no longer de-energizes the units",
+    "caught_by": [
+     "E4_advance_units"
+    ],
+    "caught_by_all": [
+     "E4_advance_units"
+    ]
+   },
+   "N02_hb_counts_ignoring_verdict": {
+    "plausibility": 4,
+    "description": "upd_hb increments on every Tick outside PTN, the bh verdict is not read",
+    "caught_by": [
+     "E6_hb_tick_exact"
+    ],
+    "caught_by_all": [
+     "E6_hb_tick_exact"
+    ]
+   },
+   "N03_tack_counts_while_fired": {
+    "plausibility": 3,
+    "description": "t_ack keeps counting once the DMS has Fired (dms != Idle instead of == Armed)",
+    "caught_by": [
+     "E7_tack_inc_frame"
+    ],
+    "caught_by_all": [
+     "E7_tack_inc_frame"
+    ]
+   },
+   "N04_heartbeat_ignored_under_ptn": {
+    "plausibility": 4,
+    "description": "a heartbeat does not reset the watchdog counter once the PTN is latched",
+    "caught_by": [
+     "E5_heartbeat_resets_hb"
+    ],
+    "caught_by_all": [
+     "E5_heartbeat_resets_hb"
+    ]
+   },
+   "N05_concretize_against_next_phase": {
+    "plausibility": 5,
+    "description": "step_c reads the alarm matrix at the phase the sequencer is entering",
+    "caught_by": [
+     "C3_step_c_is_the_concrete_step"
+    ],
+    "caught_by_all": [
+     "C3_step_c_is_the_concrete_step"
+    ]
+   },
+   "N06_concrete_layer_order2": {
+    "plausibility": 5,
+    "description": "both instances run the abstract step with urgency order 2",
+    "caught_by": [
+     "C3_step_c_is_the_concrete_step"
+    ],
+    "caught_by_all": [
+     "C3_step_c_is_the_concrete_step"
+    ]
+   },
+   "N07_concrete_layer_ignores_instance": {
+    "plausibility": 5,
+    "description": "step_c always uses instance 1's alarm matrix",
+    "caught_by": [
+     "C3_step_c_is_the_concrete_step"
+    ],
+    "caught_by_all": [
+     "C3_step_c_is_the_concrete_step"
+    ]
+   },
+   "N08_plasma_loss_inhibits": {
+    "plausibility": 3,
+    "description": "loss of plasma latches the units Inhibited instead of de-energizing them",
+    "caught_by": [
+     "E1_inhibit_source"
+    ],
+    "caught_by_all": [
+     "E1_inhibit_source"
+    ]
+   },
+   "N09_heaton_needs_healthy_watchdog": {
+    "plausibility": 3,
+    "description": "HeatOn is refused whenever the watchdog verdict bh is false",
+    "caught_by": [
+     "V1_verdict_frame"
+    ],
+    "caught_by_all": [
+     "V1_verdict_frame"
+    ]
+   },
+   "N10_commfault_dropped_when_hb_late": {
+    "plausibility": 4,
+    "description": "CommFault{False} is ignored while the watchdog verdict bh is false",
+    "caught_by": [
+     "V1_verdict_frame"
+    ],
+    "caught_by_all": [
+     "V1_verdict_frame"
+    ]
+   },
+   "N11_advance_restarts_ack_timer": {
+    "plausibility": 3,
+    "description": "Advance restarts t_ack while the DMS is Idle",
+    "caught_by": [
+     "E8_tack_reset_frame"
+    ],
+    "caught_by_all": [
+     "E8_tack_reset_frame",
+     "P19_advance_frozen"
+    ]
+   },
+   "N12_stop_lnone_restarts_ack_timer": {
+    "plausibility": 3,
+    "description": "a Stop{LNone} restarts t_ack while the DMS is Idle",
+    "caught_by": [
+     "E8_tack_reset_frame"
+    ],
+    "caught_by_all": [
+     "E8_tack_reset_frame"
+    ]
+   },
+   "N13_instance2_window_off_by_one": {
+    "plausibility": 5,
+    "description": "instance 2's MHD override starts at Heating1 instead of Xpoint",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "N14_dms_req_ignores_phase_window": {
+    "plausibility": 5,
+    "description": "dms_req drops the phase window: FAST/MHD arm the DMS in every phase",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "N15_arm_goes_straight_to_fired": {
+    "plausibility": 4,
+    "description": "arming the DMS sets DmsFired directly",
+    "caught_by": [
+     "P16_dms_armed_on_demand"
+    ],
+    "caught_by_all": [
+     "P16_dms_armed_on_demand"
+    ]
+   },
+   "N16_ptn_deenergizes_nb_only": {
+    "plausibility": 5,
+    "description": "to_ptn de-energizes the neutral beam and forgets the RF",
+    "caught_by": [
+     "P2_ptn_deenergizes"
+    ],
+    "caught_by_all": [
+     "P2_ptn_deenergizes",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "N17_heatack_also_latches_ptn": {
+    "plausibility": 3,
+    "description": "the heating acknowledgement also latches the PTN and trips the units",
+    "caught_by": [
+     "P10_no_spurious_stop"
+    ],
+    "caught_by_all": [
+     "D17_heatack_frame",
+     "P10_no_spurious_stop"
+    ]
+   },
+   "N18_heartbeat_restarts_ack_timer": {
+    "plausibility": 4,
+    "description": "a heartbeat also restarts the DMS acknowledgement timer",
+    "caught_by": [
+     "D18_heartbeat_frame"
+    ],
+    "caught_by_all": [
+     "D18_heartbeat_frame",
+     "E8_tack_reset_frame",
+     "P18_tack_frame"
+    ]
+   },
+   "N19_plasma_true_resets_hb": {
+    "plausibility": 3,
+    "description": "Plasma{True} is treated as proof of life and resets the watchdog",
+    "caught_by": [
+     "D6_hb_frame"
+    ],
+    "caught_by_all": [
+     "D6_hb_frame"
+    ]
+   },
+   "N20_arms_now_drops_idle_test": {
+    "plausibility": 4,
+    "description": "arms_now returns the payload alone, so a repeat demand restarts t_ack",
+    "caught_by": [
+     "P18_tack_frame"
+    ],
+    "caught_by_all": [
+     "E8_tack_reset_frame",
+     "P18_tack_frame"
+    ]
+   },
+   "N21_counter_limits_swapped": {
+    "plausibility": 4,
+    "description": "the verdicts read hb against ack_max and t_ack against hb_max",
+    "caught_by": [
+     "traces_safe_concrete"
+    ],
+    "caught_by_all": [
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "N22_stop_accept_ge": {
+    "plausibility": 3,
+    "description": "the stop acceptance test is >= instead of > (a repeat request re-runs the ramp)",
+    "caught_by": [
+     "E3_stop_phase_exact"
+    ],
+    "caught_by_all": [
+     "E3_stop_phase_exact",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "N23_accept_hardwired_order1": {
+    "plausibility": 5,
+    "description": "the acceptance comparison is hard-wired to urgency order 1",
+    "caught_by": [
+     "P1_latched"
+    ],
+    "caught_by_all": [
+     "D1_stop_honoured",
+     "D2_soft_stop_ramps",
+     "E3_stop_phase_exact",
+     "P1_latched"
+    ]
+   },
+   "N24_watchdog_ignores_latched_ptn": {
+    "plausibility": 4,
+    "description": "the watchdog branch runs even when the PTN is already latched, pre-empting the ack timeout",
+    "caught_by": [
+     "P17_dms_frame"
+    ],
+    "caught_by_all": [
+     "D7_ack_timeout_fires",
+     "D8_ack_counts",
+     "E8_tack_reset_frame",
+     "P17_dms_frame"
+    ]
+   },
+   "N25_reset_keeps_phase": {
+    "plausibility": 4,
+    "description": "an accepted end of pulse clears the responses but leaves the phase where it was",
+    "caught_by": [
+     "P20_reset_guarded"
+    ],
+    "caught_by_all": [
+     "D10_reset_accepted_when_safe",
+     "P20_reset_guarded"
+    ]
+   },
+   "M63_hb_max_4": {
+    "plausibility": 5,
+    "description": "HB_MAX = 4: the watchdog tolerates one missed heartbeat more than A-11 allows",
+    "caught_by": [
+     "traces_safe_concrete"
+    ],
+    "caught_by_all": [
+     "S1_inv_all_is_spec",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M64_ack_max_3": {
+    "plausibility": 5,
+    "description": "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-13 allows",
+    "caught_by": [
+     "traces_safe_concrete"
+    ],
+    "caught_by_all": [
+     "S1_inv_all_is_spec",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M65_init_plasma_true": {
+    "plausibility": 4,
+    "description": "the initial state has plasma_ok = True (R-5: no plasma at Breakdown)",
+    "caught_by": [
+     "S0_init_is_spec"
+    ],
+    "caught_by_all": [
+     "D10_reset_accepted_when_safe",
+     "P20_reset_guarded",
+     "S0_init_is_spec"
+    ]
+   },
+   "M66_init_iprise": {
+    "plausibility": 3,
+    "description": "the initial phase is IpRise instead of Breakdown",
+    "caught_by": [
+     "S0_init_is_spec"
+    ],
+    "caught_by_all": [
+     "D10_reset_accepted_when_safe",
+     "P20_reset_guarded",
+     "S0_init_is_spec"
+    ]
+   },
+   "M67_heat_win_xpoint": {
+    "plausibility": 4,
+    "description": "the heating window also admits Xpoint (A-6: Heating1 and Heating2 only)",
+    "caught_by": [
+     "E4_advance_units"
+    ],
+    "caught_by_all": [
+     "E4_advance_units",
+     "P5_heat_permissive",
+     "S1_inv_all_is_spec",
+     "pres",
+     "pres_fin/pres_i5/pres_i6",
+     "traces_safe_concrete"
+    ]
+   },
+   "M68_dms_window_no_term": {
+    "plausibility": 4,
+    "description": "the DMS arming window drops Termination (R-13 / [S6] include it)",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "M69_rank2_jtt_ge_rtps": {
+    "plausibility": 4,
+    "description": "urgency order 2 ranks JTT and RTPS equal (a tie: neither pre-empts the other)",
+    "caught_by": [
+     "D1_stop_honoured"
+    ],
+    "caught_by_all": [
+     "D1_stop_honoured",
+     "D2_soft_stop_ramps",
+     "E3_stop_phase_exact"
+    ]
+   },
+   "M70_heatack_ignored_in_term": {
+    "plausibility": 3,
+    "description": "the concrete layer drops XHeatAck while the phase is Termination",
+    "caught_by": [
+     "C3_step_c_is_the_concrete_step"
+    ],
+    "caught_by_all": [
+     "C3_step_c_is_the_concrete_step"
+    ]
+   },
+   "M71_reset_fired_needs_plasma_false": {
+    "plausibility": 3,
+    "description": "the end of pulse with the DMS Fired is accepted only once the plasma is gone",
+    "caught_by": [
+     "D10_reset_accepted_when_safe"
+    ],
+    "caught_by_all": [
+     "D10_reset_accepted_when_safe"
+    ]
+   },
+   "M72_inv_all_hb_le": {
+    "plausibility": 4,
+    "description": "the MODEL invariant reads hb <= HB_MAX instead of hb < HB_MAX (the oracle side is what is mutated)",
+    "caught_by": [
+     "S1_inv_all_is_spec"
+    ],
+    "caught_by_all": [
+     "S1_inv_all_is_spec"
+    ]
+   },
+   "M73_table_one_cell": {
+    "plausibility": 5,
+    "description": "one wrong cell in the alarm matrix (instance 1, Xpoint, Slow: RTPS for PTN), concretize wired correctly",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   }
+  },
+  "killed": 72,
+  "total": 73,
+  "by_batch": {
+   "M01-M37 (review 1)": {
+    "killed": 36,
+    "total": 37
+   },
+   "N01-N25 (review 2)": {
+    "killed": 25,
+    "total": 25
+   },
+   "M63-M73 (constants and oracle)": {
+    "killed": 11,
+    "total": 11
+   }
+  },
+  "survivors": [
+   "M06_dms_arms_on_second_demand"
+  ],
+  "known_equivalent": [
+   "M06_dms_arms_on_second_demand"
+  ],
+  "flags_killed": 17,
+  "flags_total": 17,
+  "flag_survivors": [],
+  "seconds": 586.8,
+  "ok": true,
+  "laws_per_kill": {
+   "per_mutant": {
+    "M01_tick_ack_before_watchdog": 1,
+    "M02_advance_term_no_ramp": 5,
+    "M03_advance_term_deenergize": 2,
+    "M04_soft_stop_deenergize": 1,
+    "M05_heatoff_clears_inhibit": 2,
+    "M07_plasma_true_clears_stop": 5,
+    "M08_plasma_true_rearms_heat": 6,
+    "M09_stop_lnone_resets_hb": 1,
+    "M10_advance_resets_hb": 2,
+    "M11_heaton_resets_hb": 2,
+    "M12_reset_rejects_fired": 1,
+    "M13_reset_accepts_term_armed": 2,
+    "M14_counters_swapped": 12,
+    "M15_ack_max_off_by_one": 2,
+    "M16_hb_verdict_off_by_one_other_way": 2,
+    "M17_concretize_mchs_as_slow": 1,
+    "M18_concretize_dhs_as_mchs": 1,
+    "M19_concretize_heaton_to_heatoff": 1,
+    "M20_concretize_tick_arms_dms": 1,
+    "M21_heatoff_hits_both_units": 1,
+    "M22_local_inhibits_both_units": 1,
+    "M23_advance_skips_a_phase": 2,
+    "M24_rtps_jumps_to_termination": 2,
+    "M25_heatack_never_fires": 2,
+    "M26_stop_ptn_without_dms_is_noop": 1,
+    "M27_watchdog_never_latches_ptn": 4,
+    "M28_plasma_false_keeps_flag": 1,
+    "M29_heaton_ignores_plasma": 4,
+    "M30_commfault_ignores_dms_flag": 1,
+    "M31_ptn_clears_inhibit": 1,
+    "M32_tack_counts_while_idle": 3,
+    "M33_dms_arms_on_second_demand_v2": 1,
+    "M34_watchdog_acts_only_if_wired_to_dms": 1,
+    "M35_soft_stop_is_noop": 3,
+    "M36_heatack_fires_from_idle": 5,
+    "M37_no_rearm_after_commfault_ptn": 1,
+    "N01_advance_nonheat_keeps_power": 1,
+    "N02_hb_counts_ignoring_verdict": 1,
+    "N03_tack_counts_while_fired": 1,
+    "N04_heartbeat_ignored_under_ptn": 1,
+    "N05_concretize_against_next_phase": 1,
+    "N06_concrete_layer_order2": 1,
+    "N07_concrete_layer_ignores_instance": 1,
+    "N08_plasma_loss_inhibits": 1,
+    "N09_heaton_needs_healthy_watchdog": 1,
+    "N10_commfault_dropped_when_hb_late": 1,
+    "N11_advance_restarts_ack_timer": 2,
+    "N12_stop_lnone_restarts_ack_timer": 1,
+    "N13_instance2_window_off_by_one": 1,
+    "N14_dms_req_ignores_phase_window": 1,
+    "N15_arm_goes_straight_to_fired": 1,
+    "N16_ptn_deenergizes_nb_only": 4,
+    "N17_heatack_also_latches_ptn": 2,
+    "N18_heartbeat_restarts_ack_timer": 3,
+    "N19_plasma_true_resets_hb": 1,
+    "N20_arms_now_drops_idle_test": 2,
+    "N21_counter_limits_swapped": 2,
+    "N22_stop_accept_ge": 4,
+    "N23_accept_hardwired_order1": 4,
+    "N24_watchdog_ignores_latched_ptn": 4,
+    "N25_reset_keeps_phase": 2,
+    "M63_hb_max_4": 3,
+    "M64_ack_max_3": 3,
+    "M65_init_plasma_true": 3,
+    "M66_init_iprise": 3,
+    "M67_heat_win_xpoint": 6,
+    "M68_dms_window_no_term": 1,
+    "M69_rank2_jtt_ge_rtps": 3,
+    "M70_heatack_ignored_in_term": 1,
+    "M71_reset_fired_needs_plasma_false": 1,
+    "M72_inv_all_hb_le": 1,
+    "M73_table_one_cell": 1
+   },
+   "histogram": {
+    "1": 37,
+    "2": 15,
+    "3": 8,
+    "4": 6,
+    "5": 3,
+    "6": 2,
+    "12": 1
+   },
+   "killed_by_a_single_law": [
+    "M01_tick_ack_before_watchdog",
+    "M04_soft_stop_deenergize",
+    "M09_stop_lnone_resets_hb",
+    "M12_reset_rejects_fired",
+    "M17_concretize_mchs_as_slow",
+    "M18_concretize_dhs_as_mchs",
+    "M19_concretize_heaton_to_heatoff",
+    "M20_concretize_tick_arms_dms",
+    "M21_heatoff_hits_both_units",
+    "M22_local_inhibits_both_units",
+    "M26_stop_ptn_without_dms_is_noop",
+    "M28_plasma_false_keeps_flag",
+    "M30_commfault_ignores_dms_flag",
+    "M31_ptn_clears_inhibit",
+    "M33_dms_arms_on_second_demand_v2",
+    "M34_watchdog_acts_only_if_wired_to_dms",
+    "M37_no_rearm_after_commfault_ptn",
+    "M68_dms_window_no_term",
+    "M70_heatack_ignored_in_term",
+    "M71_reset_fired_needs_plasma_false",
+    "M72_inv_all_hb_le",
+    "M73_table_one_cell",
+    "N01_advance_nonheat_keeps_power",
+    "N02_hb_counts_ignoring_verdict",
+    "N03_tack_counts_while_fired",
+    "N04_heartbeat_ignored_under_ptn",
+    "N05_concretize_against_next_phase",
+    "N06_concrete_layer_order2",
+    "N07_concrete_layer_ignores_instance",
+    "N08_plasma_loss_inhibits",
+    "N09_heaton_needs_healthy_watchdog",
+    "N10_commfault_dropped_when_hb_late",
+    "N12_stop_lnone_restarts_ack_timer",
+    "N13_instance2_window_off_by_one",
+    "N14_dms_req_ignores_phase_window",
+    "N15_arm_goes_straight_to_fired",
+    "N19_plasma_true_resets_hb"
+   ]
+  }
+ },
+ "all_ok": true,
+ "provenance": {
+  "timestamp_utc": "2026-09-21T19:44:35Z",
+  "bend": {
+   "version": "bend 2.0.24",
+   "commit": "e52cda47a58967aa65d1eb26efe8f42a0b0407df",
+   "src": "C:\\Users\\franc/.bend-src"
+  },
+  "bun": "1.3.11",
+  "node": "v22.22.2",
+  "python": "3.14.3",
+  "hypothesis": "6.168.0",
+  "seed": 20260921,
+  "max_examples": 3000,
+  "sha256": {
+   "v3/LAWS_JETPROT.bend": "63afdf33fec370e80d129760eac93dffe24e585099c288fbce2abee4176f4032",
+   "v3/LAWS_JETPROT_CONF.bend": "7119fef316b42c424f24e4bb020c043e4ed3cb123265f0ff87f88ca44b80020e",
+   "v3/LAWS_JETPROT_SOUND.bend": "61ced91c9b1e964d8e9f4ab8c271c3366006d7d9b4c9d95beee440a2da48ca4b",
+   "v3/PROOF_JETPROT.bend": "4d9dd2fdab32badfb7e5324614ca81d601e4a4865ad8a3b90e3fc040c517f1bb",
+   "v3/PROOF_JETPROT_CONF.bend": "8c9e6f64ad70ea12ccb671dac9081ce9831f7c820d189a8bd754f6eead202e07",
+   "v3/PROOF_JETPROT_COR.bend": "7f87cb771cfacd33a0b98e0c0d16d1dc892bbb8ced6c7e96782bdc4eabeaff5e",
+   "v3/PROOF_JETPROT_FIN.bend": "f4374d0ac5a637dae2a79a374b9b8a5f2ebb24ac8fb8a6afc95af9835b5e5c3a",
+   "v3/PROOF_JETPROT_FIN_ALT.bend": "d0395fdb67b3e33c92888cf82b39354576d59c56b73dfb2b6d2bb857e0d801b1",
+   "v3/PROOF_JETPROT_SOUND.bend": "342c5296dc817789e04d995faa0d55814be6701969f92d9c68621f247c4025bf",
+   "v3/enum_jetprot.bend": "4277ae6a54e821793045048245e960e88f15352241c35c8ea1facb0b7addda62",
+   "v3/jetprot.bend": "fe36781fc1c3c3eec61b82044db156c1da7e301d969b6a1804f018ee15cb0de5",
+   "v3/spec_jetprot.bend": "c4d141df08ddbfb990db186cbb7a5191ae190feb9daee509e3e6e6cb025940da",
+   "v3/tests/jetprot_bug10_soft_stop_trips.bend": "5572abf836457600c4608381228f68f85cbd3a37de47661f7906764a8c56b0bd",
+   "v3/tests/jetprot_bug1_deescalation.bend": "9894c1746c6abce79ec9913a68702dbaae38051202efba41b70953d22474b970",
+   "v3/tests/jetprot_bug2_jtt_no_ramp.bend": "51aa5b5c9a0f7d77fc0a7f647d79c821995a5404abc3cf0b3a12b15a4611bf09",
+   "v3/tests/jetprot_bug3_commfault_no_deenergize.bend": "8591013d25be0271af43d25671ecaa36d35be49f60baf35b67d38cb0b899482e",
+   "v3/tests/jetprot_bug4_dms_without_ptn.bend": "e79599053de218f74e70413d66839002404e0b30549bbe4197d3257e05700b9c",
+   "v3/tests/jetprot_bug5_law_p2_unconditional.bend": "b0cb90f4cdae0c6003100d3837e6ffc0658be84e65d72ae0a688e854f0d9d3bc",
+   "v3/tests/jetprot_bug6_rearm_restarts_ack.bend": "4b0ab049a753ada43c81462c0d2a440a0c76d57184926dbf7415164bf06ad670",
+   "v3/tests/jetprot_bug7_rtps_keeps_full_power.bend": "0c9d310e9ebd1bf66816419236e94793d000a1c7360a84e04e06407637c1674c",
+   "v3/tests/jetprot_bug8_certificate_false.bend": "03c9259e4ebd7070d82f544b3ee1ecec032acb76b94114894d1f86d3ff469e2a",
+   "v3/tests/jetprot_bug9_stop_is_noop.bend": "8d659403a9610aef921b7657aaa2578ed2c5f7ca0d67fb1ffb54a36f0bf2480e",
+   "v3/tests/laws_jetprot_smoke.bend": "b1efc61d662db9a6f2b60afe991ae3e7fcc62744f652c9a3d6d899c40d53dab9",
+   "v3/pymodel/jetprot_laws.py": "aee0a21aaac8176a9ff60db724b726759827672b0a663f78f563b319bb6c6f73",
+   "v3/pymodel/jetprot_ref.py": "30b2cea057fc13bd4e281f7a0321485f1b3f21c7a59d7e21607253d3be14424a",
+   "v3/pymodel/mutants.py": "dd0f662eee4912d698cb0ec8ab901d36d38723c38fb5a927a7da72279c8866ce",
+   "v3/pymodel/spec_consts.py": "ca266f6edad8e3309fde9f29b6bf6b16a7127b5c1661b31a2831d2741d2dd56e",
+   "v3/prod/jetprot_prod.py": "404b8bdabbdceed8eb70651e75d3d2c5fa32664d7ffcae83c0f51c5dfcb48504",
+   "v3/bridge.mjs": "2d8674427bc798b5d11ff8446ea53581aa3d5451688fd0247a982cd279e91d7c",
+   "v3/bridge_client.py": "8922e474b86e156264710fbd03b2648e1d7e77854406eaec767ad71a444cbe8b",
+   "v3/recheck.py": "509a7d49cba2a1b9a53fbaed99c76fd82c13fe5b7f8ca6a7890324500259097b",
+   "v3/run.py": "394b90817b3abc693f83c99b2e81f8a498ccb548727d75d842c61665878e4b3e",
+   "env/bend.sh": "943bfc9e5304f97dcfa6f3dcd5ab77179f4e5b6f2e5cfc53c4d84ea7a9bb7e06",
+   "env/check_env.sh": "2a80cfcb4324a5d40dd53eca333413e8a0496b90ae0b52a12b8300f81c1fa1b2"
+  },
+  "host": {
+   "os": "Windows-11-10.0.26200-SP0",
+   "machine": "AMD64",
+   "cpu": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD"
+  }
+ }
+}

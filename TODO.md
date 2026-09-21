@@ -5,6 +5,8 @@
       + preprint hace falta una persona o entidad identificada. Decisión del autor humano;
       anotado 2026-09-19, pendiente a propósito.
 - [ ] **Revisión con Fable 5.1** de las leyes de demanda (créditos agotados hasta el lunes).
+- [ ] `CITATION.cff`: `repository-code` (PLACEHOLDER) y el nombre del autor dependen de la misma decisión
+      del titular del copyright; completar antes de publicar (agregado 2026-09-21).
 - [ ] Lectura de exactitud fáctica por los autores de [S1]/[S2] antes del preprint
       (ver README §7 y `v3/docs/fase3-seguridad.md` §0).
 - [x] ~~Commit inicial del repositorio.~~ Hecho 2026-09-19.

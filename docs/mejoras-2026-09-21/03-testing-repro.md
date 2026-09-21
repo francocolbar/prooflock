@@ -1,6 +1,6 @@
 # 03 — Testing diferencial y reproducibilidad: diseño de mejoras
 
-Fecha: 2026-09-21. Origen: auditoría de 6 agentes (simulación/testing, docs/preprint). Estado: **diseño, no aplicado**.
+Fecha: 2026-09-21. Origen: auditoría de 6 agentes (simulación/testing, docs/preprint). Estado: **§1–§4 aplicados el 2026-09-21** (ver `docs/STATUS_2026-09-21.md` §4, bloqueantes 2 y 3, con las diferencias respecto de este diseño); §5 (`check_trace.py`), §6 (CI) y §7 (demo) siguen como diseño.
 Nombres de archivo y función son los reales del repo (`v3/run.py`, `v3/recheck.py`, `v3/pymodel/mutants.py`,
 `env/bend.sh`, `env/check_env.sh`).
 

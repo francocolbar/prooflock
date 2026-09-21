@@ -25,7 +25,7 @@ escrito antes que los resultados, en `v3/docs/fase3-seguridad.md`.
 
 | Ruta | Qué | Cómo se corre |
 |---|---|---|
-| `env/` | versiones pinneadas, el runner portable de Bend (`env/bend.sh`), 11 chequeos hello-world | `bash env/check_env.sh` |
+| `env/` | el runner de Bend pinneado a un commit (`env/bend.sh`, rechaza cualquier otro checkout), 13 chequeos de toolchain y hello-world | `bash env/check_env.sh` |
 | `v3/` | **el caso de estudio**: modelo, certificado, leyes, pruebas, tests negativos, puente, implementación de producción con bugs plantados, re-chequeo Python independiente, gate | `py -3.14 v3/run.py` |
 | `v3/docs/` | fuentes y citas (`fase3-fuente.md`), diseño y leyes (`fase3-diseno.md`), peligros / requisitos de seguridad / límites de la evidencia (`fase3-seguridad.md`), trazabilidad (`fase3-trazabilidad.md`), copias CC BY de los papers (`sources/`) | castellano |
 | `v2/num/` | base numérica probada: enteros canónicos con el anillo conmutativo completo (22 leyes), naturales grandes como listas de bits con sumador probado, enteros grandes | reutilizable |
@@ -69,14 +69,15 @@ escrito antes que los resultados, en `v3/docs/fase3-seguridad.md`.
 ## 4. Reproducir
 
 ```bash
-bash env/check_env.sh          # entorno + 11 hello-worlds (Bend 2.0.6 vía bun, node, Python 3.14, JAX f64)
-py -3.14 v3/run.py             # el caso de estudio: pruebas, humo, 10 negativos, re-chequeo, testing diferencial -> v3/results.json
+bash env/check_env.sh          # entorno + 13 chequeos, pin de Bend 2.0.24 (bun, node, Python 3.14, JAX f64)
+py -3.14 v3/run.py quick       # el caso de estudio en < 1 min (gate de CI); `--help` lista las etapas y sus tiempos
+py -3.14 v3/run.py all         # todo (~7 min): pruebas, humo, 10 negativos, re-chequeo, 73 mutantes, testing diferencial -> v3/results.json + SHA256SUMS
 py -3.14 v3/recheck.py         # solo los gates del lado Python (C2 vacuidad, C3 sensibilidad, C5 re-chequeo, C6 mutantes)
 py -3.14 v2/seq3/run.py        # el ejercicio del secuenciador
 py -3.14 v2/heat/run.py        # el ejercicio del calor
 ```
 Todo corre en Windows sin toolchain nativo (Bend sobre el backend JS a través de `env/bend.sh`); Linux/macOS igual.
-Versiones pinneadas: `env/SETUP.md`. Python necesita `hypothesis` (`py -3.14 -m pip install hypothesis`). El compilador Bend no está vendorizado: `env/bend.sh` lo busca, y `env/SETUP.md` registra la versión contra la que se verificó esto.
+Versiones pinneadas: `env/SETUP.md`. Python: `py -3.14 -m pip install -r requirements.txt`. El compilador Bend no está vendorizado: `env/bend.sh` baja el commit pinneado (2.0.24), rechaza cualquier otro checkout, y `env/SETUP.md` registra el commit, el hash del árbol y qué hacer ahora que el repo de GitHub responde 404 (`BEND_SRC` a un checkout de ese commit, o `BEND_BIN` al binario del instalador oficial).
 
 ## 5. El método en siete movimientos
 

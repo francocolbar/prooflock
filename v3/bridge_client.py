@@ -6,7 +6,8 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-LOADER = "file:///" + os.path.expanduser("~/.bend-src/bend2/main.ts").replace("\\", "/").lstrip("/")
+BEND_SRC = os.environ.get("BEND_SRC", os.path.expanduser("~/.bend-src"))   # the checkout env/bend.sh pins
+LOADER = "file:///" + os.path.join(BEND_SRC, "bend2", "main.ts").replace(os.sep, "/").lstrip("/")
 
 
 class Bridge:

@@ -25,7 +25,7 @@ results, in `v3/docs/fase3-seguridad.md`.
 
 | Path | What | Status |
 |---|---|---|
-| `env/` | toolchain pins, the portable Bend runner (`env/bend.sh`), 11 hello-world checks | `bash env/check_env.sh` |
+| `env/` | the Bend runner pinned to one commit (`env/bend.sh`, refuses any other checkout), 13 toolchain and hello-world checks | `bash env/check_env.sh` |
 | `v3/` | **the case study**: model, certificate, laws, proofs, negative tests, bridge, production implementation with planted bugs, independent Python re-check, gate | `py -3.14 v3/run.py` |
 | `v3/docs/` | sources and quotations (`fase3-fuente.md`), design and laws (`fase3-diseno.md`), hazards / safety requirements / limits of evidence (`fase3-seguridad.md`), traceability (`fase3-trazabilidad.md`), CC BY copies of the source papers (`sources/`) | Spanish |
 | `v2/num/` | proven numeric base: canonical integers with the full commutative ring (22 laws), big naturals as bit lists with a proven adder, big integers | reusable |
@@ -69,14 +69,15 @@ results, in `v3/docs/fase3-seguridad.md`.
 ## 4. Reproduce
 
 ```bash
-bash env/check_env.sh          # toolchain + 11 hello-worlds (Bend 2.0.6 via bun, node, Python 3.14, JAX f64)
-py -3.14 v3/run.py             # the case study: proofs, smoke, 10 negatives, re-check, differential testing -> v3/results.json
+bash env/check_env.sh          # toolchain + 13 checks, Bend 2.0.24 pinned (bun, node, Python 3.14, JAX f64)
+py -3.14 v3/run.py quick       # the case study in < 1 min (the CI gate); `--help` lists the stages and their times
+py -3.14 v3/run.py all         # everything (~7 min): proofs, smoke, 10 negatives, re-check, 73 mutants, differential testing -> v3/results.json + SHA256SUMS
 py -3.14 v3/recheck.py         # only the Python-side gates (C2 vacuity, C3 sensitivity, C5 re-check, C6 mutants)
 py -3.14 v2/seq3/run.py        # the sequencer exercise
 py -3.14 v2/heat/run.py        # the heat exercise
 ```
 Everything runs on Windows without a native toolchain (Bend on the JS backend through `env/bend.sh`); Linux/macOS work
-the same. Pinned versions: `env/SETUP.md`. Python needs `hypothesis` (`py -3.14 -m pip install hypothesis`). The Bend compiler itself is not vendored: `env/bend.sh` fetches it, and `env/SETUP.md` records the version this was verified against.
+the same. Pinned versions: `env/SETUP.md`. Python: `py -3.14 -m pip install -r requirements.txt`. The Bend compiler itself is not vendored: `env/bend.sh` fetches the pinned commit (2.0.24), refuses any other checkout, and `env/SETUP.md` records the commit, the tree hash and what to do now that the upstream GitHub repository answers 404 (`BEND_SRC` to a checkout of that commit, or `BEND_BIN` to the official installer's binary).
 
 ## 5. The method in seven moves
 
