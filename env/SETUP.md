@@ -42,6 +42,6 @@ Limitaciones de esta máquina (documentadas en la skill, verificadas hoy):
 
 ## Verificación
 ```bash
-bash bend-spike/env/check_env.sh     # imprime versiones y PASS/FAIL por cada hello-world
+bash prooflock/env/check_env.sh      # imprime versiones y PASS/FAIL por cada hello-world
 ```
 El log de la corrida de referencia está en `env/check_env.log`.

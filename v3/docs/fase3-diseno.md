@@ -8,7 +8,7 @@ revisores independientes por perspectiva); registro de hallazgos en §9, con los
 registro de hipótesis: `fase3-fuente.md` (**R-n**, **A-n**). Peligros, requisitos de seguridad y límites de la
 evidencia: `fase3-seguridad.md`. Patrón: `v2/seq3/` (control finito + comandos a contadores + certificado por cómputo +
 reflexión). Mismo estándar que la v2: instanciación exhaustiva antes de probar, un agente probador por archivo, test
-negativo, gate único `py -3.14 bend-spike/v3/run.py`.
+negativo, gate único `py -3.14 v3/run.py` (desde la raíz del repo).
 
 **Qué es el modelo.** El *Stop Selector* del RTPS de JET ([S1]: "the state machine and alarm processing logic") más la
 interfaz al PTN y la secuencia de armado del DMS; no el *Stop Manager* (las formas de onda de sobreescritura). Certifica
@@ -337,7 +337,7 @@ se saltea. Gate completo (`run.py`) ≈ 5–6 min.
 
 ## 8. Qué cuenta como "cerró"
 
-`py -3.14 bend-spike/v3/run.py` → `all gates and checks ok: True`: (1) los PROOF imprimen `All terms check.`; (2) la
+`py -3.14 v3/run.py` (desde la raíz del repo) → `all gates and checks ok: True`: (1) los PROOF imprimen `All terms check.`; (2) la
 grilla exhaustiva sin `FALSE` y C2 sin ninguna ley vacía; (3) los seis negativos rechazados; (4) sin bugs, ningún
 contraejemplo; cada bug plantado encontrado por algún generador con traza mínima y los dos oráculos disparando; (5) C5
 coincide con C1 celda por celda y la alcanzabilidad concreta está contenida en `inv_all`; (6) C6 reportado; (7) C3 y

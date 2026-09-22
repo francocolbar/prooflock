@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it as below."
 type: software
-title: "bend-spike: configuration-independent verification of a machine-protection interlock chain (JET case study) in Bend 2"
+title: "prooflock: configuration-independent verification of a machine-protection interlock chain (JET case study) in Bend 2"
 abstract: >-
   A verified reference model of the JET wall-protection chain (JTT / RTPS / PTN / DMS)
   written in Bend 2: laws over every urgency order, control state, event and counter value,
@@ -12,11 +12,12 @@ abstract: >-
   produced by a human author working with an AI assistant (Claude); the adversarial reviews
   recorded in the docs are automated passes, not independent human evaluation.
 authors:
-  - name: "The authors of this repository (see README; the copyright holder is to be named before publication, TODO.md)"
+  - family-names: "Colombo Barceló"
+    given-names: "Franco"
 license: Apache-2.0
-repository-code: "https://github.com/PLACEHOLDER/bend-spike"
-version: "0.3.0"
-date-released: "2026-09-21"
+repository-code: "https://github.com/PLACEHOLDER/prooflock"
+version: "0.4.0"
+date-released: "2026-09-22"
 keywords:
   - formal verification
   - Bend

@@ -1,5 +1,5 @@
-bend-spike / Fase 3 case study
-Copyright 2026 the authors of this repository. Licensed under the Apache License, Version 2.0 (see LICENSE).
+prooflock - verified reference models for machine-protection logic (JET case study)
+Copyright 2026 Franco Colombo Barceló. Licensed under the Apache License, Version 2.0 (see LICENSE).
 
 Third-party material (papers under CC BY) is listed with its own attribution and licence in v3/docs/sources/NOTICE.
 Bend 2 (HigherOrderCO) is used as an external tool and is not redistributed here.

@@ -1,7 +1,7 @@
-# Verified reference models for machine-protection logic
+# prooflock — verified reference models for machine-protection logic
 
 *A case study on the JET wall-protection chain (RTPS Stop Selector + PTN + DMS arming), built with Bend 2.*
-Working name: to be decided (candidates in §9). Spanish version: [README.es.md](README.es.md).
+Spanish version: [README.es.md](README.es.md).
 
 ## 1. What this is, in one paragraph
 
@@ -136,11 +136,11 @@ Edwards et al., Fusion Eng. Des. 146 (2019) 277 · Alves et al., ICALEPCS 2011, 
 Fusion Eng. Des. 88 (2013) 1101 · Stuart et al., Fusion Eng. Des. 168 (2021) 112412. Full records and licences:
 `v3/docs/fase3-fuente.md` §2 and `v3/docs/sources/NOTICE`.
 
-## 9. Name (not decided)
+## 9. Name
 
-Candidates: **cerrojo** (Spanish: bolt, latch — an interlock), **veredicto** (verdict, the idiom the proofs use: a
-verdict with its evidence), **latchproof**, **finlock**.
+**prooflock** (interlock + proof), decided 2026-09-22. The repository was developed under the working name
+*bend-spike*, which the dated documents in `docs/` keep; "verdict with its evidence" stays the idiom of the proofs.
 
 ## 10. Licence
 
-Apache License 2.0 (see `LICENSE`, `NOTICE`). Third-party papers under their own CC BY licences (`v3/docs/sources/NOTICE`).
+Apache License 2.0, copyright 2026 Franco Colombo Barceló (see `LICENSE`, `NOTICE`; cite with `CITATION.cff`). Third-party papers under their own CC BY licences (`v3/docs/sources/NOTICE`).

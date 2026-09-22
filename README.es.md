@@ -1,7 +1,7 @@
-# Modelos de referencia verificados para lógica de protección de máquina
+# prooflock — modelos de referencia verificados para lógica de protección de máquina
 
 *Caso de estudio sobre la cadena de protección de la pared de JET (Stop Selector del RTPS + PTN + armado del DMS), construido con Bend 2.*
-Nombre del proyecto: sin decidir (candidatos en §9). Versión en inglés: [README.md](README.md).
+Versión en inglés: [README.md](README.md).
 
 ## 1. Qué es, en un párrafo
 
@@ -140,11 +140,11 @@ Edwards et al., Fusion Eng. Des. 146 (2019) 277 · Alves et al., ICALEPCS 2011, 
 Fusion Eng. Des. 88 (2013) 1101 · Stuart et al., Fusion Eng. Des. 168 (2021) 112412. Registros completos y licencias:
 `v3/docs/fase3-fuente.md` §2 y `v3/docs/sources/NOTICE`.
 
-## 9. Nombre (sin decidir)
+## 9. Nombre
 
-Candidatos: **cerrojo** (un enclavamiento), **veredicto** (el idioma de las pruebas: un veredicto con su evidencia),
-**latchproof**, **finlock**.
+**prooflock** (interlock + proof), decidido el 2026-09-22. El repositorio se desarrolló bajo el nombre de trabajo
+*bend-spike*, que los documentos fechados de `docs/` conservan; "veredicto con su evidencia" sigue siendo el idioma de las pruebas.
 
 ## 10. Licencia
 
-Apache License 2.0 (`LICENSE`, `NOTICE`). Los papers de terceros bajo sus propias licencias CC BY (`v3/docs/sources/NOTICE`).
+Apache License 2.0, copyright 2026 Franco Colombo Barceló (`LICENSE`, `NOTICE`; citar con `CITATION.cff`). Los papers de terceros bajo sus propias licencias CC BY (`v3/docs/sources/NOTICE`).
