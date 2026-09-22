@@ -7,11 +7,11 @@ import ./../enum_jetprot.bend as E
 # de-energizing (a to_ptn that forgets the units). P2 must be FALSE.
 def to_ptn_bug(f: S.Fin) -> S.Fin:
   match f:
-    case S.Fin{p, l, d, pl, nb, rf}:
-      S.Fin{p, S.LPtn{}, d, pl, nb, rf}
+    case S.Fin{p, j, l, d, pl, ip, nb, rf}:
+      S.Fin{p, j, S.LPtn{}, d, pl, ip, nb, rf}
 
 def witness() -> S.Fin:
-  S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.Off{}}
+  S.Fin{S.Heating1{}, False{}, S.LNone{}, S.DmsIdle{}, True{}, True{}, S.On{}, S.Off{}}
 
 law ptn_deenergizes_on_commfault:
   {Spec.pr_p2(witness(), to_ptn_bug(witness())) == True{} : Bool}

@@ -1,5 +1,12 @@
 # Modelos de referencia verificados para lógica de protección de máquina: un caso de estudio sobre la cadena de protección de la pared de JET
 
+> **Nota (2026-09-21).** Los números de este borrador corresponden a la versión del 2026-09-19 (2 688 estados, 64 + 117
+> leyes, 61/62 mutantes). La revisión del bloqueante 4 (`docs/STATUS_2026-09-21.md`: dos vistas del tiempo, potencia
+> parcial, máscaras, umbral del DMV) cambió el modelo a 10 752 estados, 73 + 137 leyes, 8 lemas de soundness y 2 teoremas
+> de respuesta acotada; los números vigentes están en `README.md` §3 y en `v3/results.json`. Este borrador se reescribe
+> con ellos antes del preprint.
+
+
 **Borrador de preprint, revisión 1 (2026-09-19).** Idioma de trabajo castellano; la versión para arXiv (cs.SE / cs.LO,
 con cross-list a physics.plasm-ph) se traduce al inglés al cierre. Los números de esta versión salen de
 `v3/results.json` y `v3/recheck.json`; las citas [S1]–[S7] son las de `v3/docs/fase3-fuente.md`.

@@ -21,13 +21,16 @@ por conformidad.
 
 | Campo | Valores | Fuente |
 |---|---|---|
-| `phase` | `Breakdown < IpRise < Limiter < Xpoint < Heating1 < Heating2 < Termination` (instancia; orden total por A-5) | R-1, R-5, A-5 |
+| `prog` | `Breakdown < IpRise < Limiter < Xpoint < Heating1 < Heating2 < Termination` (instancia; orden total por A-5): la fase de **programa** de Level-1, la que indexa la Tabla 1 y que solo `Advance` mueve | R-1, R-5, A-5, A-24 |
+| `jtt` | `Bool`: el JTT ya conmutó a las formas de onda de terminación; la fase de **onda** es `wave = jtt ? Termination : prog` (la leen el permisivo, la ventana del DMV, el fin de pulso, I2/I3) | R-4, [S2] §3.4, A-24 |
 | `level` | `LNone < LJtt < LRtps < LPtn` (autoridad/irreversibilidad; PTN arriba por R-0, JTT/RTPS por A-1) | R-3, R-0, A-1 |
 | `dms` | `DmsIdle < DmsArmed < DmsFired` | R-11, A-11 |
 | `plasma_ok` | `Bool` | R-12, A-8 |
-| `nb`, `rf` | `Unit = Off | Inhibited | Ramping | On` | R-9, A-6, A-9 |
+| `ip` | `Bool`: corriente de plasma sobre el umbral del DMV; gatea el **armado** del DMS | R-14, [S6], (A-22 retirada) |
+| `nb`, `rf` | `Unit = Off | Ramping | Reduced | On` (`Reduced` = potencia parcial: un PINI/antena fuera, R-9; `Inhibited` retirado, A-26) | R-9, A-6, A-9, A-26 |
 
-**2 688 estados.** `init() = Fin{Breakdown, LNone, DmsIdle, plasma_ok = False, Off, Off}`, `hb = 0`, `t_ack = 0`.
+**10 752 estados** (revisión 2026-09-21; eran 2 688). `init() = Fin{Breakdown, jtt = False, LNone, DmsIdle, plasma_ok = False,
+ip = False, Off, Off}`, `hb = 0`, `t_ack = 0`.
 
 Contadores (fuera del control, con comandos `CKeep/CReset/CInc` como en seq3): `hb` (ticks sin heartbeat, límite
 `hb_max = 3`, A-12) y `t_ack` (ticks esperando el acuse del DMS, límite `ack_max = 2`, A-11). Veredictos: `bh = (1+hb <
@@ -40,51 +43,60 @@ La configuración (qué respuesta pide cada disparador en cada fase, qué parada
 `step_fin`**: entra como carga del evento. Así las leyes valen para **toda** configuración, y la instancia entra por
 una capa concreta de una línea por evento más las leyes de conformidad.
 
-**Abstracto (24 variantes)**: `Advance` · `Stop{req: Level, dms: Bool}` ×8 · `Local{u}` ×2 · `HeatOn{u}` ×2 ·
-`HeatOff{u}` ×2 · `Plasma{ok}` ×2 · `CommFault{dms}` ×2 · `Heartbeat` · `Tick{dms}` ×2 · `HeatAck` · `Reset`.
+**Abstracto (28 variantes)**: `Advance` · `Stop{req: Level, dms: Bool}` ×8 · `Local{u}` ×2 · `HeatOn{u}` ×2 ·
+`HeatOff{u}` ×2 · `Plasma{ok}` ×2 · `Ip{ok}` ×2 · `CommFault{dms, en}` ×4 (`en`: el chequeo está habilitado en la
+instancia, A-21) · `Heartbeat` · `Tick{dms}` ×2 · `HeatAck` · `Reset`.
 
-**Concreto (21 eventos)**: `Alarm{t}` con `t ∈ {Slow, Fast, Mhd, MhdB, Mchs, Dhs, BothHs}` ↦ `Stop{table1(phase, t),
-dms_req(phase, t)}`; `CommFault` ↦ `CommFault{dms_on_commfault}`; `Tick` ↦ `Tick{dms_on_watchdog}`; el resto, identidad.
-`step(s, e) = step_abs(s, concretize(phase(s), e))`.
+**Concreto (22 eventos)**: `Alarm{t}` con `t ∈ {Slow, Fast, Mhd, MhdB, Mchs, Dhs, BothHs, Blind}` ↦ `Stop{masked_table(i,
+prog, t), dms_req(wave, t)}` (la tabla se lee en la fase de **programa**, la ventana del DMV en la de **onda**; `Blind`
+sin respuesta si la máscara lo deshabilita); `CommFault` ↦ `CommFault{dms_on_commfault, mask(i).comm}`; `Tick` ↦
+`Tick{dms_on_watchdog}`; `Ip{ok}` ↦ `Ip{ok}`; el resto, identidad. `step_c(i, s, e) = step(s, concretize(i, fin(s), e))`.
 
 **Configuración (instancia 1, "Tabla 1 publicada")**: `table1` = R-5 + A-4; `dms_req(p, t) = t ∈ {Fast, Mhd, MhdB} ∧
 dms_window(p)`, `dms_window = p ∈ {Xpoint, Heating1, Heating2, Termination}` (R-14); `dms_on_commfault = False`;
-`dms_on_watchdog = False`; `heat_allowed(u, p) = p ∈ {Heating1, Heating2}`. **Instancia 2, "MHD al PTN"**: igual, con
-`table1(p, Mhd) = table1(p, MhdB) = LPtn` para `p ≥ Xpoint` (para ejercitar el camino DMS que [S6]/[S7] describen).
+`dms_on_watchdog = False`; `heat_allowed(u, p) = p ∈ {Heating1, Heating2}`; `mask = {comm: True, blind: True}`. **Instancia
+2, "MHD al PTN"**: igual, con `table1(p, Mhd) = table1(p, MhdB) = LPtn` para `p ≥ Xpoint` (para ejercitar el camino DMS que
+[S6]/[S7] describen). **Instancia 3, "chequeos deshabilitados"**: la Tabla 1 con `mask = {False, False}` (A-21: una falla de
+comunicación y una alarma ciega no hacen nada; certificada igual que las otras dos).
 
 ### Helpers compartidos
 
-- `deenergize(u)`: `On | Ramping → Off`; `Off`, `Inhibited` sin cambio (**preserva `Inhibited`**).
-- `ramp(u)`: `On → Ramping`; el resto sin cambio.
+- `deenergize(u)`: `On | Reduced | Ramping → Off`.
+- `ramp(u)`: `On | Reduced → Ramping`; el resto sin cambio.
+- `reduce(u)`: `On → Reduced`; el resto sin cambio (una alarma local saca un PINI: potencia parcial, R-9).
 - `to_ptn(f)`: `level := LPtn`; `nb, rf := deenergize`. Lo usan las reglas 1, 7 y 8; ningún camino a PTN pasa por otro lado.
-- `arm_dms(f)`: si `dms = DmsIdle`: `dms := DmsArmed` y `CReset` a `t_ack`; si no, sin cambio y `CKeep` (H6, P18).
-- `soft_stop(f, req)`: `level := req`; `nb, rf := ramp`; si `req = LJtt`: `phase := Termination`.
+- `arm_dms(f)`: si `dms = DmsIdle` **y `ip`**: `dms := DmsArmed` y `CReset` a `t_ack`; si no, sin cambio y `CKeep` (H6, P18, R-14).
+- `soft_stop(f, req)`: `level := req`; `nb, rf := ramp`; si `req = LJtt`: `jtt := True` (la fase de programa no se mueve, A-24).
 
 ### Reglas (cada una un helper de un solo `match`; veredictos como parámetros booleanos)
 
 1. `Stop{req, d}`: si `req = LPtn` → `to_ptn`, y `arm_dms` si `d` (también si `level` ya era PTN: una parada con DMS
    después de un PTN por falla de comunicación sí arma). Si no, si `req > level` → `soft_stop(req)`. Si no, sin cambio.
-2. `Local{u}`: `u := Inhibited`. Nada más cambia; contadores `CKeep` (R-9).
-3. `HeatOn{u}`: aceptado solo si `u = Off ∧ heat_allowed(u, phase) ∧ plasma_ok ∧ level = LNone` → `On`. Si no, sin cambio.
+2. `Local{u}`: `u := reduce(u)`. Nada más cambia; contadores `CKeep` (R-9, F2).
+3. `HeatOn{u}`: aceptado solo si `u = Off ∧ heat_allowed(u, wave) ∧ plasma_ok ∧ level = LNone` → `On`. Si no, sin cambio.
 4. `HeatOff{u}`: `u := deenergize(u)`.
-5. `Plasma{ok}`: `plasma_ok := ok`; si `¬ok`, unidades `deenergize`.
+5. `Plasma{ok}`: `plasma_ok := ok`; si `¬ok`, unidades `deenergize`. 5b. `Ip{ok}`: `ip := ok` (R-14).
 6. `Advance`: si `level = LPtn` o `phase = Termination`: identidad (sin re-rampa). Si no, fase siguiente; al entrar a
    `Termination`, unidades `ramp` (el fin natural del programa baja el calentamiento); al entrar a una fase `p` con
    `¬heat_allowed(u, p)` y `u = On`, `deenergize(u)` (la ventana se cerró). Con la instancia 1 solo ocurre el primer caso.
-7. `CommFault{d}`: `to_ptn`; `arm_dms` si `d` (A-13).
+7. `CommFault{d, en}`: si `en`: `to_ptn` y `arm_dms` si `d`; si no, identidad, contadores `CKeep` (A-13, A-21, F3).
 8. `Tick{d}`: **primero** el watchdog: si `¬bh ∧ level ≠ LPtn` → `to_ptn`, `arm_dms` si `d`; **si no**, el timeout del
    acuse: si `dms = DmsArmed ∧ ¬bt` → `DmsFired`. Las dos cláusulas son excluyentes (A5 de la revisión: solo se
    solapan en estados que violan I4).
 9. `Heartbeat`: `CReset` a `hb`.
 10. `HeatAck`: si `dms = DmsArmed` → `DmsFired`.
-11. `Reset`: aceptado solo si `(level = LPtn ∨ phase = Termination) ∧ dms ≠ DmsArmed` → `init()`, contadores `CReset`
+11. `Reset`: aceptado solo si `(level = LPtn ∨ wave = Termination) ∧ dms ≠ DmsArmed` → `init()`, contadores `CReset`
     (A-14). Si no: control **y contadores** sin cambio (`CKeep`).
 
 Comandos a los contadores: `hb`: `CInc` en `Tick` mientras `bh ∧ level ≠ LPtn` (nivel del estado previo), `CReset` en
 `Heartbeat` y `Reset` aceptado, `CKeep` en el resto; `t_ack`: `CReset` solo cuando `arm_dms` **transiciona** desde
 `Idle`, `CInc` en `Tick` si `DmsArmed ∧ bt`, `CReset` en `Reset` aceptado, `CKeep` en el resto.
 
-## 2. Las leyes (`LAWS_JETPROT.bend`, 64 + `LAWS_JETPROT_CONF.bend`, 117)
+## 2. Las leyes (`LAWS_JETPROT.bend`, 75 + `LAWS_JETPROT_CONF.bend`, 137)
+
+*Revisión 2026-09-21 (bloqueante 4): 64 → 75 leyes (P8 y E1 se retiraron con `Inhibited`; entraron F1a–F1e, F2a, F2d, F3b, F4,
+IP1–IP4; ver la tabla al final de esta sección) y 117 → 137 de conformidad (la fila `Blind`, la instancia 3 y las máscaras).
+Las filas marcadas “(b4)” cambiaron de enunciado.*
 
 Formato de la Fase 2: enunciado, intención, límites. Notación: `s2 = step(s, e)`; `u2` la unidad `u` en `s2`. Las leyes
 universales sobre `Ord × Fin × Ev × Bool × Bool` se prueban por reflexión sobre el certificado; las de contadores con el
@@ -104,9 +116,9 @@ porque una revisión adversarial construyó ese modelo y lo hizo pasar (§9b).
 | # | Ley | Enunciado | Intención | Límites |
 |---|---|---|---|---|
 | I0 | `inv_init` | `inv_all(init())` | El estado inicial es seguro. | — |
-| I1 | `full_power_window` | `u = On` implica ventana de habilitación, `plasma_ok` y `level = LNone` | Una unidad a potencia plena está en la ventana, con condiciones de plasma y sin ninguna parada en curso. | La ventana es la abstracción de PEWS plegada al secuenciador (A-5), no la ventana temporal por PINI real. |
+| I1 | `full_power_window` | `u ∈ {On, Reduced}` implica ventana de habilitación (fase de onda), `plasma_ok` y `level = LNone` (b4) | Una unidad que entrega potencia, plena o parcial, está en la ventana, con condiciones de plasma y sin ninguna parada en curso. | La ventana es la abstracción de PEWS plegada al secuenciador (A-5), no la ventana temporal por PINI real. |
 | I2 | `ramping_context` | `u = Ramping` implica `plasma_ok`, `level ≠ LPtn`, y parada blanda o terminación | Solo se rampa bajo una parada blanda o en la terminación natural, nunca bajo PTN. | No dice cuánto baja ni en cuánto tiempo (A-15, A-19). |
-| I3 | `jtt_in_termination` | `level = LJtt` implica `phase = Termination` | Un JTT en curso implica que el programa está en la región de terminación. | Una sola celda de la matriz produce JTT; C2 lo reporta. |
+| I3 | `jtt_in_termination` | `level = LJtt` implica `wave = Termination` (b4) | Un JTT en curso implica que las formas de onda de terminación están en marcha. | Una sola celda de la matriz produce JTT; C2 lo reporta. |
 | I4 | `dms_only_under_ptn` | `dms ≠ DmsIdle` implica `level = LPtn` | El DMS solo se arma o dispara con el PTN activo, y por I1/I2 sin unidad con potencia. | Predicado de estado: armar y des-energizar son el mismo paso atómico; **no** verifica el acuse como secuencia (A-11). |
 | I5 | `ack_bounded` | `dms = DmsArmed` implica `t_ack < ack_max` | La espera del acuse está acotada en ticks. | No dice que dispare (vivacidad) ni cuánto tarda. |
 | I6 | `watchdog_bounded` | `level ≠ LPtn` implica `hb < hb_max` | Un RTPS mudo no deja la máquina sin protección. | No cubre fallas del propio PTN (A-17). |
@@ -120,30 +132,30 @@ porque una revisión adversarial construyó ese modelo y lo hizo pasar (§9b).
 |---|---|---|
 | P1 | `latched` | Las paradas nunca se degradan. |
 | P2 | `ptn_deenergizes` | **El paso que llega al PTN des-energiza**, por cualquier camino. Ley de cabecera. |
-| P3 | `stop_reduces_power` | El paso que inicia una parada blanda saca a toda unidad de potencia plena. |
-| P4 | `ramping_never_returns` | Una unidad en rampa no vuelve a potencia plena en el pulso. *(Derivada: implicada por P5 y P7.)* |
+| P3 | `stop_reduces_power` | El paso que inicia una parada blanda saca a toda unidad de potencia, plena o parcial (b4). |
+| P4 | `ramping_never_returns` | Una unidad en rampa no vuelve a entregar potencia en el pulso (b4). *(Derivada: implicada por P5 y P7.)* |
 | P5 | `heat_permissive` | El permisivo de encendido: solo desde `Off`, en ventana, con plasma y sin parada. |
-| P6 | `stop_overrides_heat` | Con una parada en curso ninguna orden enciende nada. *(Derivada: P5 y P7.)* |
-| P7 | `heat_frame` | Ningún actuador se energiza sin su orden. |
-| P8 | `inhibit_latched` | La protección local queda enclavada todo el pulso. |
-| P9 | `local_is_local` | Una alarma local inhibe su unidad y no toca nada más, contadores incluidos. |
+| P6 | `stop_overrides_heat` | Con una parada en curso ninguna unidad adquiere potencia (b4). *(Derivada: P5 y P7.)* |
+| P7 | `heat_frame` | Ninguna unidad adquiere potencia sin su orden (b4). |
+| ~~P8~~ | ~~`inhibit_latched`~~ | Retirada con `Inhibited` (A-26): ningún evento del pulso lo producía; habría quedado vacua. |
+| P9 | `local_is_local` | Una alarma local **reduce** su unidad (`On → Reduced`, lo demás igual) y no toca nada más, contadores incluidos (b4; F2b). |
 | P10 | `no_spurious_stop` | El nivel solo cambia por alarma, falla de comunicación, fin de pulso o watchdog vencido. |
-| P12 | `commfault_ptn` | Perder la comunicación es una parada, desde cualquier estado. |
-| P14, P15 | `phase_monotone`, `dms_monotone` | El programa no rebobina; el DMS no se desarma ni se "des-dispara". |
-| P16, P17 | `dms_armed_on_demand`, `dms_frame` | El DMS se arma cuando una parada marcada llega al PTN, **y solo entonces**. |
+| P12 | `commfault_ptn` | Perder la comunicación es una parada, desde cualquier estado, **cuando el chequeo está habilitado** (b4; F3a). |
+| P14, P15 | `phase_monotone`, `dms_monotone` | Ni la fase de programa ni la de onda rebobinan (b4); el DMS no se desarma ni se "des-dispara". |
+| P16, P17 | `dms_armed_on_demand`, `dms_frame` | El DMS se arma cuando una parada marcada llega al PTN con la corriente sobre el umbral, **y solo entonces** (b4). |
 | P18 | `tack_frame` | Una alarma repetida no reinicia la espera del acuse. |
 | P19 | `advance_frozen` | Bajo PTN el programa no avanza. |
 | P20, P21 | `reset_guarded`, `reset_refused_mid_pulse` | El fin de pulso se acepta solo con el pulso terminado y sin mitigación armada. *(P20 está expresada con la guarda del propio modelo y por eso no detecta una guarda equivocada; P21 y D10 la escriben literalmente. Ver §9b.)* |
 | T | `traces_safe`, `traces_safe_concrete` | **El teorema**: ninguna secuencia de eventos, sobre el alfabeto abstracto (cualquier configuración) o el concreto (cualquiera de las dos instancias), saca al sistema de I1–I6. |
 
-### Leyes de demanda y de marco: qué **tiene** que pasar (D1–D18, E1–E11, V1)
+### Leyes de demanda y de marco: qué **tiene** que pasar (D1–D18, E2–E11, V1)
 
 Sin estas, el conjunto entero lo satisface un modelo que ignora casi todo. Cada una nació de un mutante que sobrevivía.
 
 | # | Ley | Qué demanda | Mutante que la motivó |
 |---|---|---|---|
 | D1 | `stop_honoured` | El nivel pasa a ser el máximo entre el actual y el pedido: **una petición de parada se honra**. Dos lados, donde P1 tenía uno solo. | una parada PTN ignorada si no está cableada al DMS: convertía en no-op casi toda la Tabla 1 |
-| D2 | `soft_stop_ramps` | Una parada blanda aceptada pasa a rampa toda unidad a potencia plena (R-4). | la parada blanda que **corta** en vez de rampar |
+| D2 | `soft_stop_ramps` | Una parada blanda aceptada pasa a rampa toda unidad que entrega potencia, plena o parcial (R-4; b4). | la parada blanda que **corta** en vez de rampar |
 | D3 | `advance_to_termination_ramps` | El fin natural del programa también rampa. *(Derivada de E4.)* | — |
 | D4 | `watchdog_latches` | El watchdog enclava el PTN **independientemente** de si la instancia lo cablea al DMS. | el watchdog que solo actúa si está cableado |
 | D5 | `hb_counts` | El contador del heartbeat corre mientras el PTN no está enclavado. *(Derivada de E6.)* | — |
@@ -152,23 +164,45 @@ Sin estas, el conjunto entero lo satisface un modelo que ignora casi todo. Cada 
 | D9 | `heatack_fires` | El acuse de la planta dispara el DMS. *(Derivada de E11.)* | el acuse ignorado |
 | D10 | `reset_accepted_when_safe` | El fin de pulso **se acepta** con el pulso terminado y sin mitigación armada, **con la guarda escrita literalmente**. *(Puntualmente implicada por P20; su trabajo es romper la auto-referencia de P20.)* | una guarda de reset que también rechaza con el DMS disparado |
 | D11 | `advance_is_one_step` | El programa avanza exactamente una fase. | el avance que salta dos |
-| D12 | `phase_frame` | Nada más mueve la fase. *(Su cláusula de `Stop` está subsumida por E3.)* | un RTPS stop que salta a terminación |
+| D12 | `phase_frame` | Nada más que `Advance` o `Reset` mueve la fase de **programa** (b4; el JTT mueve la de onda: F1d). | un RTPS stop que salta a terminación |
 | D13, D14 | `plasma_is_input`, `plasma_frame` | Las condiciones de plasma son una entrada, y solo esa entrada las mueve. | la pérdida de plasma que no baja el flag |
 | D15–D18 | `heatoff_is_local`, `heaton_is_local`, `heatack_frame`, `heartbeat_frame` | Cada comando toca lo suyo y nada más. | `HeatOff` que apaga las dos unidades |
-| E1 | `inhibit_source` | **Solo una alarma local crea un inhibit.** | la pérdida de plasma que *enclava* las unidades en vez de des-energizarlas: pérdida de disponibilidad permanente que ninguna acción del operador limpia, y todas las leyes pasaban porque solo decían "sin potencia" |
+| ~~E1~~ | ~~`inhibit_source`~~ | Retirada con `Inhibited` (A-26). El mutante que la motivó (la pérdida de plasma que *enclavaba* las unidades) hoy es N08, "la pérdida de plasma deja las unidades a potencia parcial", y lo atrapa I1. |
 | E2 | `dms_fire_frame` | El DMS dispara solo por el acuse o por el timeout. | — |
-| E3 | `stop_phase_exact` | Una parada mueve la fase a Termination exactamente cuando un JTT aceptado lo pide. | — |
+| E3 | `stop_phase_exact` | Una parada mueve la fase de **onda** a Termination exactamente cuando un JTT aceptado lo pide (b4). | — |
 | E4 | `advance_units` | Las unidades tras un `Advance` quedan completamente determinadas, en las seis transiciones y no en una. | el avance a una fase sin ventana que no cierra el calentamiento |
 | E5 | `heartbeat_resets_hb` | **Un heartbeat siempre reinicia el contador del watchdog.** | el heartbeat ignorado bajo PTN: nada lo exigía, D18 enmarcaba el control y el otro contador, y D6 solo lo *permitía* |
 | E6 | `hb_tick_exact` | El contador del watchdog en un `Tick` está exactamente determinado. | el contador que pasa de largo su límite sin que ninguna ley lo vea |
 | E7, E8 | `tack_inc_frame`, `tack_reset_frame` | Solo lo que debe incrementa o reinicia la espera del acuse. | — |
 | E11 | `heatack_exact` | El acuse es de dos lados. | — |
-| V1 | `verdict_frame_step/_hb/_tack` | **Fuera del brazo `Tick` nada lee los veredictos de los contadores.** Convierte en teorema la suposición que legitima que el certificado chequee 19 de sus 24 columnas con un solo par de veredictos. | dos mutantes que vivían enteros en las esquinas de veredictos no examinadas |
+| V1 | `verdict_frame_step/_hb/_tack` | **Fuera del brazo `Tick` nada lee los veredictos de los contadores.** Convierte en teorema la suposición que legitima que el certificado chequee 23 de sus 28 columnas con un solo par de veredictos. | dos mutantes que vivían enteros en las esquinas de veredictos no examinadas |
 
-### Conformidad de la configuración (`LAWS_JETPROT_CONF.bend`, 117)
+### Leyes de fidelidad (bloqueante 4, 2026-09-21: F1–F3, IP)
 
-Las 28 celdas publicadas de la Tabla 1 (15 impresas + 13 por marca de ídem) y las 21 supuestas por A-4, separadas; la
-instancia 2; el cableado del DMS; `fast_ptn`; y dos leyes sobre la capa concreta:
+Nacieron de la auditoría de fidelidad a [S1]/[S2]/[S6] (`docs/PLAN_MEJORAS_2026-09-21.md`): tres puntos donde el modelo
+decía lo contrario de la fuente, más el umbral del DMV. F1b, F1d, F2a, F2d, F3b, IP1, IP3, IP4 son leyes de celda
+(grupo `g_f` del certificado); F1a, F1c e IP2 se prueban directamente.
+
+| # | Ley | Qué demanda | De dónde sale |
+|---|---|---|---|
+| F1a | `f1a_table_reads_prog` | Una alarma concreta lee la Tabla 1 en la fase de **programa**, sea cual sea `jtt` y el resto del estado; contra la transcripción independiente de la matriz y las máscaras del enumerador. | [S2] §3.4 "two views of time": el JTT re-etiquetaba la única fase y un `Slow` posterior leía la fila Termination (PTN no publicado) |
+| F1b | `f1b_stop_keeps_prog` | Una parada nunca mueve la fase de programa. | ídem |
+| F1c | `f1c_wave_ahead` | `wave ≥ prog` siempre (I7; por construcción de `wave`). | ídem |
+| F1d | `f1d_wave_frame` | La fase de onda solo se mueve con `Advance`, un JTT aceptado o el fin de pulso. | ídem |
+| F1e | `f1e_jtt_exact` | El flag de onda está exactamente determinado: lo enciende un JTT aceptado, lo apaga el fin de pulso, nada más lo toca. | la métrica de ajuste: con `prog = Termination`, dos estados que solo difieren en `jtt` son bisimilares y nada fijaba el flag (H36) |
+| F2a | `f2a_local_reduces` | Una alarma local lleva una unidad a potencia plena a potencia **parcial**, nunca a apagada. | R-9: "the relevant PINI should be turned off [...] This should not preclude the neutral-beam system as a whole from continuing to deliver" |
+| F2d | `f2d_reduced_never_returns` | Una unidad a potencia parcial no vuelve a potencia plena en el pulso. | sin ella, un `Plasma{True}` que restaurara `On` pasaba todas las leyes (hallado al validar el conjunto nuevo en Python) |
+| F4 | `f4_units_frame` | Si el nivel de respuesta no cambia y el evento no es un comando de unidad, pérdida de plasma, `Advance`, `Reset`, parada PTN ni falla de comunicación habilitada, las dos unidades quedan como estaban. | la métrica de ajuste: ante `Ip` o `Plasma{True}` ninguna ley enmarcaba las unidades (antes lo hacían P8 y los cuatro valores de `Heat`) (H36) |
+| F3b | `f3b_commfault_masked_is_noop` | Una falla de comunicación cuyo chequeo la instancia deshabilita es la identidad, contadores incluidos. | R-13 "*can* trigger the PTN", "features [...] not in use cannot cause problems"; [S6] las 5 disrupciones perdidas por inhibits |
+| IP1 | `ip1_low_never_arms` | Por debajo del umbral de corriente el DMS no se arma, con ningún evento. | R-14; 7 de las 16 disrupciones perdidas de R-15 |
+| IP2 | `ip2_arms_on_demand` | Con corriente, DMS ocioso y una alarma concreta que la instancia mapea a PTN y cablea al DMS dentro de la ventana, la alarma arma en el mismo paso (forma concreta de P16). | R-14, [S6] |
+| IP3, IP4 | `ip3_ip_is_input`, `ip4_ip_frame` | El veredicto de corriente es una entrada y solo esa entrada (o el fin de pulso) lo mueve. | como D13/D14 para el plasma |
+
+### Conformidad de la configuración (`LAWS_JETPROT_CONF.bend`, 137)
+
+Las 28 celdas publicadas de la Tabla 1 (15 impresas + 13 por marca de ídem) y las 21 supuestas por A-4, separadas; la fila
+`Blind` (A-25, 14 leyes); la instancia 2; la instancia 3 y las máscaras (`inst3_uses_table1`, `mask_inst*`,
+`blind_masked_no_response`); el cableado del DMS; `fast_ptn` (tres instancias); y dos leyes sobre la capa concreta:
 
 - `concretize_is_the_table`: `concretize` es la configuración **valor por valor**, contra una transcripción literal de
   la matriz como constantes propias. La primera versión de esta ley era **auto-referencial** — comparaba `concretize`
@@ -183,7 +217,9 @@ instancia 2; el cableado del DMS; `fast_ptn`; y dos leyes sobre la capa concreta
 
 Leyes que se **enuncian y no se prueban** (límites declarados): la corrección de las alarmas (VTM/WALLS); los tiempos y
 las formas de las rampas; la planta que acusa; independencia y diversidad entre las capas (A-17); entradas inválidas
-(A-18); la respuesta secundaria (R-6, A-16); el umbral de corriente del DMV (A-22); el bypass de entradas del PTN (A-21).
+(A-18); la respuesta secundaria (R-6, A-16); el bypass de las entradas y salidas del PTN y la ventana mal configurada (A-21;
+las máscaras de los dos chequeos de fiabilidad sí se modelan). El umbral de corriente del DMV dejó de ser un límite
+(A-22 retirada, IP1–IP4).
 
 ## 3. Tests negativos (`tests/jetprot_bug*.bend`, el checker debe rechazar con contraejemplo)
 
@@ -233,10 +269,11 @@ las demás; es el único que puede dar verde.
 | Instancia | `table1` | `dms_req` | Para qué |
 |---|---|---|---|
 | 1 "Tabla 1 publicada" | R-5 + A-4 | `Fast, Mhd, MhdB` × ventana `Xpoint..Termination` | conformidad P11; el DMS solo se arma por `Fast` (celda supuesta): C2 lo dice |
-| 2 "MHD al PTN" | ídem, con `Mhd, MhdB → LPtn` para `phase ≥ Xpoint` | ídem | el camino que JET operó ([S6], [S7]): el DMS se arma por una celda **con base publicada** |
+| 2 "MHD al PTN" | ídem, con `Mhd, MhdB → LPtn` para `prog ≥ Xpoint` | ídem | el camino que JET operó ([S6], [S7]): el DMS se arma por una celda **con base publicada** |
+| 3 "chequeos deshabilitados" (2026-09-21) | = instancia 1, `mask = {comm: False, blind: False}` | ídem | la configuración de A-21: una falla de comunicación y una alarma ciega no hacen nada, y el resto sigue certificado |
 
-Las leyes I0–I6 y P1–P10, P12, P14–P21 se prueban una vez sobre el alfabeto abstracto y valen para las dos instancias;
-solo P11/P13 y C2 se corren por instancia. Registro de configuración por instancia: hash del modelo, de las matrices,
+Las leyes de paso, demanda, marco y fidelidad se prueban una vez sobre el alfabeto abstracto y valen para las tres
+instancias; solo la conformidad (P11/P13, C1, `mask_*`) y C2 se corren por instancia. Registro de configuración por instancia: hash del modelo, de las matrices,
 de las leyes, versión del checker, salida del gate, fecha (A-23).
 
 ## 7. Plan de pruebas
@@ -257,12 +294,13 @@ que lo importa: gate total estimado 6–8 min más C3/C4.
 
 | | Estados | Columnas | Celdas por orden | Producto completo |
 |---|---|---|---|---|
-| Certificado (`check_fin`) | 2 688 | 39 | **104 832** | 2 688 × 24 × 4 = 258 048 |
+| Certificado (`check_fin`), hasta 2026-09-21 | 2 688 | 39 | **104 832** | 2 688 × 24 × 4 = 258 048 |
+| Certificado (`check_fin`), bloqueante 4 | 10 752 | 43 | **462 336** | 10 752 × 28 × 4 = 1 204 224 |
 | Fase 2b (referencia) | 448 | 18 × 4 | 32 256 | — |
 
-Los veredictos se enumeran en 5 de las 24 columnas (los dos `Tick`, `Reset`, `CommFault{True}`, `Stop{LPtn,True}`),
-exactamente aquellas donde `reset_if` o `arms_now` quedan trabados sobre un `Fin` simbólico; que las otras 19 no los
-lean es la ley V1.
+Los veredictos se enumeran en 5 de las 28 columnas (los dos `Tick`, `Reset`, `CommFault{True, True}`,
+`Stop{LPtn,True}`), exactamente aquellas donde `reset_if` o `arms_now` quedan trabados sobre un `Fin` simbólico; que las
+otras 23 no los lean es la ley V1. Tiempos de la revisión: ver `docs/STATUS_2026-09-21.md` §4.4.
 
 | Artefacto | Líneas de código | |
 |---|---|---|
@@ -347,6 +385,10 @@ Los tres más importantes del proyecto, porque no son errores de transcripción 
 | **H30** | Dos leyes **auto-referenciales**: P20 expresa la guarda del fin de pulso con la guarda del propio modelo (así que la satisface cualquier guarda), y la primera ley de `concretize` comparaba la función contra una expectativa construida con la misma tabla (así que no detectaba un valor equivocado). | análisis de fuerza de cada ley, quitando una guarda por vez y buscando contraejemplos | D10 y E8 escriben la guarda literalmente; la matriz va transcrita como constantes propias. |
 | H31 | La métrica de cobertura de C2 era **cero por construcción**: `P1`, `P14` y `P15` tienen hipótesis `e ≠ Reset`, así que toda celda quedaba "cubierta". Y el banco de 17 mutantes estaba elegido para calzar con las leyes. | la misma revisión | Métrica de **ajuste** (cuántos de los 2 688 sucesores admite el conjunto de leyes, más los 9 pares de comandos), y banco adversarial de 62 escrito por revisores cuyo encargo era romper. |
 | H32 | Una ley propuesta por la auditoría (`dms ≠ DmsIdle ⇒ plasma_ok`) es **físicamente falsa y no inductiva**: perder el plasma con el DMS armado la viola en un paso, y ese paso es justamente para lo que existe la mitigación. | la propia auditoría, al verificarla antes de recomendarla | No se agregó; la preocupación subyacente (estados alcanzables con el DMS disparado y sin plasma) queda como límite declarado. |
+| **H33** | **Fidelidad, ronda 6 (2026-09-21, seis auditores + revisión directa):** el JTT re-etiquetaba la única fase y `concretize` leía después la fila Termination de la Tabla 1 (un `Slow` posterior escalaba a PTN sin base publicada); la protección local apagaba la unidad entera cuando R-9 dice *un PINI*; `CommFault` era PTN incondicional cuando [S1] dice "*can* trigger" y [S6] documenta disrupciones perdidas por inhibits; el umbral de corriente del DMV quedaba fuera (7/16 misses de R-15). | auditoría de fidelidad contra [S1]/[S2]/[S6] | Bloqueante 4: `prog`/`jtt` (A-24), `Reduced` (A-6/A-7), `CommFault{dms, en}` + `Blind` + máscaras (A-13/A-21/A-25), `ip` (A-22 retirada); leyes F1a–F1d, F2a, F2d, F3b, IP1–IP4. |
+| H34 | Con la protección local reduciendo, `Inhibited` quedó **inalcanzable**: P8 tenía 0 celdas alcanzables (vacua por construcción, lo que C2 rechaza) y el diseño proponía conservarlo "para R-10". | al validar el dominio nuevo en Python antes de tocar Bend | Se retiró el valor (A-26) y con él P8 y E1; el certificado bajó de 16 800 a 10 752 estados. |
+| H35 | Un `Plasma{True}` que devolviera una unidad de `Reduced` a `On` pasaba **todas** las leyes: I1 ya se cumplía, P7 solo mira unidades sin potencia y ninguna ley enmarcaba las unidades ante `Plasma{True}`. | la misma validación | F2d (`reduced_never_returns`); el bug plantado `plasma_ok_restores_reduced` en `prod/`. |
+| H36 | La métrica de **ajuste** cayó de 93 % a 82 % con el modelo nuevo: sin P8 y con `Reduced`, nada enmarcaba las unidades ante los eventos que no las tocan (`Ip`, `Plasma{True}`, un `Tick` sin watchdog, una parada rechazada), y `jtt` quedaba libre con `prog = Termination`. | la primera corrida `all` del bloqueante 4, y un diagnóstico de qué campos variaban entre sucesores admisibles | F4 (`units_frame`) y F1e (`jtt_exact`): ajuste 99 %, media 1,01 admisibles. Lección: la métrica de ajuste vale más que el conteo de leyes; una revisión de tipos deja huecos que ninguna ley existente ve. |
 
 ### 9c. Lecciones sobre el método, para el preprint
 

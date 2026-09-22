@@ -35,36 +35,46 @@ escrito antes que los resultados, en `v3/docs/fase3-seguridad.md`.
 
 ## 3. El caso de estudio (v3) en números
 
-- **Modelo**: 2 688 estados de control × 24 variantes de evento abstracto (la configuración viaja como carga del
-  evento) + 2 contadores; 1 116 líneas de código Bend incluyendo los predicados de las 48 leyes de paso. Un alfabeto
-  concreto de 21 eventos de planta llega a él por dos instancias de configuración: la Tabla 1 de Stephen et al. 2011
-  tal como fue publicada, y la misma con el mode lock enrutado al PTN — el camino que describen [S6]/[S7].
-- **Certificado**: 39 columnas × 2 688 estados = **104 832 celdas por orden de urgencia**, los dos órdenes, decididas
-  por el verificador; más un certificado de 2 688 estados para los corolarios.
-- **Leyes**: **64** (`LAWS_JETPROT.bend`) + **117** de conformidad, todas con `All terms check.` Seis cláusulas de
-  invariante, 21 leyes de paso que dicen qué no puede pasar, 29 leyes de demanda y de marco que dicen qué tiene que
-  pasar, el teorema de trazas para el alfabeto abstracto y el concreto, y la configuración celda por celda (28
-  publicadas + 21 supuestas, separadas).
-- **Tests negativos**: **10**, cada uno rechazado por el verificador con contraejemplo explícito, y el gate acepta el
-  rechazo solo si el verificador refutó un *Bool* y nombró la ley — un error de tipos de Bend imprime las mismas
-  palabras. Dos merecen mención: una *ley falsa sobre el modelo correcto* (una ley de paso sin su condición "de
-  llegada" falla en 11 592 celdas inalcanzables) y un *certificado afirmado falso* (38 s de cómputo, que es la
-  evidencia de que `{==}` se decide y no se saltea).
-- **Re-chequeo independiente**: **209 664 celdas** del certificado Bend comparadas contra el modelo Python de
-  referencia, con cada ley re-evaluada sobre los estados que produjo Bend, 0 discrepancias; alcanzabilidad concreta de
-  921 estados (hb ≤ 2, tack ≤ 1), todos dentro del invariante.
-- **Mutación adversarial**: **61 de 62** defectos muertos. El banco lo escribieron dos revisiones independientes cuyo
-  encargo era romper el conjunto de leyes; el único sobreviviente es un mutante *equivalente*, cuya relación de
-  transición difiere de la del modelo en 0 de 209 664 celdas. Los 17 flags escritos junto con las leyes dan 17/17 y se
-  reportan como la medida débil, porque un banco elegido para calzar con las leyes siempre puntúa bien.
-- **Ajuste**: sobre una muestra fija de 400 celdas alcanzables, el conjunto de leyes fija el estado de control
-  siguiente de forma única en el **93,5 %** (1,1 admisibles de 2 688). Antes de las leyes de demanda era 12 % y 15
-  admisibles. Reemplazó a una métrica de cobertura que era idénticamente cero por construcción.
-- **Testing diferencial**: 6 defectos plantados × 2 instancias × 2 generadores; todas las configuraciones con defecto
-  encontradas, ningún falso positivo en las limpias. El generador guiado encuentra los seis con trazas mínimas de 2 a
-  10 eventos; el puramente aleatorio pierde varios en 3 000 trazas.
-- **Sensibilidad**: el orden de urgencia entre las dos respuestas blandas — la única elección libre del modelo — es un
-  parámetro; toda ley se prueba para los dos órdenes, y el comportamiento difiere en 168 celdas alcanzables.
+Revisado el 2026-09-21 (fidelidad a [S1]/[S2]/[S6], `docs/STATUS_2026-09-21.md` bloqueante 4): la fase de programa y
+la forma de onda de terminación son dos vistas del tiempo, una alarma local reduce la unidad en vez de inhibirla, el
+umbral de corriente del DMV gatea el armado del DMS, y los dos chequeos de fiabilidad pasan por máscaras por instancia.
+
+- **Modelo**: 10 752 estados de control (fase de programa × flag de onda × respuesta × DMS × plasma × umbral de
+  corriente × dos unidades en Off / Ramping / Reduced / On) × 28 variantes de evento abstracto (la configuración
+  viaja como carga del evento) + 2 contadores. Un alfabeto concreto de 22 eventos de planta llega a él por tres
+  instancias de configuración: la Tabla 1 de Stephen et al. 2011 tal como se publicó, la misma con el mode lock
+  cableado al PTN (el camino que describen [S6]/[S7]), y la tabla publicada con los dos chequeos de fiabilidad
+  deshabilitados.
+- **Certificado**: 43 columnas × 10 752 estados = **462 336 celdas por orden de urgencia**, los dos órdenes,
+  decididas por el verificador (1064 s para `PROOF_JETPROT.bend` en el checker JS); más un certificado de
+  10 752 estados para los corolarios y uno de 924 celdas para la capa concreta.
+- **Leyes**: **75** (`LAWS_JETPROT.bend`) + **137** de conformidad + 8 lemas de soundness + 2 teoremas de respuesta
+  acotada, todas con `All terms check.` Seis cláusulas de invariante, las leyes de paso (qué no puede pasar), las de
+  demanda y marco (qué tiene que pasar), trece leyes de fidelidad (dos vistas del tiempo, potencia parcial, máscaras,
+  umbral de corriente, y los dos marcos que pidió la métrica de ajuste), el teorema de trazas para los alfabetos abstracto y concreto, la configuración celda por celda
+  (28 publicadas + 21 supuestas + la fila ciega, separadas), y dos teoremas de respuesta sobre trazas: `hb_max` ticks
+  sin heartbeat enclavan el PTN, un DMS armado dispara en a lo sumo `ack_max` ticks; universales en los dos límites.
+- **Tests negativos**: **10**, cada uno rechazado por el verificador con un contraejemplo explícito; el gate acepta
+  un rechazo solo si el verificador refutó un *Bool* y nombró la ley (un error de tipos de Bend imprime las mismas
+  palabras).
+- **Re-chequeo independiente**: **924,672 celdas** del certificado Bend comparadas contra el modelo
+  Python de referencia, toda ley re-evaluada sobre los estados que produjo Bend, 0 discrepancias;
+  alcanzabilidad concreta 804 estados por instancia, todos dentro del invariante.
+- **Mutación adversarial**: **72 de 73** defectos muertos, juzgados contra las constantes de la
+  especificación (`pymodel/spec_consts.py`), no las del modelo. 62 los escribieron dos revisiones independientes con
+  el encargo de romper las leyes, 11 apuntan a las constantes y al propio oráculo; el único sobreviviente es un
+  mutante *equivalente*, cuya relación de transición difiere de la del modelo en 0 de 924 672 celdas. `run.py all --full` registra además cuántas leyes atrapan cada mutante; en la última corrida completa 37 cayeron por una
+  sola ley (10 de ellos solo por las dos leyes de la capa concreta): puntos débiles declarados.
+- **Ajuste**: sobre una muestra fija y reproducible de 400 celdas alcanzables, el conjunto de leyes fija el estado
+  siguiente de forma única en el **99.3 %** (1.01 admisibles de 10 752).
+- **Testing diferencial**: 8 defectos plantados × 3 instancias × 2 generadores, seed fija; 26 de
+  27 configuraciones con defecto encontradas, ningún falso positivo en las limpias; la 27.ª (el bug de falla de comunicación
+  en la instancia que enmascara ese chequeo) es inobservable por construcción y el gate lo declara.
+- **Sensibilidad**: el orden de urgencia entre las dos respuestas blandas (la única elección libre del modelo) es un
+  parámetro; toda ley se prueba para los dos órdenes.
+- **Reproducibilidad**: `py -3.14 v3/run.py quick` en unos 30 s, `all` en unos 37.3 min; `results.json`,
+  `recheck.json` y `SHA256SUMS` son la corrida de referencia commiteada, con bloque de procedencia (versiones, el
+  commit pinneado de Bend, la seed, el SHA-256 de cada input).
 
 ## 4. Reproducir
 

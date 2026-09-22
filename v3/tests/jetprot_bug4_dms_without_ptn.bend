@@ -13,7 +13,7 @@ def stop_fin_bug(f: S.Fin, req: S.Level, d: Bool) -> S.Fin:
       S.arm_if(d, S.soft_apply(r2, f))
 
 def witness() -> S.Fin:
-  S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.Off{}, S.Off{}}
+  S.Fin{S.Heating1{}, False{}, S.LNone{}, S.DmsIdle{}, True{}, True{}, S.Off{}, S.Off{}}
 
 law inv_survives_soft_arming:
   {Spec.pr_pres(witness(), stop_fin_bug(witness(), S.LRtps{}, True{})) == True{} : Bool}

@@ -18,7 +18,7 @@ def pr_p18_bug(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> Bool:
             S.is_keep(upd_tack_bug(f, e, bt, bh)))
 
 def witness() -> S.Fin:
-  S.Fin{S.Heating2{}, S.LPtn{}, S.DmsArmed{}, True{}, S.Off{}, S.Off{}}
+  S.Fin{S.Heating2{}, False{}, S.LPtn{}, S.DmsArmed{}, True{}, True{}, S.Off{}, S.Off{}}
 
 law repeated_stop_keeps_the_wait:
   {pr_p18_bug(witness(), S.Stop{S.LPtn{}, True{}}, True{}, True{}) == True{} : Bool}

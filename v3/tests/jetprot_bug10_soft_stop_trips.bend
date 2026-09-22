@@ -10,11 +10,11 @@ import ./../spec_jetprot.bend as Spec
 # pressure, antenna lines). D2 (soft_stop_ramps) is the law that catches it.
 def soft_apply_bug(+req: S.Level, f: S.Fin) -> S.Fin:
   match f:
-    case S.Fin{p, l, d, pl, nb, rf}:
-      S.Fin{S.jtt_phase(req, p), req, d, pl, S.deenergize(nb), S.deenergize(rf)}
+    case S.Fin{p, j, l, d, pl, ip, nb, rf}:
+      S.Fin{p, Bool.or(j, S.is_jtt(req)), req, d, pl, ip, S.deenergize(nb), S.deenergize(rf)}
 
 def witness() -> S.Fin:
-  S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.On{}}
+  S.Fin{S.Heating1{}, False{}, S.LNone{}, S.DmsIdle{}, True{}, True{}, S.On{}, S.On{}}
 
 law soft_stop_ramps_when_it_trips:
   {Spec.pr_d2(S.Ord1{}, witness(), S.Stop{S.LRtps{}, False{}}, soft_apply_bug(S.LRtps{}, witness())) == True{} : Bool}

@@ -35,36 +35,44 @@ results, in `v3/docs/fase3-seguridad.md`.
 
 ## 3. The case study (v3) in numbers
 
-- **Model**: 2 688 control states × 24 abstract event variants (the configuration travels as event payload) + 2
-  counters; 1 116 lines of Bend code including the predicates of the 48 step laws. A concrete alphabet of 21 plant
-  events reaches it through two configuration instances: Table 1 of Stephen et al. 2011 as published, and the same
-  with mode lock routed to the PTN — the path [S6]/[S7] describe.
-- **Certificate**: 39 columns × 2 688 states = **104 832 cells per urgency order**, both orders, decided by the
-  checker; plus a 2 688-state certificate for the state corollaries.
-- **Laws**: **64** (`LAWS_JETPROT.bend`) + **117** conformance laws, all `All terms check.` Six invariant clauses, 21
-  step laws saying what cannot happen, 29 demand and frame laws saying what must happen, the trace theorem for the
-  abstract and the concrete alphabets, and the configuration cell by cell (28 published cells + 21 assumed, kept
-  apart).
+Revised 2026-09-21 (fidelity to [S1]/[S2]/[S6], `docs/STATUS_2026-09-21.md` blocker 4): the program phase and the
+termination waveform are two views of time, a local alarm reduces a unit instead of inhibiting it, the DMV current
+threshold gates the arming of the DMS, and the two reliability checks pass through per-instance masks.
+
+- **Model**: 10 752 control states (program phase × waveform flag × response × DMS × plasma × current threshold ×
+  two units at Off / Ramping / Reduced / On) × 28 abstract event variants (the configuration travels as event
+  payload) + 2 counters. A concrete alphabet of 22 plant events reaches it through three configuration instances:
+  Table 1 of Stephen et al. 2011 as published, the same with mode lock routed to the PTN (the path [S6]/[S7]
+  describe), and the published table with both reliability checks masked out.
+- **Certificate**: 43 columns × 10 752 states = **462 336 cells per urgency order**, both orders, decided by the
+  checker (1064 s for `PROOF_JETPROT.bend` on the JS checker); plus a 10 752-state certificate for the
+  state corollaries and a 924-cell one for the concrete layer.
+- **Laws**: **75** (`LAWS_JETPROT.bend`) + **137** conformance laws + 8 soundness lemmas + 2 bounded-response
+  theorems, all `All terms check.` Six invariant clauses, the step laws saying what cannot happen, the demand and
+  frame laws saying what must happen, thirteen fidelity laws (two views of time, partial power, masks, current
+  threshold, and the two frames the tightness metric asked for), the trace theorem for the abstract and the concrete alphabets, the configuration cell by cell (28
+  published cells + 21 assumed + the blind row, kept apart), and two response theorems over traces: `hb_max`
+  ticks without a heartbeat latch the PTN, an armed DMS fires within `ack_max` ticks -- universal in both limits.
 - **Negative tests**: **10**, each rejected by the checker with an explicit counterexample, and the gate accepts a
-  rejection only if the checker refuted a *Bool* and named the law — a Bend type error prints the same words. Two of
-  them are worth naming: a *false law over the correct model* (a step law stated without its "reaching" condition
-  fails on 11 592 unreachable cells) and a *false certificate* (38 s of computation, which is the evidence that
-  `{==}` is decided and not skipped).
-- **Independent re-check**: **209 664 cells** of the Bend certificate compared against the Python reference model,
-  every law re-evaluated on the states Bend produced, 0 mismatches; concrete reachability 921 states (hb ≤ 2,
-  tack ≤ 1) all inside the invariant.
-- **Adversarial mutation**: **61 of 62** defects killed. The bank was written by two independent reviews whose brief
-  was to break the law set; the single survivor is an *equivalent* mutant whose transition relation differs from the
-  model's on 0 of 209 664 cells. The 17 flags written alongside the laws score 17/17 and are reported as the weaker
-  measure, because a suite chosen to fit the laws always scores well.
-- **Tightness**: on a fixed sample of 400 reachable cells, the law set pins the next control state uniquely on
-  **93.5 %** of them (1.1 admissible of 2 688). Before the demand laws that number was 12 % and 15 admissible. This
-  replaced a coverage metric that was identically zero by construction.
-- **Differential testing**: 6 planted defects × 2 instances × 2 generators; every defective configuration found, no
-  false positive on the clean ones. The guided generator finds all six with minimal traces of 2–10 events; the purely
-  random one misses several in 3 000 traces.
-- **Sensitivity**: the urgency order between the two soft responses — the model's one free choice — is a parameter;
-  every law is proved for both orders, and the behaviour differs on 168 reachable cells.
+  rejection only if the checker refuted a *Bool* and named the law -- a Bend type error prints the same words.
+- **Independent re-check**: **924,672 cells** of the Bend certificate compared against the Python
+  reference model, every law re-evaluated on the states Bend produced, 0 mismatches; concrete
+  reachability 804 states per instance, all inside the invariant.
+- **Adversarial mutation**: **72 of 73** defects killed, judged against the specification's
+  constants (`pymodel/spec_consts.py`), not the model's. 62 of them were written by two independent reviews whose
+  brief was to break the law set, 11 target the constants and the oracle itself; the single survivor is an
+  *equivalent* mutant whose transition relation differs from the model's on 0 of 924 672 cells. `run.py all --full` also records how many laws catch each mutant; in the last full run 37 fell to a single law (10 of
+  them only to the two concrete-layer laws): declared weak points.
+- **Tightness**: on a fixed, reproducible sample of 400 reachable cells, the law set pins the next control state
+  uniquely on **99.3 %** of them (1.01 admissible of 10 752).
+- **Differential testing**: 8 planted defects × 3 instances × 2 generators, fixed seed; 26 of
+  27 defective configurations found, no false positive on the clean ones; the 27th (the communication-fault bug in
+  the instance that masks that check) is unobservable by construction and declared as such by the gate.
+- **Sensitivity**: the urgency order between the two soft responses -- the model's one free choice -- is a
+  parameter; every law is proved for both orders.
+- **Reproducibility**: `py -3.14 v3/run.py quick` in about 30 s, `all` in about 37.3 min; `results.json`,
+  `recheck.json` and `SHA256SUMS` are the committed reference run with a provenance block (tool versions, the
+  pinned Bend commit, the seed, the SHA-256 of every input).
 
 ## 4. Reproduce
 

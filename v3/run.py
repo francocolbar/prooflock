@@ -12,7 +12,7 @@
                      without planted bugs, one for every planted bug, shrunk to a minimal trace.
   recheck  ~ 30 s    C5 (every Bend cell == the Python model, every law re-evaluated on the
                      Bend-produced next state), C2 vacuity / tightness, C3 order sensitivity.
-  mutants  ~ 2 min   C6: the 73-mutant bank and the 17 model flags against the spec-side
+  mutants  ~ 4 min   C6: the 73-mutant bank and the 17 model flags against the spec-side
                      oracle (pymodel/jetprot_laws.py + spec_consts.py). --full (about 10 min
                      more) also records how many laws catch each mutant.
   all      ~ 7 min   everything above; writes v3/results.json, v3/recheck.json and SHA256SUMS
@@ -46,7 +46,7 @@ from bridge_client import Bridge  # noqa: E402
 
 PROOFS = ["PROOF_JETPROT.bend", "PROOF_JETPROT_CONF.bend", "PROOF_JETPROT_SOUND.bend"]   # FIN, FIN_ALT and COR are imported by PROOF_JETPROT
 QUICK_PROOFS = ["PROOF_JETPROT_CONF.bend", "PROOF_JETPROT_SOUND.bend"]
-SMOKE_LINES = 6            # verdict lines the runtime smoke must print
+SMOKE_LINES = 7            # verdict lines the runtime smoke must print
 DEFAULT_SEED = 20260921
 DEFAULT_MAX_EXAMPLES = 3000
 QUICK_MAX_EXAMPLES = 200
@@ -58,12 +58,13 @@ INPUTS = (sorted(glob.glob(os.path.join(HERE, "*.bend"))) + sorted(glob.glob(os.
              os.path.join(HERE, "recheck.py"), os.path.join(HERE, "run.py"),
              os.path.join(ROOT, "env", "bend.sh"), os.path.join(ROOT, "env", "check_env.sh")])
 SUMMED = INPUTS + [os.path.join(HERE, "results.json"), os.path.join(HERE, "recheck.json")]
-TRIGS = ["Slow", "Fast", "Mhd", "MhdB", "Mchs", "Dhs", "BothHs"]
+TRIGS = ["Slow", "Fast", "Mhd", "MhdB", "Mchs", "Dhs", "BothHs", "Blind"]
 EVENTS = ([{"$": "XTick"}] * 4 + [{"$": "XHeartbeat"}] * 3 + [{"$": "XAdvance"}] * 3 +
           [{"$": "XAlarm", "t": t} for t in TRIGS] +
           [{"$": k, "u": u} for u in ("Nb", "Rf") for k in ("XLocal", "XHeatOn", "XHeatOff")] +
-          [{"$": "XPlasma", "ok": True}, {"$": "XPlasma", "ok": False}, {"$": "XCommFault"}, {"$": "XHeatAck"}, {"$": "XReset"}])
-HAPPY = [{"$": "XPlasma", "ok": True}, {"$": "XAdvance"}, {"$": "XAdvance"}, {"$": "XAdvance"}, {"$": "XAdvance"},
+          [{"$": "XPlasma", "ok": True}, {"$": "XPlasma", "ok": False}, {"$": "XIp", "ok": True}, {"$": "XIp", "ok": False},
+           {"$": "XCommFault"}, {"$": "XHeatAck"}, {"$": "XReset"}])
+HAPPY = [{"$": "XPlasma", "ok": True}, {"$": "XIp", "ok": True}, {"$": "XAdvance"}, {"$": "XAdvance"}, {"$": "XAdvance"}, {"$": "XAdvance"},
          {"$": "XHeatOn", "u": "Nb"}, {"$": "XHeartbeat"}, {"$": "XTick"}, {"$": "XHeatOn", "u": "Rf"}, {"$": "XAdvance"}]
 
 
@@ -173,10 +174,13 @@ def diff(results, seed, max_examples, quick=False):
     plain = st.lists(st.sampled_from(EVENTS), min_size=0, max_size=40)
     guided = st.builds(lambda k, rest: HAPPY[:k] + rest, st.integers(0, len(HAPPY)), st.lists(st.sampled_from(EVENTS), min_size=0, max_size=30))
     generators = [("guided", guided)] if quick else [("random", plain), ("guided", guided)]
-    instances = (1,) if quick else (1, 2)
+    instances = (1,) if quick else (1, 2, 3)
     configs = [("no bugs", {})] + [(b, {b: True}) for b in prod.BUGS] + [("all bugs", {b: True for b in prod.BUGS})]
     if quick:
         configs = configs[:2]
+    # a planted bug that the instance's configuration makes unobservable: the communication check is
+    # masked out in instance 3, so the path the bug lives on is never taken (that is F3)
+    unobservable = {("commfault_leaves_heating", 3)}
     results["diff"] = []
     results["max_examples"] = max_examples
     results["seed"] = seed
@@ -199,15 +203,15 @@ def diff(results, seed, max_examples, quick=False):
                     rec = {"config": cfg_name, "generator": gen_name, "instance": inst, "found": True,
                            "minimal_trace": [e["$"][1:] + ("" if len(e) == 1 else ":" + str(list(e.values())[1])) for e in minimal],
                            "trajectory_differs": traj, "invariant_violated": inv, "final_prod_state": prod.run(minimal, inst)[-1] if minimal else prod.init()}
-                    expected = bool(bugs)
+                    expected = bool(bugs) and (cfg_name, inst) not in unobservable
                 except NoSuchExample:
                     rec = {"config": cfg_name, "generator": gen_name, "instance": inst, "found": False}
-                    expected = not bugs
+                    expected = (not bugs) or (cfg_name, inst) in unobservable
                 rec["seconds"] = round(time.perf_counter() - t0, 1)
                 rec["bridge_calls"] = bridge.calls - calls0
                 rec["as_expected"] = expected
                 if rec["found"]:
-                    ok &= bool(bugs)  # a counterexample with no bug planted is a false positive
+                    ok &= bool(bugs) and (cfg_name, inst) not in unobservable  # no bug, or an unobservable one: a false positive
                 key = (cfg_name, inst)
                 found_by[key] = found_by.get(key, False) or rec["found"]
                 results["diff"].append(rec)
@@ -220,10 +224,11 @@ def diff(results, seed, max_examples, quick=False):
     for b in prod.BUGS:
         prod.BUGS[b] = False
     for (cfg_name, inst), found in sorted(found_by.items()):
-        must = cfg_name != "no bugs"
+        must = cfg_name != "no bugs" and (cfg_name, inst) not in unobservable
         ok &= (found == must)
         print(f"[diff] {cfg_name:28} inst{inst} -> {'found' if found else 'not found'} by some generator; expected {'found' if must else 'not found'}")
     results["found_by_some_generator"] = {f"{k[0]} / inst{k[1]}": v for k, v in found_by.items()}
+    results["unobservable_configs"] = [f"{c} / inst{i}" for c, i in sorted(unobservable)]
     return ok
 
 

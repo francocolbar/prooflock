@@ -61,8 +61,10 @@ de configuración, J = justificación).
 | SR-5 | El DMS **shall not** armarse ni dispararse salvo con el PTN activo (y por SR-1, sin calentamiento comandado). | `dms_no_heat` | R-11 (F), [S6] | I4, `dms_frame`, **`dms_fire_frame`** | — |
 | SR-6 | Cuando una parada marcada para DMS llega al PTN, el DMS **shall** armarse; la espera del acuse **shall** estar acotada; una alarma repetida **shall not** reiniciarla. | — | R-11 (F), A-10, A-11 | `dms_armed_on_demand`, I5, `tack_frame`, `dms_monotone`, **`ack_timeout_fires`**, **`heatack_exact`** | fuera (50 ms real, [S6]) |
 | SR-7 | La ausencia de heartbeat del RTPS durante `hb_max` ciclos **shall** producir una parada PTN. | — | R-13 (F), A-12 | I6, **`watchdog_latches`**, **`heartbeat_resets_hb`**, **`hb_tick_exact`**, **`hb_frame`** | fuera |
-| SR-8 | Una falla de comunicación o alarma ciega **shall** producir una parada PTN desde cualquier estado. | — | R-13 (F), A-13 | `commfault_ptn` | fuera |
-| SR-9 | Una alarma local **shall** inhibir la unidad afectada y **shall not** alterar fase, respuesta, DMS ni la otra unidad; la inhibición **shall** persistir el pulso. | — | R-8, R-9 (F/J), A-7 | `inhibit_latched`, `local_is_local`, **`inhibit_source`** | — |
+| SR-8 | Una falla de comunicación **shall** producir una parada PTN desde cualquier estado cuando la instancia habilita el chequeo, y **shall not** hacer nada cuando lo deshabilita; una alarma ciega **shall** pasar por la tabla (revisión 2026-09-21). | — | R-13 (F), A-13, A-21, A-25 | `commfault_ptn`, **`f3b_commfault_masked_is_noop`**, `mask_*`, `asm_*_Blind` | fuera |
+| SR-9 | Una alarma local **shall** llevar la unidad afectada de potencia plena a potencia parcial (un PINI fuera) y **shall not** alterar fase, respuesta, DMS ni la otra unidad; la reducción **shall** persistir el pulso (revisión 2026-09-21: antes "inhibir"). | — | R-8, R-9 (F/J), A-6, A-7 | `local_is_local`, **`f2a_local_reduces`**, **`f2d_reduced_never_returns`** | — |
+| SR-16 | Una alarma concreta **shall** leer la Tabla 1 en la fase de programa; un JTT **shall** conmutar la forma de onda de terminación y **shall not** mover la fase de programa (revisión 2026-09-21). | — | R-1, R-4 (F), [S2] §3.4, A-24 | **`f1a_table_reads_prog`**, **`f1b_stop_keeps_prog`**, **`f1c_wave_ahead`**, **`f1d_wave_frame`** | — |
+| SR-18 | El DMS **shall not** armarse con la corriente de plasma por debajo del umbral del DMV y **shall** armarse ante una demanda por encima de él (revisión 2026-09-21). | — | R-14 (F), [S6] | **`ip1_low_never_arms`**, **`ip2_arms_on_demand`**, **`ip3_ip_is_input`**, **`ip4_ip_frame`** | fuera (el umbral como número) |
 | SR-10 | La respuesta **shall not** cambiar salvo por alarma, falla de comunicación, watchdog vencido o fin de pulso. | — | R-13, A-12, A-13 | `no_spurious_stop` | — |
 | SR-11 | La configuración certificada **shall** coincidir celda por celda con la publicada (y las celdas supuestas **shall** estar identificadas). | — | R-5 (D), A-4 | `pub_*` (28), `asm_*` (21), `fast_ptn`, **`concretize_is_the_table`**, **`step_c_is_the_concrete_step`** | — |
 | SR-12 | Bajo PTN el programa **shall not** avanzar; el programa **shall not** rebobinar. | — | R-0, A-5 | `advance_frozen`, `phase_monotone`, **`advance_is_one_step`**, **`phase_frame`** | — |
@@ -72,7 +74,8 @@ de configuración, J = justificación).
 | SR-14 | Para toda secuencia de eventos del alfabeto, el estado **shall** satisfacer I1–I6. | `inv_all` | todos | `traces_safe`, `traces_safe_concrete` | — |
 
 **Fuera de alcance, declarado**: la respuesta secundaria (R-6 → A-16); el acuse como secuencia (R-11 parcial → A-11);
-el umbral de corriente del DMV (R-14 → A-22); bypass y ventanas mal configuradas (R-15 → A-21); todo plazo (A-15).
+el bypass de las entradas y salidas del PTN y las ventanas mal configuradas (R-15 → A-21; las máscaras de los dos chequeos
+de fiabilidad sí se modelan); todo plazo (A-15). El umbral de corriente del DMV dejó de estar fuera (A-22 retirada, SR-18).
 
 ## 3. Matriz peligro → ley
 
@@ -84,18 +87,18 @@ negativo (`fase3-diseno.md` §9b).
 |---|---|---|---|
 | H-A1 hot spot antes del calentamiento | `pub_*`/`asm_*`, `ptn_deenergizes`, I1, **`stop_honoured`** | — | qué responder con una parada ya en curso: solo `latched` y `stop_honoured` |
 | H-A1 **durante el calentamiento** (→ RTPS) | **`soft_stop_ramps`**, `stop_reduces_power`, `ramping_never_returns`, I2, `stop_overrides_heat` | — | cuánto baja la potencia y en cuánto tiempo (A-19, A-15) |
-| H-A2 shine-through / local | `inhibit_latched`, **`inhibit_source`** | `local_is_local` | qué unidad inhibir (la lógica de PEWS2); la compensación de R-9 (A-6) |
+| H-A2 shine-through / local | **`f2a_local_reduces`**, **`f2d_reduced_never_returns`** | `local_is_local` | qué PINI sacar (la lógica de PEWS2); la compensación con otros PINIs (A-6) |
 | H-A3 la parada daña la pared | — | — | **inexpresable** en esta abstracción; es la motivación de [S1]; declarado |
 | H-B disrupción / MHD | `dms_armed_on_demand` (instancia 2) | — | en la instancia publicada MHD → None: la protección real corre fuera de la tabla primaria ([S6], [S7]) |
 | H-C gas con calentamiento | I4 ∧ I1 ∧ I2 (`dms_no_heat`), `dms_frame`, **`dms_fire_frame`** | — | estado comandado, no reportado (A-11, A-19) |
-| H-C2 el DMS no dispara | `dms_armed_on_demand`, **`ack_timeout_fires`**, **`heatack_exact`**, **`ack_counts`** | I5 | vivacidad (A-15); el umbral de corriente (A-22) |
+| H-C2 el DMS no dispara | `dms_armed_on_demand`, **`ip2_arms_on_demand`**, **`ack_timeout_fires`**, **`heatack_exact`**, **`ack_counts`** | I5, **`ip1_low_never_arms`** | vivacidad (A-15); el umbral como número (R-14) |
 | H-D pérdida de protección | `commfault_ptn`, I6, **`watchdog_latches`**, **`heartbeat_resets_hb`**, **`hb_tick_exact`**, **`hb_frame`** | `no_spurious_stop` | fallas del propio PTN; alarma ciega y falla de comunicación fundidas (A-13) |
 | H-E fuera de ventana | I1, `heat_permissive`, `stop_overrides_heat`, `heat_frame`, **`plasma_is_input`**, **`plasma_frame`** | — | la independencia del PEWS real (A-5, A-17) |
 | H-F configuración | `pub_*`/`asm_*`, **`concretize_is_the_table`**, **`step_c_is_the_concrete_step`**, `fast_ptn`, C2, registro de configuración (A-23) | — | no hay ley de **buena formación** de configuraciones (p. ej. "ninguna fase con plasma mapea un disparador térmico a None"): trabajo futuro |
 | H-G segunda falla | `latched`, **`stop_honoured`** | — | R-6 fuera de alcance (A-16) |
-| H-H espuria / bypass | — | `no_spurious_stop`, `reset_guarded`, `local_is_local` | el bypass no se modela (A-21) |
+| H-H espuria / bypass | **`f3b_commfault_masked_is_noop`**, `mask_*` | `no_spurious_stop`, `reset_guarded`, `local_is_local` | el bypass de entradas/salidas del PTN no se modela (A-21); las máscaras de los dos chequeos sí |
 | H-I independencia | — | — | **nada** (A-17): va en el resumen del preprint |
-| H-J liberación prematura | `latched`, `inhibit_latched`, `dms_monotone`, `reset_guarded`, `reset_refused_mid_pulse`, **`reset_accepted_when_safe`**, **`advance_is_one_step`**, **`phase_frame`** | — | bien cubierto |
+| H-J liberación prematura | `latched`, `f2d_reduced_never_returns`, `dms_monotone`, `reset_guarded`, `reset_refused_mid_pulse`, **`reset_accepted_when_safe`**, **`advance_is_one_step`**, **`phase_frame`**, **`f1d_wave_frame`** | — | bien cubierto |
 | H-K tiempo | — | — | nada (A-15) |
 | H-L obediencia del actuador | — | `heat_frame`, **`heatoff_is_local`**, **`advance_units`** | comando = efecto (A-19) |
 

@@ -8,12 +8,24 @@
 # checker by computation over the whole domain (enum_jetprot.bend) and lifted to universal
 # laws by reflection (PROOF_JETPROT.bend). Two layers:
 #   * the ABSTRACT alphabet `Ev` carries the configuration as event payload (which response
-#     an alarm asks for, whether the stop arms the DMS), so the laws hold for EVERY
-#     configuration;
-#   * the CONCRETE alphabet `CEv` is the plant's (seven stop triggers, ...); `concretize`
-#     maps it to `Ev` through a configuration instance (`Inst`).
+#     an alarm asks for, whether the stop arms the DMS, whether a reliability check is
+#     enabled), so the laws hold for EVERY configuration;
+#   * the CONCRETE alphabet `CEv` is the plant's (eight stop triggers, ...); `concretize`
+#     maps it to `Ev` through a configuration instance (`Inst`: the matrix and the masks).
 # The urgency order between the two soft responses (JTT, RTPS: hypothesis A-1) is a
 # parameter `Ord`, so the sensitivity check C3 is a theorem, not a gate.
+#
+# Revision 2026-09-21 (docs/STATUS_2026-09-21.md, blocker 4: fidelity to [S1]/[S2]/[S6]):
+#   F1  two views of time ([S2] 3.4): `prog` is the Level-1 program phase, the one that indexes
+#       Table 1 and that only `Advance` moves; `jtt` says the JTT switched to the termination
+#       waveform, so the waveform phase is `wave_of(f)` = Termination if jtt else prog (A-24).
+#   F2  local protection REDUCES a unit at full power (one PINI off, R-9) instead of
+#       inhibiting it: `Reduced`; the pre-pulse disabled state of R-10 is configuration, not
+#       a pulse event, so `Inhibited` is gone (A-26).
+#   F3  the reliability checks of R-13 pass through the instance's masks: a communication
+#       fault carries `en` (A-21), a blind stop alarm is a table trigger `Blind` (A-25).
+#   IP  the DMV current threshold of R-14 is state (`ip`, input `Ip{ok}`) and gates the ARMING
+#       of the DMS (A-22 retired).
 
 import Base
 
@@ -44,12 +56,12 @@ type Dms is Data:
   DmsArmed{}
   DmsFired{}
 
-# one heating unit: off; inhibited by local protection; ramping down under a stop; at
-# full requested power
+# one heating unit: off; ramping down under a stop; at partial power (a local alarm took
+# one PINI / antenna out, R-9); at full requested power
 type Heat is Data:
   Off{}
-  Inhibited{}
   Ramping{}
+  Reduced{}
   On{}
 
 # the two heating units (A-6): neutral beams, radio-frequency
@@ -63,9 +75,10 @@ type Ord is Data:
   Ord1{}
   Ord2{}
 
-# the finite control state
+# the finite control state: program phase, termination-waveform flag, response level, DMS,
+# plasma conditions, DMV current threshold, the two units
 type Fin is Data:
-  Fin{phase: Phase, level: Level, dms: Dms, plasma: Bool, nb: Heat, rf: Heat}
+  Fin{prog: Phase, jtt: Bool, level: Level, dms: Dms, plasma: Bool, ip: Bool, nb: Heat, rf: Heat}
 
 # a command to a counter
 type Upd is Data:
@@ -77,7 +90,8 @@ type Upd is Data:
 type St is Data:
   St{fin: Fin, hb: Nat, tack: Nat}
 
-# the ABSTRACT alphabet (configuration as payload)
+# the ABSTRACT alphabet (configuration as payload: the response a stop asks for, whether it
+# is wired to the DMS, whether the communication check is enabled)
 type Ev is Data:
   Advance{}
   Stop{req: Level, dms: Bool}
@@ -85,13 +99,14 @@ type Ev is Data:
   HeatOn{u: Who}
   HeatOff{u: Who}
   Plasma{ok: Bool}
-  CommFault{dms: Bool}
+  Ip{ok: Bool}
+  CommFault{dms: Bool, en: Bool}
   Heartbeat{}
   Tick{dms: Bool}
   HeatAck{}
   Reset{}
 
-# the seven stop triggers of R-2
+# the seven stop triggers of R-2, plus the blind stop alarm of R-13 (A-25)
 type Trig is Data:
   Slow{}
   Fast{}
@@ -100,6 +115,7 @@ type Trig is Data:
   Mchs{}
   Dhs{}
   BothHs{}
+  Blind{}
 
 # the CONCRETE alphabet (the plant's events)
 type CEv is Data:
@@ -109,17 +125,24 @@ type CEv is Data:
   XHeatOn{u: Who}
   XHeatOff{u: Who}
   XPlasma{ok: Bool}
+  XIp{ok: Bool}
   XCommFault{}
   XHeartbeat{}
   XTick{}
   XHeatAck{}
   XReset{}
 
-# configuration instances: Inst1 = Table 1 of [S1] as published (+ A-4); Inst2 = the same
-# with the MHD triggers routed to PTN from X-point on (the path JET operated, [S6]/[S7])
+# configuration instances: Inst1 = Table 1 of [S1] as published (+ A-4), both checks on;
+# Inst2 = the same with the MHD triggers routed to PTN from X-point on ([S6]/[S7]);
+# Inst3 = Table 1 with both reliability checks masked out (the A-21 configuration)
 type Inst is Data:
   Inst1{}
   Inst2{}
+  Inst3{}
+
+# the reliability checks an instance enables (R-13, A-21): communication fault, blind alarms
+type Mask is Data:
+  Mask{comm: Bool, blind: Bool}
 
 def hb_max() -> Nat:
   3n
@@ -199,16 +222,26 @@ def is_on(u: Heat) -> Bool:
     case _:
       False{}
 
-def is_ramping(u: Heat) -> Bool:
+def is_reduced(u: Heat) -> Bool:
   match u:
-    case Ramping{}:
+    case Reduced{}:
       True{}
     case _:
       False{}
 
-def is_inh(u: Heat) -> Bool:
+# delivering power, full or partial
+def is_hot(u: Heat) -> Bool:
   match u:
-    case Inhibited{}:
+    case On{}:
+      True{}
+    case Reduced{}:
+      True{}
+    case _:
+      False{}
+
+def is_ramping(u: Heat) -> Bool:
+  match u:
+    case Ramping{}:
       True{}
     case _:
       False{}
@@ -220,12 +253,10 @@ def is_off(u: Heat) -> Bool:
     case _:
       False{}
 
-# not On and not Ramping
+# no power at all (Off); Ramping still delivers a decaying power, Reduced a partial one
 def unpowered(u: Heat) -> Bool:
   match u:
     case Off{}:
-      True{}
-    case Inhibited{}:
       True{}
     case _:
       False{}
@@ -236,6 +267,10 @@ def implies(a: Bool, b: Bool) -> Bool:
       True{}
     case True{}:
       b
+
+# ---------------------------------------------------------------------------
+# Ranks (the encodings the equality predicates of spec_jetprot.bend compare)
+# ---------------------------------------------------------------------------
 
 def lvl_rank(o: Ord, l: Level) -> Nat:
   match o l:
@@ -286,9 +321,9 @@ def unit_rank(u: Heat) -> Nat:
   match u:
     case Off{}:
       0n
-    case Inhibited{}:
-      1n
     case Ramping{}:
+      1n
+    case Reduced{}:
       2n
     case On{}:
       3n
@@ -308,37 +343,60 @@ def is_creset(u: Upd) -> Bool:
       False{}
 
 # ---------------------------------------------------------------------------
-# Field access
+# Accessors
 # ---------------------------------------------------------------------------
 
-def phase_of(f: Fin) -> Phase:
+def prog_of(f: Fin) -> Phase:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       p
+
+def jtt_of(f: Fin) -> Bool:
+  match f:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      j
+
+# the waveform phase (A-24): Termination once an accepted JTT switched to it, else the program phase
+def wave_go(j: Bool, p: Phase) -> Phase:
+  match j:
+    case True{}:
+      Termination{}
+    case False{}:
+      p
+
+def wave_of(f: Fin) -> Phase:
+  match f:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      wave_go(j, p)
 
 def level_of(f: Fin) -> Level:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       l
 
 def dms_of(f: Fin) -> Dms:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       d
 
 def plasma_of(f: Fin) -> Bool:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       pl
+
+def ip_of(f: Fin) -> Bool:
+  match f:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      ip
 
 def nb_of(f: Fin) -> Heat:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       nb
 
 def rf_of(f: Fin) -> Heat:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       rf
 
 def unit_of(w: Who, f: Fin) -> Heat:
@@ -368,26 +426,34 @@ def tack_of(s: St) -> Nat:
 # ---------------------------------------------------------------------------
 
 def init_fin() -> Fin:
-  Fin{Breakdown{}, LNone{}, DmsIdle{}, False{}, Off{}, Off{}}
+  Fin{Breakdown{}, False{}, LNone{}, DmsIdle{}, False{}, False{}, Off{}, Off{}}
 
 def init() -> St:
   St{init_fin(), 0n, 0n}
 
-# powered units go off; an inhibit is PRESERVED
+# any power goes off
 def deenergize(u: Heat) -> Heat:
   match u:
-    case On{}:
+    case Off{}:
       Off{}
-    case Ramping{}:
+    case _:
       Off{}
-    case u2:
-      u2
 
-# a unit at full power starts ramping down; nothing else changes
+# a unit delivering power (full or partial) starts ramping down; nothing else changes
 def ramp(u: Heat) -> Heat:
   match u:
     case On{}:
       Ramping{}
+    case Reduced{}:
+      Ramping{}
+    case u2:
+      u2
+
+# a local alarm: full power becomes partial (one PINI / antenna off, R-9); nothing else changes
+def reduce(u: Heat) -> Heat:
+  match u:
+    case On{}:
+      Reduced{}
     case u2:
       u2
 
@@ -401,14 +467,14 @@ def close_if(b: Bool, u: Heat) -> Heat:
 # the only way to PTN: latch the level and de-energize (R-0, R-11, A-9)
 def to_ptn(f: Fin) -> Fin:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
-      Fin{p, LPtn{}, d, pl, deenergize(nb), deenergize(rf)}
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      Fin{p, j, LPtn{}, d, pl, ip, deenergize(nb), deenergize(rf)}
 
-# arm the DMS from Idle only (A-11)
+# arm the DMS from Idle only (A-11), and only above the DMV current threshold (R-14)
 def arm_dms(f: Fin) -> Fin:
   match f:
-    case Fin{p, l, DmsIdle{}, pl, nb, rf}:
-      Fin{p, l, DmsArmed{}, pl, nb, rf}
+    case Fin{p, j, l, DmsIdle{}, pl, True{}, nb, rf}:
+      Fin{p, j, l, DmsArmed{}, pl, True{}, nb, rf}
     case f2:
       f2
 
@@ -419,18 +485,12 @@ def arm_if(b: Bool, f: Fin) -> Fin:
     case False{}:
       f
 
-def jtt_phase(req: Level, p: Phase) -> Phase:
-  match req:
-    case LJtt{}:
-      Termination{}
-    case _:
-      p
-
-# a soft stop: the level, the ramp-down of both units, and the jump for JTT (A-9, A-5)
+# a soft stop: the level, the ramp-down of both units, and the switch to the termination
+# waveform for JTT (A-9, A-24); the program phase does not move (F1)
 def soft_apply(+req: Level, f: Fin) -> Fin:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
-      Fin{jtt_phase(req, p), req, d, pl, ramp(nb), ramp(rf)}
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      Fin{p, Bool.or(j, is_jtt(req)), req, d, pl, ip, ramp(nb), ramp(rf)}
 
 def soft_if(gt: Bool, req: Level, f: Fin) -> Fin:
   match gt:
@@ -443,8 +503,9 @@ def soft_if(gt: Bool, req: Level, f: Fin) -> Fin:
 # The rules
 # ---------------------------------------------------------------------------
 
-# rule 1: a stop request. PTN always wins (and arms the DMS if configured, also when the
-# level already was PTN); a soft request applies only if more urgent than the current one
+# rule 1: a stop request. PTN always wins (and arms the DMS if configured and the current is
+# above the threshold, also when the level already was PTN); a soft request applies only if
+# more urgent than the current one
 def stop_fin(o: Ord, f: Fin, req: Level, d: Bool) -> Fin:
   match req:
     case LPtn{}:
@@ -454,22 +515,22 @@ def stop_fin(o: Ord, f: Fin, req: Level, d: Bool) -> Fin:
       +f2 = f
       soft_if(lvl_lt(o, level_of(f2), r3), r3, f2)
 
-# rule 2: local protection inhibits one unit and nothing else (R-9)
+# rule 2: local protection reduces one unit and nothing else (R-9, F2)
 def local_fin(f: Fin, w: Who) -> Fin:
   match f w:
-    case Fin{p, l, d, pl, nb, rf} Nb{}:
-      Fin{p, l, d, pl, Inhibited{}, rf}
-    case Fin{p, l, d, pl, nb, rf} Rf{}:
-      Fin{p, l, d, pl, nb, Inhibited{}}
+    case Fin{p, j, l, d, pl, ip, nb, rf} Nb{}:
+      Fin{p, j, l, d, pl, ip, reduce(nb), rf}
+    case Fin{p, j, l, d, pl, ip, nb, rf} Rf{}:
+      Fin{p, j, l, d, pl, ip, nb, reduce(rf)}
 
-# rule 3: the enable permissive (R-12, A-5, A-8, A-9)
-def permit_go(p: Phase, pl: Bool, l: Level) -> Bool:
-  Bool.and(heat_win(p), Bool.and(pl, is_none(l)))
+# rule 3: the enable permissive (R-12, A-5, A-8, A-9), read on the waveform phase (A-24)
+def permit_go(w: Phase, pl: Bool, l: Level) -> Bool:
+  Bool.and(heat_win(w), Bool.and(pl, is_none(l)))
 
 def permit(f: Fin) -> Bool:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
-      permit_go(p, pl, l)
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      permit_go(wave_go(j, p), pl, l)
 
 def turn_on(ok: Bool, u: Heat) -> Heat:
   match ok u:
@@ -480,30 +541,36 @@ def turn_on(ok: Bool, u: Heat) -> Heat:
 
 def heat_on_fin(f: Fin, w: Who) -> Fin:
   match f w:
-    case Fin{+p, +l, d, +pl, nb, rf} Nb{}:
-      Fin{p, l, d, pl, turn_on(permit_go(p, pl, l), nb), rf}
-    case Fin{+p, +l, d, +pl, nb, rf} Rf{}:
-      Fin{p, l, d, pl, nb, turn_on(permit_go(p, pl, l), rf)}
+    case Fin{+p, +j, +l, d, +pl, ip, nb, rf} Nb{}:
+      Fin{p, j, l, d, pl, ip, turn_on(permit_go(wave_go(j, p), pl, l), nb), rf}
+    case Fin{+p, +j, +l, d, +pl, ip, nb, rf} Rf{}:
+      Fin{p, j, l, d, pl, ip, nb, turn_on(permit_go(wave_go(j, p), pl, l), rf)}
 
 # rule 4
 def heat_off_fin(f: Fin, w: Who) -> Fin:
   match f w:
-    case Fin{p, l, d, pl, nb, rf} Nb{}:
-      Fin{p, l, d, pl, deenergize(nb), rf}
-    case Fin{p, l, d, pl, nb, rf} Rf{}:
-      Fin{p, l, d, pl, nb, deenergize(rf)}
+    case Fin{p, j, l, d, pl, ip, nb, rf} Nb{}:
+      Fin{p, j, l, d, pl, ip, deenergize(nb), rf}
+    case Fin{p, j, l, d, pl, ip, nb, rf} Rf{}:
+      Fin{p, j, l, d, pl, ip, nb, deenergize(rf)}
 
 # rule 5: basic plasma conditions; losing them closes the window
 def plasma_fin(f: Fin, ok: Bool) -> Fin:
   match f:
-    case Fin{p, l, d, pl, nb, rf}:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
       +ok2 = ok
       +bad = Bool.not(ok2)
-      Fin{p, l, d, ok2, close_if(bad, nb), close_if(bad, rf)}
+      Fin{p, j, l, d, ok2, ip, close_if(bad, nb), close_if(bad, rf)}
+
+# rule 5b: the DMV current threshold verdict is an input (R-14)
+def ip_fin(f: Fin, ok: Bool) -> Fin:
+  match f:
+    case Fin{p, j, l, d, pl, ip, nb, rf}:
+      Fin{p, j, l, d, pl, ok, nb, rf}
 
 # rule 6: the pulse program moves to the next phase (frozen under PTN; identity in
 # Termination); entering Termination ramps the heating down (the natural end); entering a
-# phase outside the enable window closes it
+# phase outside the enable window closes it. Only the PROGRAM phase moves (F1).
 def next_phase(p: Phase) -> Phase:
   match p:
     case Breakdown{}:
@@ -532,21 +599,30 @@ def advance_go(frozen: Bool, f: Fin) -> Fin:
   match frozen f:
     case True{} f2:
       f2
-    case False{} Fin{p, l, d, pl, nb, rf}:
+    case False{} Fin{p, j, l, d, pl, ip, nb, rf}:
       +nxt = next_phase(p)
-      Fin{nxt, l, d, pl, adv_unit(nxt, nb), adv_unit(nxt, rf)}
+      Fin{nxt, j, l, d, pl, ip, adv_unit(nxt, nb), adv_unit(nxt, rf)}
 
 def advance_fin(f: Fin) -> Fin:
   match f:
-    case Fin{+p, +l, d, pl, nb, rf}:
-      advance_go(Bool.or(is_ptn(l), is_term(p)), Fin{p, l, d, pl, nb, rf})
+    case Fin{+p, j, +l, d, pl, ip, nb, rf}:
+      advance_go(Bool.or(is_ptn(l), is_term(p)), Fin{p, j, l, d, pl, ip, nb, rf})
+
+# rule 7: a communication fault is a PTN stop when the instance enables the check (R-13,
+# A-21, F3); a masked check is the identity
+def comm_fin(f: Fin, d: Bool, en: Bool) -> Fin:
+  match en:
+    case True{}:
+      arm_if(d, to_ptn(f))
+    case False{}:
+      f
 
 # rule 8: the watchdog (bh = heartbeat below the limit) takes precedence; otherwise the
 # ack timeout (bt = wait below the limit)
 def fire_dms(f: Fin) -> Fin:
   match f:
-    case Fin{p, l, DmsArmed{}, pl, nb, rf}:
-      Fin{p, l, DmsFired{}, pl, nb, rf}
+    case Fin{p, j, l, DmsArmed{}, pl, ip, nb, rf}:
+      Fin{p, j, l, DmsFired{}, pl, ip, nb, rf}
     case f2:
       f2
 
@@ -572,11 +648,12 @@ def tick_fin(f: Fin, d: Bool, bt: Bool, bh: Bool) -> Fin:
   +f2 = f
   tick_go(watchdog_due(f2, bh), d, bt, f2)
 
-# rule 11: end of pulse, guarded (A-14)
+# rule 11: end of pulse, guarded (A-14): the pulse has ended (PTN, or the termination
+# waveform running) and no mitigation is armed
 def reset_ok(f: Fin) -> Bool:
   match f:
-    case Fin{+p, +l, +d, pl, nb, rf}:
-      Bool.and(Bool.or(is_ptn(l), is_term(p)), Bool.not(is_armed(d)))
+    case Fin{+p, +j, +l, +d, pl, ip, nb, rf}:
+      Bool.and(Bool.or(is_ptn(l), is_term(wave_go(j, p))), Bool.not(is_armed(d)))
 
 def reset_go(ok: Bool, f: Fin) -> Fin:
   match ok:
@@ -604,8 +681,10 @@ def step_fin(o: Ord, f: Fin, e: Ev, bt: Bool, bh: Bool) -> Fin:
       heat_off_fin(f, u)
     case Plasma{ok}:
       plasma_fin(f, ok)
-    case CommFault{dms}:
-      arm_if(dms, to_ptn(f))
+    case Ip{ok}:
+      ip_fin(f, ok)
+    case CommFault{dms, en}:
+      comm_fin(f, dms, en)
     case Heartbeat{}:
       f
     case Tick{dms}:
@@ -646,9 +725,10 @@ def upd_hb(f: Fin, e: Ev, bh: Bool) -> Upd:
     case _:
       CKeep{}
 
-# does this stop request arm the DMS now (from Idle)?
+# does this demand arm the DMS now (wired, above the threshold, from Idle)?
 def arms_now(d: Bool, f: Fin) -> Bool:
-  Bool.and(d, is_idle(dms_of(f)))
+  +f2 = f
+  Bool.and(d, Bool.and(ip_of(f2), is_idle(dms_of(f2))))
 
 def tack_tick(wd: Bool, d: Bool, bt: Bool, f: Fin) -> Upd:
   match wd:
@@ -663,8 +743,8 @@ def upd_tack(f: Fin, e: Ev, bt: Bool, bh: Bool) -> Upd:
   match e:
     case Stop{req, dms}:
       reset_if(Bool.and(is_ptn(req), arms_now(dms, f)))
-    case CommFault{dms}:
-      reset_if(arms_now(dms, f))
+    case CommFault{dms, en}:
+      reset_if(Bool.and(en, arms_now(dms, f)))
     case Tick{dms}:
       +f2 = f
       tack_tick(watchdog_due(f2, bh), dms, bt, f2)
@@ -712,7 +792,7 @@ def run(trace: List<&2, Ev>, s: St) -> St:
   run_o(Ord1{}, trace, s)
 
 # ---------------------------------------------------------------------------
-# The concrete layer: configuration instances (docs/fase3-fuente.md R-5, A-4, A-10)
+# The concrete layer: configuration instances (docs/fase3-fuente.md R-5, A-4, A-10, A-21)
 # ---------------------------------------------------------------------------
 
 # Table 1 of [S1]: 28 published cells (R-5) ...
@@ -741,8 +821,8 @@ def table1_pub(p: Phase, t: Trig) -> Level:
     case _ _:
       LNone{}
 
-# ... and the 21 assumed cells (A-4): Fast -> PTN everywhere; MHD-B = MHD; both hotspots
-# = the more urgent of MCHS and DHS under Ord1
+# ... and the assumed cells (A-4): Fast -> PTN everywhere; MHD-B = MHD; both hotspots
+# = the more urgent of MCHS and DHS under Ord1; a blind stop alarm -> PTN everywhere (A-25)
 def lvl_pick(lt: Bool, a: Level, b: Level) -> Level:
   match lt:
     case True{}:
@@ -758,6 +838,8 @@ def lvl_max1(a: Level, b: Level) -> Level:
 def table1(p: Phase, t: Trig) -> Level:
   match t:
     case Fast{}:
+      LPtn{}
+    case Blind{}:
       LPtn{}
     case MhdB{}:
       table1_pub(p, Mhd{})
@@ -795,9 +877,47 @@ def table(i: Inst, p: Phase, t: Trig) -> Level:
       table1(p, t)
     case Inst2{}:
       table2(p, t)
+    case Inst3{}:
+      table1(p, t)
+
+# the reliability checks each instance enables (R-13, A-21)
+def mask_of(i: Inst) -> Mask:
+  match i:
+    case Inst1{}:
+      Mask{True{}, True{}}
+    case Inst2{}:
+      Mask{True{}, True{}}
+    case Inst3{}:
+      Mask{False{}, False{}}
+
+def comm_of(m: Mask) -> Bool:
+  match m:
+    case Mask{c, b}:
+      c
+
+def blind_of(m: Mask) -> Bool:
+  match m:
+    case Mask{c, b}:
+      b
+
+# a blind stop alarm reads its row only when the instance enables the check
+def blind_pick(en: Bool, i: Inst, p: Phase) -> Level:
+  match en:
+    case True{}:
+      table(i, p, Blind{})
+    case False{}:
+      LNone{}
+
+def masked_table(+i: Inst, p: Phase, t: Trig) -> Level:
+  match t:
+    case Blind{}:
+      blind_pick(blind_of(mask_of(i)), i, p)
+    case t2:
+      table(i, p, t2)
 
 # which triggers are wired to the DMS (A-10): the disruption precursors and the fast
-# termination, inside the DMV enable window of R-14 (X-point .. Termination)
+# termination, inside the DMV enable window of R-14 (X-point .. Termination), read on the
+# waveform phase
 def dms_trig(t: Trig) -> Bool:
   match t:
     case Fast{}:
@@ -823,21 +943,23 @@ def dms_window(p: Phase) -> Bool:
 def dms_req(p: Phase, t: Trig) -> Bool:
   Bool.and(dms_trig(t), dms_window(p))
 
-# the hardwired paths do not arm the DMS in either instance (A-10, A-13)
+# the hardwired paths do not arm the DMS in any instance (A-10, A-13)
 def dms_on_commfault() -> Bool:
   False{}
 
 def dms_on_watchdog() -> Bool:
   False{}
 
-def concretize(i: Inst, p: Phase, c: CEv) -> Ev:
+# the abstract event of a concrete one, through the instance: Table 1 is indexed by the
+# PROGRAM phase (A-24), the DMS window by the waveform phase, the checks by the masks
+def concretize(+i: Inst, f: Fin, c: CEv) -> Ev:
   match c:
     case XAdvance{}:
       Advance{}
     case XAlarm{t}:
       +t2 = t
-      +p2 = p
-      Stop{table(i, p2, t2), dms_req(p2, t2)}
+      +f2 = f
+      Stop{masked_table(i, prog_of(f2), t2), dms_req(wave_of(f2), t2)}
     case XLocal{u}:
       Local{u}
     case XHeatOn{u}:
@@ -846,8 +968,10 @@ def concretize(i: Inst, p: Phase, c: CEv) -> Ev:
       HeatOff{u}
     case XPlasma{ok}:
       Plasma{ok}
+    case XIp{ok}:
+      Ip{ok}
     case XCommFault{}:
-      CommFault{dms_on_commfault()}
+      CommFault{dms_on_commfault(), comm_of(mask_of(i))}
     case XHeartbeat{}:
       Heartbeat{}
     case XTick{}:
@@ -859,7 +983,7 @@ def concretize(i: Inst, p: Phase, c: CEv) -> Ev:
 
 def step_c(i: Inst, s: St, c: CEv) -> St:
   +s2 = s
-  step(s2, concretize(i, phase_of(fin_of(s2)), c))
+  step(s2, concretize(i, fin_of(s2), c))
 
 def run_c(+i: Inst, trace: List<&2, CEv>, s: St) -> St:
   match trace:
@@ -872,21 +996,23 @@ def run_c(+i: Inst, trace: List<&2, CEv>, s: St) -> St:
 # Invariants (docs/fase3-diseno.md §2): four on the control, two on the counters
 # ---------------------------------------------------------------------------
 
-# I1: a unit at full power is inside the window, with plasma conditions and no stop
-def on_ok(u: Heat, p: Phase, pl: Bool, l: Level) -> Bool:
-  implies(is_on(u), Bool.and(heat_win(p), Bool.and(pl, is_none(l))))
+# I1: a unit delivering power (full or partial) is inside the window (waveform phase), with
+# plasma conditions and no stop
+def on_ok(u: Heat, w: Phase, pl: Bool, l: Level) -> Bool:
+  implies(is_hot(u), Bool.and(heat_win(w), Bool.and(pl, is_none(l))))
 
-# I2: a ramping unit has plasma conditions, no PTN, and a soft stop or the termination
-def ramp_ok(u: Heat, p: Phase, pl: Bool, l: Level) -> Bool:
+# I2: a ramping unit has plasma conditions, no PTN, and a soft stop or the termination waveform
+def ramp_ok(u: Heat, w: Phase, pl: Bool, l: Level) -> Bool:
   +l2 = l
-  implies(is_ramping(u), Bool.and(pl, Bool.and(Bool.not(is_ptn(l2)), Bool.or(Bool.not(is_none(l2)), is_term(p)))))
+  implies(is_ramping(u), Bool.and(pl, Bool.and(Bool.not(is_ptn(l2)), Bool.or(Bool.not(is_none(l2)), is_term(w)))))
 
 def inv_fin(f: Fin) -> Bool:
   match f:
-    case Fin{+p, +l, +d, +pl, +nb, +rf}:
-      Bool.and(Bool.and(on_ok(nb, p, pl, l), on_ok(rf, p, pl, l)),
-      Bool.and(Bool.and(ramp_ok(nb, p, pl, l), ramp_ok(rf, p, pl, l)),
-      Bool.and(implies(is_jtt(l), is_term(p)),
+    case Fin{+p, +j, +l, +d, +pl, ip, +nb, +rf}:
+      +w = wave_go(j, p)
+      Bool.and(Bool.and(on_ok(nb, w, pl, l), on_ok(rf, w, pl, l)),
+      Bool.and(Bool.and(ramp_ok(nb, w, pl, l), ramp_ok(rf, w, pl, l)),
+      Bool.and(implies(is_jtt(l), is_term(w)),
                implies(Bool.not(is_idle(d)), is_ptn(l)))))
 
 def cnt_go(running: Bool, n: Nat, limit: Nat) -> Bool:
@@ -914,7 +1040,7 @@ def inv_all(+s: St) -> Bool:
 # the defined safe state
 def safe(f: Fin) -> Bool:
   match f:
-    case Fin{p, +l, +d, pl, +nb, +rf}:
+    case Fin{p, j, +l, +d, pl, ip, +nb, +rf}:
       Bool.and(is_ptn(l), Bool.and(unpowered(nb), Bool.and(unpowered(rf), Bool.not(is_armed(d)))))
 
 
@@ -963,15 +1089,15 @@ def show_unit(u: Heat) -> String:
   match u:
     case Off{}:
       "Off"
-    case Inhibited{}:
-      "Inhibited"
     case Ramping{}:
       "Ramping"
+    case Reduced{}:
+      "Reduced"
     case On{}:
       "On"
 
 def show_st(s: St) -> String:
   match s:
-    case St{Fin{p, l, d, pl, nb, rf}, hb, tack}:
-      show_phase(p) ++ " " ++ show_level(l) ++ " dms=" ++ show_dms(d) ++ " plasma=" ++ Bool.show(pl) ++
-      " nb=" ++ show_unit(nb) ++ " rf=" ++ show_unit(rf) ++ " hb=" ++ Nat.show(hb) ++ " tack=" ++ Nat.show(tack)
+    case St{Fin{p, j, l, d, pl, ip, nb, rf}, hb, tack}:
+      show_phase(p) ++ " jtt=" ++ Bool.show(j) ++ " " ++ show_level(l) ++ " dms=" ++ show_dms(d) ++ " plasma=" ++ Bool.show(pl) ++
+      " ip=" ++ Bool.show(ip) ++ " nb=" ++ show_unit(nb) ++ " rf=" ++ show_unit(rf) ++ " hb=" ++ Nat.show(hb) ++ " tack=" ++ Nat.show(tack)

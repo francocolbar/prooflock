@@ -14,7 +14,7 @@ def stop_fin_bug(f: S.Fin, req: S.Level, d: Bool) -> S.Fin:
       S.soft_apply(r2, f)
 
 def witness() -> S.Fin:
-  S.Fin{S.Heating2{}, S.LRtps{}, S.DmsIdle{}, True{}, S.Ramping{}, S.Off{}}
+  S.Fin{S.Heating2{}, False{}, S.LRtps{}, S.DmsIdle{}, True{}, True{}, S.Ramping{}, S.Off{}}
 
 law latched_survives_deescalation:
   {Spec.pr_p1(S.Ord1{}, witness(), S.Stop{S.LJtt{}, False{}}, stop_fin_bug(witness(), S.LJtt{}, False{})) == True{} : Bool}

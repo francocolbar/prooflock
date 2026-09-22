@@ -10,7 +10,7 @@ def pr_p2_unconditional(+f2: S.Fin) -> Bool:
   S.implies(S.is_ptn(S.level_of(f2)), Bool.and(S.unpowered(S.nb_of(f2)), S.unpowered(S.rf_of(f2))))
 
 def witness() -> S.Fin:
-  S.Fin{S.Breakdown{}, S.LPtn{}, S.DmsIdle{}, False{}, S.Off{}, S.On{}}
+  S.Fin{S.Breakdown{}, False{}, S.LPtn{}, S.DmsIdle{}, False{}, False{}, S.Off{}, S.On{}}
 
 law p2_without_the_reaching_condition:
   {pr_p2_unconditional(S.step_fin(S.Ord1{}, witness(), S.Heartbeat{}, True{}, True{})) == True{} : Bool}

@@ -67,7 +67,7 @@ def catching_laws(early=True):
                 if h(s) and not c(s) and hit("cor_" + n):
                     return sorted(caught)
     # the preservation laws and the trace theorem, over the concrete reachable set
-    for inst in (1, 2):
+    for inst in (1, 2, 3):
         states, _ = R.reachable_concrete(inst)
         for st in states:
             if not L.inv_all(st) and hit("traces_safe_concrete"):
@@ -104,10 +104,12 @@ def ev_from_json(e):
         return ("Stop", e["req"], e["dms"])
     if k in ("Local", "HeatOn", "HeatOff"):
         return (k, e["u"])
-    if k == "Plasma":
-        return ("Plasma", e["ok"])
-    if k in ("CommFault", "Tick"):
-        return (k, e["dms"])
+    if k in ("Plasma", "Ip"):
+        return (k, e["ok"])
+    if k == "CommFault":
+        return ("CommFault", e["dms"], e["en"])
+    if k == "Tick":
+        return ("Tick", e["dms"])
     return (k,)
 
 
@@ -117,13 +119,17 @@ def cev_to_json(c):
         return {"$": k, "t": c[1]}
     if k in ("XLocal", "XHeatOn", "XHeatOff"):
         return {"$": k, "u": c[1]}
-    if k == "XPlasma":
+    if k in ("XPlasma", "XIp"):
         return {"$": k, "ok": c[1]}
     return {"$": k}
 
 
 def fin_from_json(f):
-    return (f["phase"], f["level"], f["dms"], f["plasma"], f["nb"], f["rf"])
+    return (f["prog"], f["jtt"], f["level"], f["dms"], f["plasma"], f["ip"], f["nb"], f["rf"])
+
+
+def fin_to_json(s):
+    return {"prog": s[0], "jtt": s[1], "level": s[2], "dms": s[3], "plasma": s[4], "ip": s[5], "nb": s[6], "rf": s[7]}
 
 
 def c5(bridge, results):
@@ -147,22 +153,24 @@ def c5(bridge, results):
                     lawfail += 1
                     if lawfail <= 5:
                         print(f"[C5] LAW FAILS on Bend cell o={o} s={s} e={e}: {fails}")
-    # the concrete layer
+    # the concrete layer: the fields concretize reads (program phase, waveform flag) x the plant events
     cmism = 0
-    for inst in (1, 2):
+    for inst in (1, 2, 3):
         for ph in R.PHASES:
-            for c in R.CEVENTS:
-                ev = ev_from_json(bridge.ask({"concretize": {"inst": inst, "phase": ph, "cev": cev_to_json(c)}})["ev"])
-                if ev != R.concretize(inst, ph, c):
-                    cmism += 1
+            for j in (False, True):
+                s = (ph, j, "LNone", "DmsIdle", True, True, "Off", "Off")
+                for c in R.CEVENTS:
+                    ev = ev_from_json(bridge.ask({"concretize": {"inst": inst, "fin": fin_to_json(s), "cev": cev_to_json(c)}})["ev"])
+                    if ev != R.concretize(inst, s, c):
+                        cmism += 1
     # concrete reachability (the Python model, now known to agree with Bend cell by cell)
     reach = {}
-    for inst in (1, 2):
+    for inst in (1, 2, 3):
         states, edges = R.reachable_concrete(inst)
         reach[inst] = {"states": len(states), "max_hb": max(x[1] for x in states), "max_tack": max(x[2] for x in states),
                        "all_inv_all": all(L.inv_all(x) for x in states),
-                       "phase_level_pairs": sorted({(x[0][0], x[0][1]) for x in states}),
-                       "dms_reached": sorted({x[0][2] for x in states}),
+                       "phase_level_pairs": sorted({(x[0][R.P], x[0][R.L]) for x in states}),
+                       "dms_reached": sorted({x[0][R.D] for x in states}),
                        "alarm_cells_exercised": sorted({(ph, c[1], tuple(sorted(evs))) for (ph, c), evs in edges.items() if c[0] == "XAlarm"}),
                        "dms_armed_by": sorted({c[1] for (ph, c), evs in edges.items() if c[0] == "XAlarm" and any(e[0] == "Stop" and e[1] == "LPtn" and e[2] for e in evs)})}
     ok = mism == 0 and lawfail == 0 and cmism == 0 and all(v["all_inv_all"] for v in reach.values())
@@ -199,7 +207,7 @@ def c2(results):
         n = sum(1 for s in R.all_states() if L.inv_fin(s) and h(s))
         nr = sum(1 for s in reach[1] if L.inv_fin(s) and h(s))
         cor[name] = {"states": n, "reachable_states": nr, "vacuous": n == 0 or nr == 0}
-    # How tightly the laws pin the model: on a reachable cell, how many of the 2688 control states
+    # How tightly the laws pin the model: on a reachable cell, how many of the 10 752 control states
     # does the law set admit as the next one? This replaces "cells constrained by no non-frame
     # law", which was identically zero by construction (P1/P14/P15 have hypothesis `e != Reset`,
     # so every cell was trivially "covered"). A law set that admits many successors proves little,

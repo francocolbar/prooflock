@@ -25,19 +25,22 @@ def table_cells() -> Bool:
   Bool.and(lvl_is(S.table1(S.IpRise{}, S.Dhs{}), S.LPtn{}),
            lvl_is(S.table2(S.Heating1{}, S.Mhd{}), S.LPtn{}))))))
 
-# the happy path, then a divertor hotspot in Heating 2 (JTT), then a fast stop (PTN + DMS)
+# the happy path (plasma, current above the DMV threshold), then a divertor hotspot in Heating 2
+# (JTT: the waveform switches, the program phase stays), then a fast stop (PTN + DMS)
 def sample() -> List<&2, S.CEv>:
-  [S.XPlasma{True{}}, S.XAdvance{}, S.XAdvance{}, S.XAdvance{}, S.XAdvance{}, S.XHeatOn{S.Nb{}}, S.XHeartbeat{},
+  [S.XPlasma{True{}}, S.XIp{True{}}, S.XAdvance{}, S.XAdvance{}, S.XAdvance{}, S.XAdvance{}, S.XHeatOn{S.Nb{}}, S.XHeartbeat{},
    S.XTick{}, S.XAdvance{}, S.XHeatOn{S.Rf{}}, S.XLocal{S.Nb{}}, S.XAlarm{S.Dhs{}}, S.XTick{}, S.XAlarm{S.Fast{}},
    S.XTick{}, S.XTick{}, S.XTick{}]
 
 def report() -> String:
   line("inv_init", S.inv_all(S.init())) ++
   line("table cells (sample)", table_cells()) ++
-  line("check_fin(Ord1): 2688 states x 39 columns, preservation + shapes + P1..P21", E.check_fin(S.Ord1{})) ++
+  line("check_concretize: 3 instances x 7 program phases x 2 waveform flags x 22 plant events", E.check_concretize()) ++
+  line("check_fin(Ord1): 10752 states x 43 columns, preservation + shapes + P1..P21, D, E, F, IP", E.check_fin(S.Ord1{})) ++
   line("check_fin(Ord2): the same under the swapped urgency order (C3)", E.check_fin(S.Ord2{})) ++
   "sample (instance 1): " ++ S.show_st(S.run_c(S.Inst1{}, sample(), S.init())) ++ "\n" ++
   "sample (instance 2): " ++ S.show_st(S.run_c(S.Inst2{}, sample(), S.init())) ++ "\n" ++
+  "sample (instance 3): " ++ S.show_st(S.run_c(S.Inst3{}, sample(), S.init())) ++ "\n" ++
   line("sample end state is safe", S.safe(S.fin_of(S.run_c(S.Inst1{}, sample(), S.init())))) ++
   line("sample end state satisfies inv_all", S.inv_all(S.run_c(S.Inst1{}, sample(), S.init())))
 

@@ -1,4 +1,4 @@
-"""jetprot_ref.py - a Python re-execution of the model of docs/fase3-diseno.md §1 (rules 1-11,
+"""jetprot_ref.py - a Python re-execution of the model of docs/fase3-diseno.md §1 (rules 1-12,
 counter commands, the model invariant), written from the design document. This module is the
 MODEL only: the laws, the state corollaries and the conformance checks live in jetprot_laws.py
 and read spec_consts.py; this file must never import spec_consts (blocker 2). Used by recheck.py for:
@@ -7,45 +7,58 @@ and read spec_consts.py; this file must never import spec_consts (blocker 2). Us
   C2  vacuity / coverage: reachability, hypothesis counts, conclusion falsifiability;
   C6  the mutation score: MUT flags and mutants.py plant defects and the laws must catch them.
 
-State: a tuple (phase, level, dms, plasma, nb, rf). Abstract events: tuples
+Revision 2026-09-21 (blocker 4 of docs/STATUS_2026-09-21.md): the control state gained the
+program/waveform split of F1 (`prog` indexes Table 1, `jtt` says the termination waveform is
+running), the partial-power unit state `Reduced` of F2 (and lost `Inhibited`, which no pulse event
+produces once a local alarm reduces instead of latching: the pre-pulse disabling of R-10 is
+configuration, A-26), the DMV current threshold `ip` (R-14, formerly A-22) and the configuration
+masks of F3 (carried by the CommFault event, `en`).
+
+State: a tuple (prog, jtt, level, dms, plasma, ip, nb, rf); indices P, J, L, D, PL, IP, NB, RF.
+Abstract events: tuples
   ("Advance",) ("Stop", req, dms) ("Local", u) ("HeatOn", u) ("HeatOff", u) ("Plasma", ok)
-  ("CommFault", dms) ("Heartbeat",) ("Tick", dms) ("HeatAck",) ("Reset",)
-Concrete events: ("XAlarm", t) ("XCommFault",) ("XTick",) and the rest as above with X.
+  ("Ip", ok) ("CommFault", dms, en) ("Heartbeat",) ("Tick", dms) ("HeatAck",) ("Reset",)
+Concrete events: ("XAlarm", t) ("XCommFault",) ("XTick",) ("XIp", ok) and the rest as above with X.
 """
 from itertools import product
 
 PHASES = ["Breakdown", "IpRise", "Limiter", "Xpoint", "Heating1", "Heating2", "Termination"]
 LEVELS = ["LNone", "LJtt", "LRtps", "LPtn"]
 DMSS = ["DmsIdle", "DmsArmed", "DmsFired"]
-HEATS = ["Off", "Inhibited", "Ramping", "On"]
+HEATS = ["Off", "Ramping", "Reduced", "On"]
 WHO = ["Nb", "Rf"]
-TRIGS = ["Slow", "Fast", "Mhd", "MhdB", "Mchs", "Dhs", "BothHs"]
+TRIGS = ["Slow", "Fast", "Mhd", "MhdB", "Mchs", "Dhs", "BothHs", "Blind"]
 HB_MAX, ACK_MAX = 3, 2
 RANK = {1: {"LNone": 0, "LJtt": 1, "LRtps": 2, "LPtn": 3}, 2: {"LNone": 0, "LJtt": 2, "LRtps": 1, "LPtn": 3}}
-INIT = ("Breakdown", "LNone", "DmsIdle", False, "Off", "Off")
+P, J, L, D, PL, IP, NB, RF = range(8)
+INIT = ("Breakdown", False, "LNone", "DmsIdle", False, False, "Off", "Off")
+# the masks of the three configuration instances: (comm check enabled, blind alarms enabled)
+MASKS = {1: (True, True), 2: (True, True), 3: (False, False)}
 
 MUT = {k: False for k in ["deescalation", "jtt_no_ramp", "commfault_no_deenergize", "dms_on_soft", "rearm_restarts_ack",
-                          "rtps_no_ramp", "deenergize_clears_inhibit", "advance_under_ptn", "reset_while_armed",
+                          "rtps_no_ramp", "deenergize_keeps_reduced", "advance_under_ptn", "reset_while_armed",
                           "heaton_under_rtps", "plasma_false_keeps_heat", "watchdog_off_by_one", "local_touches_level",
                           "dms_never_armed", "commfault_arms_dms", "jtt_stays_in_phase", "rearm_from_fired"]}
 
 EVENTS = [("Advance",), ("Heartbeat",), ("HeatAck",), ("Reset",)]
 EVENTS += [(k, u) for u in WHO for k in ("Local", "HeatOn", "HeatOff")]
-EVENTS += [("Plasma", b) for b in (True, False)] + [("CommFault", b) for b in (True, False)] + [("Tick", b) for b in (True, False)]
+EVENTS += [("Plasma", b) for b in (True, False)] + [("Ip", b) for b in (True, False)]
+EVENTS += [("CommFault", d, en) for d in (True, False) for en in (True, False)] + [("Tick", b) for b in (True, False)]
 EVENTS += [("Stop", r, b) for r in LEVELS for b in (True, False)]
 CEVENTS = [("XAdvance",), ("XHeartbeat",), ("XHeatAck",), ("XReset",), ("XCommFault",), ("XTick",)]
-CEVENTS += [(k, u) for u in WHO for k in ("XLocal", "XHeatOn", "XHeatOff")] + [("XPlasma", b) for b in (True, False)]
+CEVENTS += [(k, u) for u in WHO for k in ("XLocal", "XHeatOn", "XHeatOff")]
+CEVENTS += [("XPlasma", b) for b in (True, False)] + [("XIp", b) for b in (True, False)]
 CEVENTS += [("XAlarm", t) for t in TRIGS]
 
 
 def all_states():
-    return [s for s in product(PHASES, LEVELS, DMSS, (True, False), HEATS, HEATS)]
+    return [s for s in product(PHASES, (False, True), LEVELS, DMSS, (True, False), (True, False), HEATS, HEATS)]
 
 
-# The certificate enumerates all four verdict pairs for the five columns where the checker
-# cannot discharge the verdicts symbolically (reset_if / arms_now stay stuck on a symbolic
-# Fin): both Ticks, Reset, CommFault{True} and Stop{LPtn,True}. 19 x 1 + 5 x 4 = 39 columns.
-WIDE = {("Reset",), ("CommFault", True), ("Stop", "LPtn", True)}
+# The certificate enumerates all four verdict pairs for the columns where the checker cannot
+# discharge the verdicts symbolically (reset_if / arms_now stay stuck on a symbolic Fin): both
+# Ticks, Reset, CommFault{True, True} and Stop{LPtn, True}. 23 x 1 + 5 x 4 = 43 columns.
+WIDE = {("Reset",), ("CommFault", True, True), ("Stop", "LPtn", True)}
 
 
 def verdicts_for(e):
@@ -54,6 +67,11 @@ def verdicts_for(e):
 
 
 # --- helpers ---
+def wave(s):
+    """the waveform phase: Termination once an accepted JTT switched to it, the program phase otherwise"""
+    return "Termination" if s[J] else s[P]
+
+
 def heat_win(p):
     return p in ("Heating1", "Heating2")
 
@@ -64,46 +82,51 @@ def succ_phase(p):
 
 
 def deenergize(u):
-    if MUT["deenergize_clears_inhibit"] and u == "Inhibited":
-        return "Off"
-    return "Off" if u in ("On", "Ramping") else u
+    if MUT["deenergize_keeps_reduced"] and u == "Reduced":
+        return "Reduced"
+    return "Off" if u in ("On", "Ramping", "Reduced") else u
 
 
 def ramp(u):
-    return "Ramping" if u == "On" else u
+    return "Ramping" if u in ("On", "Reduced") else u
+
+
+def reduce(u):
+    return "Reduced" if u == "On" else u
 
 
 def to_ptn(s):
-    p, l, d, pl, nb, rf = s
+    p, j, l, d, pl, ip, nb, rf = s
     if MUT["commfault_no_deenergize"]:
-        return (p, "LPtn", d, pl, nb, rf)
-    return (p, "LPtn", d, pl, deenergize(nb), deenergize(rf))
+        return (p, j, "LPtn", d, pl, ip, nb, rf)
+    return (p, j, "LPtn", d, pl, ip, deenergize(nb), deenergize(rf))
 
 
 def arm(s):
-    p, l, d, pl, nb, rf = s
-    if MUT["dms_never_armed"]:
+    """arm the DMS from Idle, only while the plasma current is above the DMV threshold (R-14)"""
+    p, j, l, d, pl, ip, nb, rf = s
+    if MUT["dms_never_armed"] or not ip:
         return s
     if d == "DmsIdle" or (MUT["rearm_from_fired"] and d == "DmsFired"):
-        return (p, l, "DmsArmed", pl, nb, rf)
+        return (p, j, l, "DmsArmed", pl, ip, nb, rf)
     return s
 
 
 def soft(s, req):
-    p, l, d, pl, nb, rf = s
+    p, j, l, d, pl, ip, nb, rf = s
     skip = (MUT["jtt_no_ramp"] and req == "LJtt") or (MUT["rtps_no_ramp"] and req == "LRtps")
     nb2, rf2 = (nb, rf) if skip else (ramp(nb), ramp(rf))
-    p2 = p if (req != "LJtt" or MUT["jtt_stays_in_phase"]) else "Termination"
-    return (p2, req, d, pl, nb2, rf2)
+    j2 = j or (req == "LJtt" and not MUT["jtt_stays_in_phase"])
+    return (p, j2, req, d, pl, ip, nb2, rf2)
 
 
 def reset_ok(s):
-    p, l, d, pl, nb, rf = s
-    return (l == "LPtn" or p == "Termination") and (d != "DmsArmed" or MUT["reset_while_armed"])
+    p, j, l, d, pl, ip, nb, rf = s
+    return (l == "LPtn" or wave(s) == "Termination") and (d != "DmsArmed" or MUT["reset_while_armed"])
 
 
 def step_fin(o, s, e, bt, bh):
-    p, l, d, pl, nb, rf = s
+    p, j, l, d, pl, ip, nb, rf = s
     k = e[0]
     if k == "Stop":
         req, dm = e[1], e[2]
@@ -116,34 +139,39 @@ def step_fin(o, s, e, bt, bh):
         s2 = soft(s, req)
         return arm(s2) if (dm and MUT["dms_on_soft"]) else s2
     if k == "Local":
-        s2 = (p, l, d, pl, "Inhibited", rf) if e[1] == "Nb" else (p, l, d, pl, nb, "Inhibited")
+        s2 = (p, j, l, d, pl, ip, reduce(nb), rf) if e[1] == "Nb" else (p, j, l, d, pl, ip, nb, reduce(rf))
         if MUT["local_touches_level"] and l == "LNone":
-            s2 = (s2[0], "LJtt", *s2[2:])
+            s2 = (s2[0], s2[1], "LJtt", *s2[3:])
         return s2
     if k == "HeatOn":
-        ok = heat_win(p) and pl and (l == "LNone" or (MUT["heaton_under_rtps"] and l == "LRtps"))
+        ok = heat_win(wave(s)) and pl and (l == "LNone" or (MUT["heaton_under_rtps"] and l == "LRtps"))
         u = nb if e[1] == "Nb" else rf
         if ok and u == "Off":
-            return (p, l, d, pl, "On", rf) if e[1] == "Nb" else (p, l, d, pl, nb, "On")
+            return (p, j, l, d, pl, ip, "On", rf) if e[1] == "Nb" else (p, j, l, d, pl, ip, nb, "On")
         return s
     if k == "HeatOff":
-        return (p, l, d, pl, deenergize(nb), rf) if e[1] == "Nb" else (p, l, d, pl, nb, deenergize(rf))
+        return (p, j, l, d, pl, ip, deenergize(nb), rf) if e[1] == "Nb" else (p, j, l, d, pl, ip, nb, deenergize(rf))
     if k == "Plasma":
         if e[1] or MUT["plasma_false_keeps_heat"]:
-            return (p, l, d, e[1], nb, rf)
-        return (p, l, d, False, deenergize(nb), deenergize(rf))
+            return (p, j, l, d, e[1], ip, nb, rf)
+        return (p, j, l, d, False, ip, deenergize(nb), deenergize(rf))
+    if k == "Ip":
+        return (p, j, l, d, pl, e[1], nb, rf)
     if k == "Advance":
         if (l == "LPtn" and not MUT["advance_under_ptn"]) or p == "Termination":
             return s
         nxt = PHASES[PHASES.index(p) + 1]
         if nxt == "Termination":
-            return (nxt, l, d, pl, ramp(nb), ramp(rf))
+            return (nxt, j, l, d, pl, ip, ramp(nb), ramp(rf))
         if not heat_win(nxt):
-            return (nxt, l, d, pl, deenergize(nb), deenergize(rf))
-        return (nxt, l, d, pl, nb, rf)
+            return (nxt, j, l, d, pl, ip, deenergize(nb), deenergize(rf))
+        return (nxt, j, l, d, pl, ip, nb, rf)
     if k == "CommFault":
+        dm, en = e[1], e[2]
+        if not en:
+            return s
         s2 = to_ptn(s)
-        return arm(s2) if (e[1] or MUT["commfault_arms_dms"]) else s2
+        return arm(s2) if (dm or MUT["commfault_arms_dms"]) else s2
     if k == "Heartbeat":
         return s
     if k == "Tick":
@@ -151,23 +179,23 @@ def step_fin(o, s, e, bt, bh):
             s2 = to_ptn(s)
             return arm(s2) if e[1] else s2
         if d == "DmsArmed" and not bt:
-            return (p, l, "DmsFired", pl, nb, rf)
+            return (p, j, l, "DmsFired", pl, ip, nb, rf)
         return s
     if k == "HeatAck":
-        return (p, l, "DmsFired", pl, nb, rf) if d == "DmsArmed" else s
+        return (p, j, l, "DmsFired", pl, ip, nb, rf) if d == "DmsArmed" else s
     if k == "Reset":
         return INIT if reset_ok(s) else s
     raise ValueError(e)
 
 
 def arms_now(dm, s):
-    return dm and s[2] == "DmsIdle"
+    return dm and s[IP] and s[D] == "DmsIdle"
 
 
 def upd_hb(s, e, bh):
     k = e[0]
     if k == "Tick":
-        return "CInc" if (bh and s[1] != "LPtn") else "CKeep"
+        return "CInc" if (bh and s[L] != "LPtn") else "CKeep"
     if k == "Heartbeat":
         return "CReset"
     if k == "Reset":
@@ -182,11 +210,11 @@ def upd_tack(s, e, bt, bh):
             return "CReset" if (e[1] == "LPtn" and e[2]) else "CKeep"
         return "CReset" if (e[1] == "LPtn" and arms_now(e[2], s)) else "CKeep"
     if k == "CommFault":
-        return "CReset" if arms_now(e[1], s) else "CKeep"
+        return "CReset" if (e[2] and arms_now(e[1], s)) else "CKeep"
     if k == "Tick":
-        if (not bh) and s[1] != "LPtn":
+        if (not bh) and s[L] != "LPtn":
             return "CReset" if arms_now(e[1], s) else "CKeep"
-        return "CInc" if (s[2] == "DmsArmed" and bt) else "CKeep"
+        return "CInc" if (s[D] == "DmsArmed" and bt) else "CKeep"
     if k == "Reset":
         return "CReset" if reset_ok(s) else "CKeep"
     return "CKeep"
@@ -228,6 +256,8 @@ def table_pub(p, t):
 def table1(p, t):
     if t == "Fast":
         return "LPtn"
+    if t == "Blind":
+        return "LPtn"          # a blind stop alarm (loss of a critical signal) is a PTN stop in every phase (A-25)
     if t == "MhdB":
         return table_pub(p, "Mhd")
     if t == "BothHs":
@@ -241,53 +271,48 @@ def table(inst, p, t):
     return table1(p, t)
 
 
+def mask(inst):
+    return MASKS[inst]
+
+
+def masked_table(inst, p, t):
+    """the table row a concrete alarm reads, with the blind-alarm check masked out when the instance disables it"""
+    if t == "Blind" and not mask(inst)[1]:
+        return "LNone"
+    return table(inst, p, t)
+
+
 def dms_req(p, t):
     return t in ("Fast", "Mhd", "MhdB") and PHASES.index(p) >= 3
 
 
-def concretize(inst, p, c):
+def concretize(inst, s, c):
+    """the abstract event of a concrete one, through the instance: Table 1 is indexed by the PROGRAM
+    phase (A-24), the DMS window by the waveform phase, the checks by the instance's masks"""
     k = c[0]
     if k == "XAlarm":
-        return ("Stop", table(inst, p, c[1]), dms_req(p, c[1]))
+        return ("Stop", masked_table(inst, s[P], c[1]), dms_req(wave(s), c[1]))
     if k == "XCommFault":
-        return ("CommFault", False)
+        return ("CommFault", False, mask(inst)[0])
     if k == "XTick":
         return ("Tick", False)
     return (k[1:],) + tuple(c[1:])
 
 
 def step_c(inst, st, c):
-    return step_st(1, st, concretize(inst, st[0][0], c))
+    return step_st(1, st, concretize(inst, st[0], c))
 
 
-
-# ---------------------------------------------------------------------------
-# The concrete layer under law: `concretize` must be exactly the table lookup. Restated here
-# independently of concretize() itself, so a mis-wired column or constructor is caught
-# (audit #4 mutants M17/M18/M19: nothing constrained this layer).
-# ---------------------------------------------------------------------------
-
-def concretize_expected(inst, p, c):
-    k = c[0]
-    if k == "XAlarm":
-        return ("Stop", table(inst, p, c[1]), dms_req(p, c[1]))
-    if k == "XCommFault":
-        return ("CommFault", False)     # dms_on_commfault
-    if k == "XTick":
-        return ("Tick", False)          # dms_on_watchdog
-    return (k[1:],) + tuple(c[1:])
-
-
-
-# --- invariants ---
+# --- the model's own invariants (the oracle has its own copy in jetprot_laws.py) ---
 def inv_fin(s):
-    p, l, d, pl, nb, rf = s
+    p, j, l, d, pl, ip, nb, rf = s
+    w = wave(s)
     for u in (nb, rf):
-        if u == "On" and not (heat_win(p) and pl and l == "LNone"):
+        if u in ("On", "Reduced") and not (heat_win(w) and pl and l == "LNone"):
             return False
-        if u == "Ramping" and not (pl and l != "LPtn" and (l != "LNone" or p == "Termination")):
+        if u == "Ramping" and not (pl and l != "LPtn" and (l != "LNone" or w == "Termination")):
             return False
-    if l == "LJtt" and p != "Termination":
+    if l == "LJtt" and w != "Termination":
         return False
     if d != "DmsIdle" and l != "LPtn":
         return False
@@ -296,7 +321,7 @@ def inv_fin(s):
 
 def inv_all(st):
     s, hb, tack = st
-    return inv_fin(s) and (s[2] != "DmsArmed" or tack < ACK_MAX) and (s[1] == "LPtn" or hb < HB_MAX)
+    return inv_fin(s) and (s[D] != "DmsArmed" or tack < ACK_MAX) and (s[L] == "LPtn" or hb < HB_MAX)
 
 
 # The law set, the state corollaries and the conformance checks live in jetprot_laws.py
@@ -329,7 +354,7 @@ def reachable_concrete(inst, cap=32):
             continue
         for c in CEVENTS:
             st2 = step_c(inst, st, c)
-            edges.setdefault((st[0][0], c), set()).add(concretize(inst, st[0][0], c))
+            edges.setdefault((st[0][P], c), set()).add(concretize(inst, st[0], c))
             if st2 not in seen:
                 seen.add(st2); todo.append(st2)
     return seen, edges

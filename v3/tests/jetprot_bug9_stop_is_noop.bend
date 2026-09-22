@@ -21,7 +21,7 @@ def stop_fin_bug(o: S.Ord, f: S.Fin, req: S.Level, d: Bool) -> S.Fin:
       soft_bug(o, r2, f)
 
 def witness() -> S.Fin:
-  S.Fin{S.Heating1{}, S.LNone{}, S.DmsIdle{}, True{}, S.On{}, S.Off{}}
+  S.Fin{S.Heating1{}, False{}, S.LNone{}, S.DmsIdle{}, True{}, True{}, S.On{}, S.Off{}}
 
 law stop_is_honoured_without_dms:
   {Spec.pr_d1(S.Ord1{}, witness(), S.Stop{S.LPtn{}, False{}}, stop_fin_bug(S.Ord1{}, witness(), S.LPtn{}, False{})) == True{} : Bool}

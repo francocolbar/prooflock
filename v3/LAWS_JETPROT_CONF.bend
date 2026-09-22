@@ -1,6 +1,7 @@
 # LAWS_JETPROT_CONF.bend - conformance of the configuration instances (P11): the 28 cells of the
 # published Table 1 (R-5; 15 printed, 13 by ditto mark) and the 21 assumed cells (A-4), transcribed a
-# SECOND time, independently of table1_pub/table1 in jetprot.bend; instance 2 and the DMS wiring.
+# SECOND time, independently of table1_pub/table1 in jetprot.bend; instance 2, the blind row (A-25),
+# instance 3 and the masks (A-21), and the DMS wiring.
 # Proven in PROOF_JETPROT_CONF.bend by computation, one law per cell.
 
 import Base
@@ -302,6 +303,48 @@ law inst2_same_Heating2_BothHs:
 law inst2_same_Termination_BothHs:
   {Spec.lvl_eq(S.table2(S.Termination{}, S.BothHs{}), S.table1(S.Termination{}, S.BothHs{})) == True{} : Bool}
 
+law asm_Breakdown_Blind:
+  {Spec.lvl_eq(S.table1(S.Breakdown{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law asm_IpRise_Blind:
+  {Spec.lvl_eq(S.table1(S.IpRise{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law asm_Limiter_Blind:
+  {Spec.lvl_eq(S.table1(S.Limiter{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law asm_Xpoint_Blind:
+  {Spec.lvl_eq(S.table1(S.Xpoint{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law asm_Heating1_Blind:
+  {Spec.lvl_eq(S.table1(S.Heating1{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law asm_Heating2_Blind:
+  {Spec.lvl_eq(S.table1(S.Heating2{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law asm_Termination_Blind:
+  {Spec.lvl_eq(S.table1(S.Termination{}, S.Blind{}), S.LPtn{}) == True{} : Bool}
+
+law inst2_same_Breakdown_Blind:
+  {Spec.lvl_eq(S.table2(S.Breakdown{}, S.Blind{}), S.table1(S.Breakdown{}, S.Blind{})) == True{} : Bool}
+
+law inst2_same_IpRise_Blind:
+  {Spec.lvl_eq(S.table2(S.IpRise{}, S.Blind{}), S.table1(S.IpRise{}, S.Blind{})) == True{} : Bool}
+
+law inst2_same_Limiter_Blind:
+  {Spec.lvl_eq(S.table2(S.Limiter{}, S.Blind{}), S.table1(S.Limiter{}, S.Blind{})) == True{} : Bool}
+
+law inst2_same_Xpoint_Blind:
+  {Spec.lvl_eq(S.table2(S.Xpoint{}, S.Blind{}), S.table1(S.Xpoint{}, S.Blind{})) == True{} : Bool}
+
+law inst2_same_Heating1_Blind:
+  {Spec.lvl_eq(S.table2(S.Heating1{}, S.Blind{}), S.table1(S.Heating1{}, S.Blind{})) == True{} : Bool}
+
+law inst2_same_Heating2_Blind:
+  {Spec.lvl_eq(S.table2(S.Heating2{}, S.Blind{}), S.table1(S.Heating2{}, S.Blind{})) == True{} : Bool}
+
+law inst2_same_Termination_Blind:
+  {Spec.lvl_eq(S.table2(S.Termination{}, S.Blind{}), S.table1(S.Termination{}, S.Blind{})) == True{} : Bool}
+
 law dms_trig_Fast:
   {S.dms_trig(S.Fast{}) == True{} : Bool}
 
@@ -322,6 +365,9 @@ law dms_trig_Dhs:
 
 law dms_trig_BothHs:
   {S.dms_trig(S.BothHs{}) == False{} : Bool}
+
+law dms_trig_Blind:
+  {S.dms_trig(S.Blind{}) == False{} : Bool}
 
 law dms_window_Breakdown:
   {S.dms_window(S.Breakdown{}) == False{} : Bool}
@@ -350,6 +396,29 @@ law dms_on_commfault_off:
 law dms_on_watchdog_off:
   {S.dms_on_watchdog() == False{} : Bool}
 
+# --- blocker 4: the third instance and the masks of the two reliability checks (R-13, A-21) ---
+
+# instance 3 reads the published matrix (instance 1) cell by cell
+law inst3_uses_table1:
+  for +p: S.Phase
+  for +t: S.Trig
+  {Spec.lvl_eq(S.table(S.Inst3{}, p, t), S.table1(p, t)) == True{} : Bool}
+
+# which checks each instance enables (F3c): the two published instances run both, the third none
+law mask_inst1_checks_on:
+  {S.mask_of(S.Inst1{}) == S.Mask{True{}, True{}} : S.Mask}
+
+law mask_inst2_checks_on:
+  {S.mask_of(S.Inst2{}) == S.Mask{True{}, True{}} : S.Mask}
+
+law mask_inst3_checks_off:
+  {S.mask_of(S.Inst3{}) == S.Mask{False{}, False{}} : S.Mask}
+
+# a blind alarm whose check is masked asks for no response, in every phase (F3, the blind half)
+law blind_masked_no_response:
+  for +p: S.Phase
+  {Spec.lvl_eq(S.masked_table(S.Inst3{}, p, S.Blind{}), S.LNone{}) == True{} : Bool}
+
 # P13 fast_ptn: the Fast trigger reaches the PTN in every phase, from any state, through
 # either configuration instance (A-4: the cells are assumed, the mechanism is R-7)
 law fast_ptn:
@@ -358,15 +427,16 @@ law fast_ptn:
   {S.is_ptn(S.level_of(S.fin_of(S.step_c(i, s, S.XAlarm{S.Fast{}})))) == True{} : Bool}
 
 # C1. The concrete layer: `concretize` is exactly the configuration -- value by value -- and the
-# constructor wiring, for every instance, phase and plant event (294 cells). The expectation it is
+# constructor wiring, for every instance, program phase, waveform flag and plant event (924 cells). The expectation it is
 # compared against (enum_jetprot.bend: m_table1/m_table2/m_trig/m_win) is a fourth, independent
-# transcription of R-5 + A-4 and of the DMS wiring, so a wrong table cell or a wrong enable window
-# is caught here, not only a mis-wired column or a swapped command constructor (audit #5 section 4).
+# transcription of R-5 + A-4 + A-25, of the DMS wiring and of the masks (A-21), so a wrong table
+# cell, a wrong enable window, a table read on the waveform phase (F1a) or an ignored mask is caught
+# here, not only a mis-wired column or a swapped command constructor (audit #5 section 4).
 law concretize_is_the_table:
   {E.check_concretize() == True{} : Bool}
 
 # C3. The concrete layer is USED as declared: a concrete step is the abstract step, under the
-# order this instance is certified for (Ord1, A-1), on the phase the state is in BEFORE the
+# order this instance is certified for (Ord1, A-1), on the control state BEFORE the
 # transition, through THIS instance's configuration. Nothing else constrained step_c: reading
 # instance 1's matrix from instance 2, or the next phase instead of the current one, or the other
 # urgency order, were all invisible (audit #5 mutants N05/N06/N07).
@@ -374,4 +444,4 @@ law step_c_is_the_concrete_step:
   for +i: S.Inst
   for +s: S.St
   for +c: S.CEv
-  {S.step_c(i, s, c) == S.step_o(S.Ord1{}, s, S.concretize(i, S.phase_of(S.fin_of(s)), c)) : S.St}
+  {S.step_c(i, s, c) == S.step_o(S.Ord1{}, s, S.concretize(i, S.fin_of(s), c)) : S.St}

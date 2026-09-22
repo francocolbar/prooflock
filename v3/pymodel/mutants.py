@@ -1,5 +1,7 @@
 """mutants.py - the adversarial mutation suite: 73 defects a careless engineer could plausibly
-write, each one a patch over the reference model in jetprot_ref.py (62 from two adversarial
+write, each one a patch over the reference model in jetprot_ref.py (revised 2026-09-21 for the
+eight-field state of blocker 4: prog, jtt, level, dms, plasma, ip, nb, rf; the three mutants that
+spoke of `Inhibited` now speak of `Reduced`) (62 from two adversarial
 reviews, plus 11 defects of the constants and of the oracle added on 2026-09-21, see the third
 batch at the end).
 
@@ -38,9 +40,9 @@ O_to_ptn = R.to_ptn
 
 def _tick_ack_first(o, s, e, bt, bh):
     if e[0] == "Tick":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if d == "DmsArmed" and not bt:
-            return (p, l, "DmsFired", pl, nb, rf)
+            return (p, j, l, "DmsFired", pl, ip, nb, rf)
         if (not bh) and l != "LPtn":
             s2 = R.to_ptn(s)
             return R.arm(s2) if e[1] else s2
@@ -50,77 +52,76 @@ def _tick_ack_first(o, s, e, bt, bh):
 
 def _tick_ack_first_tack(s, e, bt, bh):
     if e[0] == "Tick":
-        if s[2] == "DmsArmed" and not bt:
+        if s[3] == "DmsArmed" and not bt:
             return "CKeep"
-        if (not bh) and s[1] != "LPtn":
+        if (not bh) and s[2] != "LPtn":
             return "CReset" if R.arms_now(e[1], s) else "CKeep"
-        return "CInc" if (s[2] == "DmsArmed" and bt) else "CKeep"
+        return "CInc" if (s[3] == "DmsArmed" and bt) else "CKeep"
     return O_tack(s, e, bt, bh)
 
 
 def _adv_term_no_ramp(o, s, e, bt, bh):
     if e[0] == "Advance":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if l == "LPtn" or p == "Termination":
             return s
         nxt = R.PHASES[R.PHASES.index(p) + 1]
         if nxt == "Termination":
-            return (nxt, l, d, pl, nb, rf)                       # <-- ramp forgotten
+            return (nxt, j, l, d, pl, ip, nb, rf)                       # <-- ramp forgotten
         if not R.heat_win(nxt):
-            return (nxt, l, d, pl, R.deenergize(nb), R.deenergize(rf))
-        return (nxt, l, d, pl, nb, rf)
+            return (nxt, j, l, d, pl, ip, R.deenergize(nb), R.deenergize(rf))
+        return (nxt, j, l, d, pl, ip, nb, rf)
     return O_step(o, s, e, bt, bh)
 
 
 def _adv_term_deenergize(o, s, e, bt, bh):
     if e[0] == "Advance":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if l == "LPtn" or p == "Termination":
             return s
         nxt = R.PHASES[R.PHASES.index(p) + 1]
         if nxt == "Termination":
-            return (nxt, l, d, pl, R.deenergize(nb), R.deenergize(rf))   # <-- off instead of ramp
+            return (nxt, j, l, d, pl, ip, R.deenergize(nb), R.deenergize(rf))   # <-- off instead of ramp
         if not R.heat_win(nxt):
-            return (nxt, l, d, pl, R.deenergize(nb), R.deenergize(rf))
-        return (nxt, l, d, pl, nb, rf)
+            return (nxt, j, l, d, pl, ip, R.deenergize(nb), R.deenergize(rf))
+        return (nxt, j, l, d, pl, ip, nb, rf)
     return O_step(o, s, e, bt, bh)
 
 
 def _soft_deenergize(s, req):
-    p, l, d, pl, nb, rf = s
+    p, j, l, d, pl, ip, nb, rf = s
     nb2, rf2 = R.deenergize(nb), R.deenergize(rf)                # <-- trip instead of ramp down
-    p2 = p if req != "LJtt" else "Termination"
-    return (p2, req, d, pl, nb2, rf2)
+    return (p, j or req == "LJtt", req, d, pl, ip, nb2, rf2)
 
 
 def _heatoff_clears_inhibit(o, s, e, bt, bh):
     if e[0] == "HeatOff":
-        p, l, d, pl, nb, rf = s
-        f = lambda u: "Off" if u in ("On", "Ramping", "Inhibited") else u
-        return (p, l, d, pl, f(nb), rf) if e[1] == "Nb" else (p, l, d, pl, nb, f(rf))
+        p, j, l, d, pl, ip, nb, rf = s
+        f = lambda u: "Off" if u in ("On", "Ramping") else u          # <-- Reduced is not switched off
+        return (p, j, l, d, pl, ip, f(nb), rf) if e[1] == "Nb" else (p, j, l, d, pl, ip, nb, f(rf))
     return O_step(o, s, e, bt, bh)
 
 
 def _arm_second(s):
-    p, l, d, pl, nb, rf = s
-    if d == "DmsIdle" and l == "LPtn":        # <-- only the SECOND demand (level already PTN) arms
-        return (p, l, "DmsArmed", pl, nb, rf)
+    p, j, l, d, pl, ip, nb, rf = s
+    if d == "DmsIdle" and l == "LPtn" and ip:  # <-- only the SECOND demand (level already PTN) arms
+        return (p, j, l, "DmsArmed", pl, ip, nb, rf)
     return s
 
 
 def _plasma_true_clears_stop(o, s, e, bt, bh):
     if e[0] == "Plasma" and e[1]:
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         l2 = "LNone" if l in ("LJtt", "LRtps") else l
-        return (p, l2, d, True, nb, rf)
+        return (p, j, l2, d, True, ip, nb, rf)
     return O_step(o, s, e, bt, bh)
 
 
 def _plasma_true_rearms(o, s, e, bt, bh):
     if e[0] == "Plasma" and e[1]:
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         g = lambda u: "On" if u == "Ramping" else u
-        return (p, l, d, True, g(nb), g(rf))
+        return (p, j, l, d, True, ip, g(nb), g(rf))
     return O_step(o, s, e, bt, bh)
 
 
@@ -133,13 +134,13 @@ def _hb_reset_on(kinds):
 
 
 def _reset_ok_no_fired(s):
-    p, l, d, pl, nb, rf = s
-    return (l == "LPtn" or p == "Termination") and d == "DmsIdle"
+    p, j, l, d, pl, ip, nb, rf = s
+    return (l == "LPtn" or R.wave(s) == "Termination") and d == "DmsIdle"
 
 
 def _reset_ok_term_any(s):
-    p, l, d, pl, nb, rf = s
-    return p == "Termination" or (l == "LPtn" and d != "DmsArmed")
+    p, j, l, d, pl, ip, nb, rf = s
+    return R.wave(s) == "Termination" or (l == "LPtn" and d != "DmsArmed")
 
 
 def _hb_as_tack(s, e, bh):
@@ -159,58 +160,58 @@ def _verdicts_hb_late(hb, tack):
 
 
 def _conc_col(swap):
-    def f(inst, p, c):
+    def f(inst, s, c):
         if c[0] == "XAlarm" and c[1] in swap:
-            return ("Stop", R.table(inst, p, swap[c[1]]), R.dms_req(p, c[1]))
-        return O_conc(inst, p, c)
+            return ("Stop", R.table(inst, s[0], swap[c[1]]), R.dms_req(R.wave(s), c[1]))
+        return O_conc(inst, s, c)
     return f
 
 
-def _conc_heaton_off(inst, p, c):
+def _conc_heaton_off(inst, s, c):
     if c[0] == "XHeatOn":
         return ("HeatOff", c[1])
-    return O_conc(inst, p, c)
+    return O_conc(inst, s, c)
 
 
-def _conc_tick_arms(inst, p, c):
+def _conc_tick_arms(inst, s, c):
     if c[0] == "XTick":
         return ("Tick", True)
-    return O_conc(inst, p, c)
+    return O_conc(inst, s, c)
 
 
 def _heatoff_both(o, s, e, bt, bh):
     if e[0] == "HeatOff":
-        p, l, d, pl, nb, rf = s
-        return (p, l, d, pl, R.deenergize(nb), R.deenergize(rf))
+        p, j, l, d, pl, ip, nb, rf = s
+        return (p, j, l, d, pl, ip, R.deenergize(nb), R.deenergize(rf))
     return O_step(o, s, e, bt, bh)
 
 
 def _local_both(o, s, e, bt, bh):
     if e[0] == "Local":
-        p, l, d, pl, nb, rf = s
-        return (p, l, d, pl, "Inhibited", "Inhibited")
+        p, j, l, d, pl, ip, nb, rf = s
+        return (p, j, l, d, pl, ip, R.reduce(nb), R.reduce(rf))
     return O_step(o, s, e, bt, bh)
 
 
 def _adv_skips(o, s, e, bt, bh):
     if e[0] == "Advance":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if l == "LPtn" or p == "Termination":
             return s
         i = min(R.PHASES.index(p) + 2, 6)                          # <-- off-by-one: skips a phase
         nxt = R.PHASES[i]
         if nxt == "Termination":
-            return (nxt, l, d, pl, R.ramp(nb), R.ramp(rf))
+            return (nxt, j, l, d, pl, ip, R.ramp(nb), R.ramp(rf))
         if not R.heat_win(nxt):
-            return (nxt, l, d, pl, R.deenergize(nb), R.deenergize(rf))
-        return (nxt, l, d, pl, nb, rf)
+            return (nxt, j, l, d, pl, ip, R.deenergize(nb), R.deenergize(rf))
+        return (nxt, j, l, d, pl, ip, nb, rf)
     return O_step(o, s, e, bt, bh)
 
 
 def _soft_rtps_term(s, req):
-    p, l, d, pl, nb, rf = s
-    p2 = "Termination" if req in ("LJtt", "LRtps") else p          # <-- RTPS also jumps
-    return (p2, req, d, pl, R.ramp(nb), R.ramp(rf))
+    p, j, l, d, pl, ip, nb, rf = s
+    j2 = j or req in ("LJtt", "LRtps")                                # <-- RTPS also switches to the termination waveform
+    return (p, j2, req, d, pl, ip, R.ramp(nb), R.ramp(rf))
 
 
 def _heatack_noop(o, s, e, bt, bh):
@@ -227,9 +228,9 @@ def _stop_ptn_nodms_noop(o, s, e, bt, bh):
 
 def _watchdog_noop_step(o, s, e, bt, bh):
     if e[0] == "Tick":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if d == "DmsArmed" and not bt:
-            return (p, l, "DmsFired", pl, nb, rf)
+            return (p, j, l, "DmsFired", pl, ip, nb, rf)
         return s                                                   # <-- the watchdog never latches PTN
     return O_step(o, s, e, bt, bh)
 
@@ -242,30 +243,30 @@ def _watchdog_noop_hb(s, e, bh):
 
 def _watchdog_noop_tack(s, e, bt, bh):
     if e[0] == "Tick":
-        return "CInc" if (s[2] == "DmsArmed" and bt) else "CKeep"
+        return "CInc" if (s[3] == "DmsArmed" and bt) else "CKeep"
     return O_tack(s, e, bt, bh)
 
 
 def _plasma_false_keeps_flag(o, s, e, bt, bh):
     if e[0] == "Plasma" and not e[1]:
-        p, l, d, pl, nb, rf = s
-        return (p, l, d, pl, R.deenergize(nb), R.deenergize(rf))   # <-- flag not cleared
+        p, j, l, d, pl, ip, nb, rf = s
+        return (p, j, l, d, pl, ip, R.deenergize(nb), R.deenergize(rf))   # <-- flag not cleared
     return O_step(o, s, e, bt, bh)
 
 
 def _heaton_no_plasma(o, s, e, bt, bh):
     if e[0] == "HeatOn":
-        p, l, d, pl, nb, rf = s
-        ok = R.heat_win(p) and l == "LNone"                        # <-- plasma_ok forgotten
+        p, j, l, d, pl, ip, nb, rf = s
+        ok = R.heat_win(R.wave(s)) and l == "LNone"                # <-- plasma_ok forgotten
         u = nb if e[1] == "Nb" else rf
         if ok and u == "Off":
-            return (p, l, d, pl, "On", rf) if e[1] == "Nb" else (p, l, d, pl, nb, "On")
+            return (p, j, l, d, pl, ip, "On", rf) if e[1] == "Nb" else (p, j, l, d, pl, ip, nb, "On")
         return s
     return O_step(o, s, e, bt, bh)
 
 
 def _commfault_no_arm(o, s, e, bt, bh):
-    if e[0] == "CommFault":
+    if e[0] == "CommFault" and e[2]:
         return R.to_ptn(s)                                         # <-- the dms flag ignored
     return O_step(o, s, e, bt, bh)
 
@@ -277,17 +278,17 @@ def _commfault_no_arm_tack(s, e, bt, bh):
 
 
 def _stop_ptn_keeps_inhibit_off(o, s, e, bt, bh):
-    """to_ptn drives every unit to Off, losing the Inhibited latch only when a PTN is latched."""
+    """to_ptn on a PTN stop switches off full power and ramp-down only: a Reduced unit stays powered."""
     if e[0] == "Stop" and e[1] == "LPtn":
-        p, l, d, pl, nb, rf = s
-        f = lambda u: "Off"
-        s2 = (p, "LPtn", d, pl, f(nb), f(rf))
+        p, j, l, d, pl, ip, nb, rf = s
+        f = lambda u: "Off" if u in ("On", "Ramping") else u
+        s2 = (p, j, "LPtn", d, pl, ip, f(nb), f(rf))
         return R.arm(s2) if e[2] else s2
     return O_step(o, s, e, bt, bh)
 
 
 def _tack_inc_when_idle(s, e, bt, bh):
-    if e[0] == "Tick" and s[2] == "DmsIdle":
+    if e[0] == "Tick" and s[3] == "DmsIdle":
         return "CInc"
     return O_tack(s, e, bt, bh)
 
@@ -301,7 +302,7 @@ MUTANTS_M = [
   lambda: {"step_fin": _adv_term_deenergize}),
  ("M04_soft_stop_deenergize", 5, "a soft stop (JTT/RTPS) trips the units to Off instead of ramping them down",
   lambda: {"soft": _soft_deenergize}),
- ("M05_heatoff_clears_inhibit", 4, "HeatOff on an Inhibited unit clears the local inhibit",
+ ("M05_heatoff_keeps_reduced", 4, "HeatOff switches off full power only: a unit at partial power stays Reduced",
   lambda: {"step_fin": _heatoff_clears_inhibit}),
  ("M06_dms_arms_on_second_demand", 4, "the DMS arms on the SECOND PTN demand (guard 'level already LPtn')",
   lambda: {"arm": _arm_second}),
@@ -335,7 +336,7 @@ MUTANTS_M = [
   lambda: {"concretize": _conc_tick_arms}),
  ("M21_heatoff_hits_both_units", 4, "HeatOff{u} de-energizes BOTH units (copy-paste)",
   lambda: {"step_fin": _heatoff_both}),
- ("M22_local_inhibits_both_units", 4, "Local{u} inhibits BOTH units",
+ ("M22_local_reduces_both_units", 4, "Local{u} reduces BOTH units (copy-paste)",
   lambda: {"step_fin": _local_both}),
  ("M23_advance_skips_a_phase", 4, "Advance jumps two phases (index+2)",
   lambda: {"step_fin": _adv_skips}),
@@ -353,7 +354,7 @@ MUTANTS_M = [
   lambda: {"step_fin": _heaton_no_plasma}),
  ("M30_commfault_ignores_dms_flag", 4, "CommFault never arms the DMS (the dms payload is dropped)",
   lambda: {"step_fin": _commfault_no_arm, "upd_tack": _commfault_no_arm_tack}),
- ("M31_ptn_clears_inhibit", 4, "to_ptn on a PTN stop drives both units to Off, clearing a local inhibit",
+ ("M31_ptn_keeps_reduced", 4, "to_ptn on a PTN stop switches off full power and ramp-down only; a Reduced unit stays powered",
   lambda: {"step_fin": _stop_ptn_keeps_inhibit_off}),
  ("M32_tack_counts_while_idle", 3, "t_ack increments on every Tick even with the DMS Idle",
   lambda: {"upd_tack": _tack_inc_when_idle}),
@@ -365,18 +366,18 @@ def _arm_second_real(o, s, e, bt, bh):
     """The DMS arms only if the PTN was ALREADY latched before this stop (the 'second demand')."""
     if e[0] == "Stop" and e[1] == "LPtn":
         s2 = R.to_ptn(s)
-        return R.arm(s2) if (e[2] and s[1] == "LPtn") else s2
-    if e[0] == "CommFault":
+        return R.arm(s2) if (e[2] and s[2] == "LPtn") else s2
+    if e[0] == "CommFault" and e[2]:
         s2 = R.to_ptn(s)
-        return R.arm(s2) if (e[1] and s[1] == "LPtn") else s2
+        return R.arm(s2) if (e[1] and s[2] == "LPtn") else s2
     return O_step(o, s, e, bt, bh)
 
 
 def _arm_second_tack(s, e, bt, bh):
     if e[0] == "Stop":
-        return "CReset" if (e[1] == "LPtn" and e[2] and s[1] == "LPtn" and R.arms_now(True, s)) else "CKeep"
+        return "CReset" if (e[1] == "LPtn" and e[2] and s[2] == "LPtn" and R.arms_now(True, s)) else "CKeep"
     if e[0] == "CommFault":
-        return "CReset" if (e[1] and s[1] == "LPtn" and R.arms_now(True, s)) else "CKeep"
+        return "CReset" if (e[2] and e[1] and s[2] == "LPtn" and R.arms_now(True, s)) else "CKeep"
     return O_tack(s, e, bt, bh)
 
 
@@ -384,21 +385,21 @@ def _watchdog_only_when_dms_step(o, s, e, bt, bh):
     """The watchdog latches PTN only when the tick is wired to the DMS; with dms_on_watchdog=False
     (BOTH certified instances) the heartbeat watchdog does nothing at all."""
     if e[0] == "Tick":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if (not bh) and l != "LPtn":
             if e[1]:
                 s2 = R.to_ptn(s)
                 return R.arm(s2)
             return s
         if d == "DmsArmed" and not bt:
-            return (p, l, "DmsFired", pl, nb, rf)
+            return (p, j, l, "DmsFired", pl, ip, nb, rf)
         return s
     return O_step(o, s, e, bt, bh)
 
 
 def _watchdog_only_when_dms_hb(s, e, bh):
     if e[0] == "Tick":
-        return "CInc" if (bh and s[1] != "LPtn") else "CKeep"
+        return "CInc" if (bh and s[2] != "LPtn") else "CKeep"
     return O_hb(s, e, bh)
 
 
@@ -411,15 +412,15 @@ def _soft_stop_noop(o, s, e, bt, bh):
 
 def _heatack_fires_idle(o, s, e, bt, bh):
     if e[0] == "HeatAck":
-        p, l, d, pl, nb, rf = s
-        return (p, l, "DmsFired", pl, nb, rf)
+        p, j, l, d, pl, ip, nb, rf = s
+        return (p, j, l, "DmsFired", pl, ip, nb, rf)
     return O_step(o, s, e, bt, bh)
 
 
 def _stop_ptn_no_arm_when_already_ptn(o, s, e, bt, bh):
     """rule 1's parenthetical dropped: a DMS stop after a comms-fault PTN does not arm."""
     if e[0] == "Stop" and e[1] == "LPtn":
-        if s[1] == "LPtn":
+        if s[2] == "LPtn":
             return s
         s2 = R.to_ptn(s)
         return R.arm(s2) if e[2] else s2
@@ -436,66 +437,67 @@ MUTANTS_M += [
  ("M36_heatack_fires_from_idle", 3, "HeatAck fires the DMS even when it was never armed",
   lambda: {"step_fin": _heatack_fires_idle}),
  ("M37_no_rearm_after_commfault_ptn", 4, "a DMS-wired PTN stop arriving when PTN is already latched does nothing (rule 1 parenthetical dropped)",
-  lambda: {"step_fin": _stop_ptn_no_arm_when_already_ptn, "upd_tack": lambda s, e, bt, bh: "CKeep" if (e[0] == "Stop" and e[1] == "LPtn" and s[1] == "LPtn") else O_tack(s, e, bt, bh)}),
+  lambda: {"step_fin": _stop_ptn_no_arm_when_already_ptn, "upd_tack": lambda s, e, bt, bh: "CKeep" if (e[0] == "Stop" and e[1] == "LPtn" and s[2] == "LPtn") else O_tack(s, e, bt, bh)}),
 ]
 
 # ---- N01 Advance into a non-heat-window phase forgets to de-energize
 def _n01(o, s, e, bt, bh):
     if e[0] == "Advance":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if l == "LPtn" or p == "Termination":
             return s
         nxt = R.PHASES[R.PHASES.index(p) + 1]
         if nxt == "Termination":
-            return (nxt, l, d, pl, R.ramp(nb), R.ramp(rf))
-        return (nxt, l, d, pl, nb, rf)              # <-- deenergize dropped for the non-heat case
+            return (nxt, j, l, d, pl, ip, R.ramp(nb), R.ramp(rf))
+        return (nxt, j, l, d, pl, ip, nb, rf)              # <-- deenergize dropped for the non-heat case
     return O_step(o, s, e, bt, bh)
 
 
 # ---- N02 the heartbeat counter increments on every Tick outside PTN, ignoring the verdict
 def _n02(s, e, bh):
     if e[0] == "Tick":
-        return "CInc" if s[1] != "LPtn" else "CKeep"     # <-- `bh and` dropped
+        return "CInc" if s[2] != "LPtn" else "CKeep"     # <-- `bh and` dropped
     return O_hb(s, e, bh)
 
 
 # ---- N03 t_ack counts while the DMS is Fired as well as Armed
 def _n03(s, e, bt, bh):
     if e[0] == "Tick":
-        if (not bh) and s[1] != "LPtn":
+        if (not bh) and s[2] != "LPtn":
             return "CReset" if R.arms_now(e[1], s) else "CKeep"
-        return "CInc" if (s[2] != "DmsIdle" and bt) else "CKeep"   # <-- != DmsIdle, not == DmsArmed
+        return "CInc" if (s[3] != "DmsIdle" and bt) else "CKeep"   # <-- != DmsIdle, not == DmsArmed
     return O_tack(s, e, bt, bh)
 
 
 # ---- N04 a heartbeat is ignored once the PTN is latched
 def _n04(s, e, bh):
     if e[0] == "Heartbeat":
-        return "CReset" if s[1] != "LPtn" else "CKeep"   # <-- "in PTN the watchdog no longer matters"
+        return "CReset" if s[2] != "LPtn" else "CKeep"   # <-- "in PTN the watchdog no longer matters"
     return O_hb(s, e, bh)
 
 
 # ---- N05 the alarm matrix is read against the phase the sequencer is about to enter
 def _n05(inst, st, c):
-    return R.step_st(1, st, R.concretize(inst, R.succ_phase(st[0][0]), c))
+    s = st[0]
+    return R.step_st(1, st, R.concretize(inst, (R.succ_phase(s[0]),) + s[1:], c))
 
 
 # ---- N06 the concrete layer of both instances runs on urgency order 2
 def _n06(inst, st, c):
-    return R.step_st(2, st, R.concretize(inst, st[0][0], c))
+    return R.step_st(2, st, R.concretize(inst, st[0], c))
 
 
 # ---- N07 the concrete layer always looks the alarm up in instance 1's matrix
 def _n07(inst, st, c):
-    return R.step_st(1, st, R.concretize(1, st[0][0], c))
+    return R.step_st(1, st, R.concretize(1, st[0], c))
 
 
 # ---- N08 loss of plasma inhibits the units instead of de-energizing them
 def _n08(o, s, e, bt, bh):
     if e[0] == "Plasma" and not e[1]:
-        p, l, d, pl, nb, rf = s
-        f = lambda u: "Inhibited" if u in ("On", "Ramping") else u
-        return (p, l, d, False, f(nb), f(rf))
+        p, j, l, d, pl, ip, nb, rf = s
+        f = lambda u: "Reduced" if u in ("On", "Ramping") else u
+        return (p, j, l, d, False, ip, f(nb), f(rf))
     return O_step(o, s, e, bt, bh)
 
 
@@ -515,14 +517,14 @@ def _n10(o, s, e, bt, bh):
 
 # ---- N11 Advance restarts the acknowledgement timer while the DMS is idle
 def _n11(s, e, bt, bh):
-    if e[0] == "Advance" and s[2] == "DmsIdle":
+    if e[0] == "Advance" and s[3] == "DmsIdle":
         return "CReset"
     return O_tack(s, e, bt, bh)
 
 
 # ---- N12 a no-response alarm restarts the acknowledgement timer while the DMS is idle
 def _n12(s, e, bt, bh):
-    if e[0] == "Stop" and e[1] == "LNone" and s[2] == "DmsIdle":
+    if e[0] == "Stop" and e[1] == "LNone" and s[3] == "DmsIdle":
         return "CReset"
     return O_tack(s, e, bt, bh)
 
@@ -541,23 +543,23 @@ def _n14(p, t):
 
 # ---- N15 arming goes straight to Fired
 def _n15(s):
-    p, l, d, pl, nb, rf = s
-    if d == "DmsIdle":
-        return (p, l, "DmsFired", pl, nb, rf)
+    p, j, l, d, pl, ip, nb, rf = s
+    if d == "DmsIdle" and ip:
+        return (p, j, l, "DmsFired", pl, ip, nb, rf)
     return s
 
 
 # ---- N16 the PTN de-energizes only the neutral beam
 def _n16(s):
-    p, l, d, pl, nb, rf = s
-    return (p, "LPtn", d, pl, R.deenergize(nb), rf)
+    p, j, l, d, pl, ip, nb, rf = s
+    return (p, j, "LPtn", d, pl, ip, R.deenergize(nb), rf)
 
 
 # ---- N17 the heating acknowledgement also latches the PTN
 def _n17(o, s, e, bt, bh):
-    if e[0] == "HeatAck" and s[2] == "DmsArmed":
-        p, l, d, pl, nb, rf = s
-        return (p, "LPtn", "DmsFired", pl, R.deenergize(nb), R.deenergize(rf))
+    if e[0] == "HeatAck" and s[3] == "DmsArmed":
+        p, j, l, d, pl, ip, nb, rf = s
+        return (p, j, "LPtn", "DmsFired", pl, ip, R.deenergize(nb), R.deenergize(rf))
     return O_step(o, s, e, bt, bh)
 
 
@@ -577,7 +579,7 @@ def _n19(s, e, bh):
 
 # ---- N20 arms_now drops the idle test (a repeat demand restarts the ack timer)
 def _n20(dm, s):
-    return dm
+    return dm and s[5]
 
 
 # ---- N21 the two counter limits are swapped in the verdicts
@@ -592,7 +594,7 @@ def _n22(o, s, e, bt, bh):
         if req == "LPtn":
             s2 = R.to_ptn(s)
             return R.arm(s2) if dm else s2
-        if R.RANK[o][req] < R.RANK[o][s[1]]:          # <-- >= accepted, not >
+        if R.RANK[o][req] < R.RANK[o][s[2]]:          # <-- >= accepted, not >
             return s
         s2 = R.soft(s, req)
         return s2
@@ -606,7 +608,7 @@ def _n23(o, s, e, bt, bh):
         if req == "LPtn":
             s2 = R.to_ptn(s)
             return R.arm(s2) if dm else s2
-        if not (R.RANK[1][req] > R.RANK[1][s[1]]):     # <-- RANK[1], not RANK[o]
+        if not (R.RANK[1][req] > R.RANK[1][s[2]]):     # <-- RANK[1], not RANK[o]
             return s
         return R.soft(s, req)
     return O_step(o, s, e, bt, bh)
@@ -615,12 +617,12 @@ def _n23(o, s, e, bt, bh):
 # ---- N24 the watchdog branch drops the "PTN not already latched" test
 def _n24(o, s, e, bt, bh):
     if e[0] == "Tick":
-        p, l, d, pl, nb, rf = s
+        p, j, l, d, pl, ip, nb, rf = s
         if not bh:
             s2 = R.to_ptn(s)
             return R.arm(s2) if e[1] else s2           # <-- runs even when l is already LPtn
         if d == "DmsArmed" and not bt:
-            return (p, l, "DmsFired", pl, nb, rf)
+            return (p, j, l, "DmsFired", pl, ip, nb, rf)
         return s
     return O_step(o, s, e, bt, bh)
 
@@ -629,7 +631,7 @@ def _n24_tack(s, e, bt, bh):
     if e[0] == "Tick":
         if not bh:
             return "CReset" if R.arms_now(e[1], s) else "CKeep"
-        return "CInc" if (s[2] == "DmsArmed" and bt) else "CKeep"
+        return "CInc" if (s[3] == "DmsArmed" and bt) else "CKeep"
     return O_tack(s, e, bt, bh)
 
 
@@ -637,7 +639,7 @@ def _n24_tack(s, e, bt, bh):
 def _n25(o, s, e, bt, bh):
     if e[0] == "Reset":
         if R.reset_ok(s):
-            return (s[0], "LNone", "DmsIdle", False, "Off", "Off")
+            return (s[0], False, "LNone", "DmsIdle", False, False, "Off", "Off")
         return s
     return O_step(o, s, e, bt, bh)
 
@@ -657,7 +659,7 @@ MUTANTS_N = [
   lambda: {"step_c": _n06}),
  ("N07_concrete_layer_ignores_instance", 5, "step_c always uses instance 1's alarm matrix",
   lambda: {"step_c": _n07}),
- ("N08_plasma_loss_inhibits", 3, "loss of plasma latches the units Inhibited instead of de-energizing them",
+ ("N08_plasma_loss_reduces", 3, "loss of plasma leaves the units at partial power instead of de-energizing them",
   lambda: {"step_fin": _n08}),
  ("N09_heaton_needs_healthy_watchdog", 3, "HeatOn is refused whenever the watchdog verdict bh is false",
   lambda: {"step_fin": _n09}),
@@ -724,13 +726,13 @@ def _s70_step_c(inst, st, c):
 
 
 def _s71_reset_ok(s):
-    p, l, d, pl, nb, rf = s
-    return (l == "LPtn" or p == "Termination") and d != "DmsArmed" and (d != "DmsFired" or not pl)   # <-- an extra guard
+    p, j, l, d, pl, ip, nb, rf = s
+    return (l == "LPtn" or R.wave(s) == "Termination") and d != "DmsArmed" and (d != "DmsFired" or not pl)   # <-- an extra guard
 
 
 def _s72_inv_all(st):
     s, hb, tack = st
-    return R.inv_fin(s) and (s[2] != "DmsArmed" or tack < R.ACK_MAX) and (s[1] == "LPtn" or hb <= R.HB_MAX)   # <-- <= instead of <
+    return R.inv_fin(s) and (s[3] != "DmsArmed" or tack < R.ACK_MAX) and (s[2] == "LPtn" or hb <= R.HB_MAX)   # <-- <= instead of <
 
 
 def _s73_table(inst, p, t):
@@ -745,9 +747,9 @@ MUTANTS_S = [
  ("M64_ack_max_3", 5, "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-13 allows",
   lambda: {"ACK_MAX": 3}),
  ("M65_init_plasma_true", 4, "the initial state has plasma_ok = True (R-5: no plasma at Breakdown)",
-  lambda: {"INIT": ("Breakdown", "LNone", "DmsIdle", True, "Off", "Off")}),
+  lambda: {"INIT": ("Breakdown", False, "LNone", "DmsIdle", True, False, "Off", "Off")}),
  ("M66_init_iprise", 3, "the initial phase is IpRise instead of Breakdown",
-  lambda: {"INIT": ("IpRise", "LNone", "DmsIdle", False, "Off", "Off")}),
+  lambda: {"INIT": ("IpRise", False, "LNone", "DmsIdle", False, False, "Off", "Off")}),
  ("M67_heat_win_xpoint", 4, "the heating window also admits Xpoint (A-6: Heating1 and Heating2 only)",
   lambda: {"heat_win": _s67_heat_win}),
  ("M68_dms_window_no_term", 4, "the DMS arming window drops Termination (R-13 / [S6] include it)",
