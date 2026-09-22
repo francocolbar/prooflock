@@ -198,6 +198,20 @@ decía lo contrario de la fuente, más el umbral del DMV. F1b, F1d, F2a, F2d, F3
 | IP2 | `ip2_arms_on_demand` | Con corriente, DMS ocioso y una alarma concreta que la instancia mapea a PTN y cablea al DMS dentro de la ventana, la alarma arma en el mismo paso (forma concreta de P16). | R-14, [S6] |
 | IP3, IP4 | `ip3_ip_is_input`, `ip4_ip_frame` | El veredicto de corriente es una entrada y solo esa entrada (o el fin de pulso) lo mueve. | como D13/D14 para el plasma |
 
+### Leyes de respuesta acotada sobre trazas (bloqueante 5, 2026-09-21: `LAWS_JETPROT_LIVE.bend`, 2)
+
+Todo lo anterior dice qué no pasa (`traces_safe`) o qué hace un paso. Estas dos dicen que la protección **llega**, para
+toda traza, toda configuración y todo valor de los contadores, y son universales en `hb_max`/`ack_max`: nada de la
+prueba lee el certificado. Se prueban en `PROOF_JETPROT_LIVE_CORE.bend` por inducción sobre la traza a partir de ocho
+hechos de celda (`step_safe`, P1, D4, D7, D8, P15, P18, E11) tomados como hipótesis template; `PROOF_JETPROT_LIVE.bend`
+los instancia con las leyes de `LAWS_JETPROT.bend` (vía `PROOF_JETPROT.bend`) y es el gate. No es vivacidad infinita
+(Bend no tiene ◇): es un invariante sobre trazas de largo acotado, que es lo que un requisito de respuesta pide.
+
+| # | Ley | Qué demanda | De dónde sale |
+|---|---|---|---|
+| L1 | `watchdog_responds` | Desde cualquier estado que cumple `inv_all`, toda traza sin `Heartbeat` ni `Reset` con al menos `hb_max` ticks termina con el PTN enclavado. | R-13, A-12 (SR-7); reclamo inductivo `ptn ∨ hb_max ≤ ticks(resto) + hb` |
+| L2 | `dms_responds` | Desde cualquier estado que cumple `inv_all` con el DMS armado, toda traza sin `Reset` con al menos `ack_max` ticks termina con el DMS disparado (por acuse o por timeout). | R-11, A-10, A-11 (SR-6); reclamo inductivo `fired ∨ (armed ∧ ack_max ≤ ticks(resto) + tack)` |
+
 ### Conformidad de la configuración (`LAWS_JETPROT_CONF.bend`, 137)
 
 Las 28 celdas publicadas de la Tabla 1 (15 impresas + 13 por marca de ídem) y las 21 supuestas por A-4, separadas; la fila
@@ -262,7 +276,9 @@ certificado por generador (alimenta C2).
 
 Los tres certificados (`PROOF_JETPROT_FIN`, `_FIN_ALT`, `_COR`) son **bibliotecas, no gates**: cada uno descarga una
 sola ley del archivo y por construcción reporta "TODOs" si se corre solo. `PROOF_JETPROT.bend` los importa y suministra
-las demás; es el único que puede dar verde.
+las demás. Desde el bloqueante 5 el gate es `PROOF_JETPROT_LIVE.bend`, que importa `PROOF_JETPROT.bend` (y con él los
+certificados) y llena las dos leyes de `LAWS_JETPROT_LIVE.bend`; `PROOF_JETPROT_LIVE_CORE.bend` es otra biblioteca
+(reporta exactamente 2 TODOs solo, sin certificado, en segundos).
 
 ## 6. Instancias certificadas
 
@@ -308,6 +324,7 @@ otras 23 no los lean es la ley V1. Tiempos de la revisión: ver `docs/STATUS_202
 | `enum_jetprot.bend` | 446 | certificado y escalera de cuantificadores |
 | `LAWS_JETPROT.bend` + `LAWS_JETPROT_CONF.bend` | 409 + 242 | 64 + 117 leyes |
 | `PROOF_JETPROT.bend` + `PROOF_JETPROT_CONF.bend` | 1 034 + 330 | reflexión, inducción y conformidad |
+| `LAWS_JETPROT_LIVE.bend` + `PROOF_JETPROT_LIVE_CORE.bend` + `PROOF_JETPROT_LIVE.bend` | 78 + 842 + 32 | respuesta acotada: inducción sobre la traza (b5) |
 | `pymodel/jetprot_ref.py` | 485 | modelo de referencia y las leyes como predicados |
 | `pymodel/mutants.py` | 526 | el banco adversarial de 62 defectos |
 | `prod/jetprot_prod.py` | 132 | implementación de producción con 6 bugs plantados |
@@ -397,4 +414,5 @@ Los tres más importantes del proyecto, porque no son errores de transcripción 
 3. **Las leyes de paso valen en todo el dominio, también en lo inalcanzable.** Tres veces el mismo error.
 4. **Una ley no debe citar al modelo en su conclusión.** Si la guarda del modelo aparece en la ley, la ley no puede detectar una guarda equivocada.
 5. **El patrón de seq3 no escala tal cual.** Bend compara formas normales completas: proyectar desde el certificado entero con argumentos simbólicos costaba 15–30 minutos. Rebanarlo en 56 piezas lo bajó a minutos.
+7. **Los hechos de una prueba por inducción van como hipótesis template, no como leyes abiertas.** Bend rechaza código vivo que llame a una ley sin llenar ("an unfilled law is a dead claim"), así que un core sin certificado no puede dejar sus hechos como `law` abiertas: los toma como `for ~fact: ...` y el archivo gate los instancia con las leyes probadas por reflexión. El core chequea en segundos y se itera sin pagar los 11–18 min del certificado; el gate paga una vez.
 6. **Lo que en Bend es definicional, en otra implementación no lo es.** `step_c_is_the_concrete_step` cierra con `{==}` en Bend porque es la definición; en el modelo Python de referencia es una obligación real, y ahí viven los mutantes que la motivaron. Por eso la mutación y el testing diferencial operan del lado que puede desviarse.

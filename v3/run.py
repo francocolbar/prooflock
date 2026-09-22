@@ -1,21 +1,22 @@
 """run.py (Fase 3) - the gate of the JET protection-chain case study, one subcommand per stage.
 
-  quick    < 1 min   PROOF_JETPROT_CONF + PROOF_JETPROT_SOUND, one negative test, the runtime
+  quick    ~ 30 s    PROOF_JETPROT_CONF + PROOF_JETPROT_SOUND, one negative test, the runtime
                      smoke, differential testing (guided generator, 200 traces, no bugs and one
                      planted bug) and the provenance block. The CI gate. Writes nothing unless
                      --json is given.
-  proofs   ~ 3 min   every PROOF file prints "All terms check." (PROOF_JETPROT alone takes
-                     ~160 s on the JS checker), the smoke, and the 10 negative tests are
+  proofs   ~ 20 min  every PROOF file prints "All terms check." (PROOF_JETPROT_LIVE, which
+                     imports the 462 336-cell certificates and the reflection proof, takes
+                     11-18 min on the JS checker), the smoke, and the 10 negative tests are
                      REJECTED by the checker with a counterexample.
-  diff     ~ 1 min   Hypothesis: 32 runs (2 generators x 2 instances x 8 bug configurations)
+  diff     ~ 3 min   Hypothesis: 60 runs (2 generators x 3 instances x 10 bug configurations)
                      of --max-examples traces each with a fixed --seed; no counterexample
                      without planted bugs, one for every planted bug, shrunk to a minimal trace.
-  recheck  ~ 30 s    C5 (every Bend cell == the Python model, every law re-evaluated on the
+  recheck  ~ 2 min   C5 (every Bend cell == the Python model, every law re-evaluated on the
                      Bend-produced next state), C2 vacuity / tightness, C3 order sensitivity.
-  mutants  ~ 4 min   C6: the 73-mutant bank and the 17 model flags against the spec-side
-                     oracle (pymodel/jetprot_laws.py + spec_consts.py). --full (about 10 min
+  mutants  ~ 5 min   C6: the 73-mutant bank and the 17 model flags against the spec-side
+                     oracle (pymodel/jetprot_laws.py + spec_consts.py). --full (about 40 min
                      more) also records how many laws catch each mutant.
-  all      ~ 7 min   everything above; writes v3/results.json, v3/recheck.json and SHA256SUMS
+  all      ~ 40 min  everything above; writes v3/results.json, v3/recheck.json and SHA256SUMS
                      at the repo root: the committed reference run. Re-run it and compare.
 
 Every results file carries a `provenance` block: tool versions, the pinned Bend commit, the
@@ -44,7 +45,9 @@ sys.path.insert(0, HERE)
 import jetprot_prod as prod  # noqa: E402
 from bridge_client import Bridge  # noqa: E402
 
-PROOFS = ["PROOF_JETPROT.bend", "PROOF_JETPROT_CONF.bend", "PROOF_JETPROT_SOUND.bend"]   # FIN, FIN_ALT and COR are imported by PROOF_JETPROT
+# PROOF_JETPROT_LIVE imports PROOF_JETPROT (which imports FIN, FIN_ALT and COR), so one check covers the
+# reflection proofs, the two bounded-response theorems and the certificates
+PROOFS = ["PROOF_JETPROT_LIVE.bend", "PROOF_JETPROT_CONF.bend", "PROOF_JETPROT_SOUND.bend"]
 QUICK_PROOFS = ["PROOF_JETPROT_CONF.bend", "PROOF_JETPROT_SOUND.bend"]
 SMOKE_LINES = 7            # verdict lines the runtime smoke must print
 DEFAULT_SEED = 20260921

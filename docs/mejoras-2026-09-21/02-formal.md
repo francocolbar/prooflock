@@ -85,6 +85,11 @@ Nota 2.0.24: como `unit_eq` pasa por `Nat.is_eq(unit_rank(a), unit_rank(b))`, el
 
 ## 2. Teoremas de respuesta sobre trazas (½ día cada uno)
 
+**Estado (2026-09-21): hecho, bloqueante 5** (`docs/STATUS_2026-09-21.md` §4.5). Diferencias con lo de abajo: las
+hipótesis van con `+` (se usan dos veces), la cota se escribe `Nat.is_le(S.hb_max(), ticks(trace))`, los hechos que
+usa la inducción son `step_safe` + P1, D4 (watchdog) y D7, D8, P15, P18, E11 (DMS), no E6/D6/E8, y no son leyes
+abiertas sino hipótesis template del core (Bend rechaza código vivo que llame a una ley sin llenar).
+
 Hoy: `traces_safe` (invariante para toda traza). Falta: *algo pasa* dentro de una cota. Sin liveness infinita (Bend no tiene ◇), pero la respuesta **acotada** es un invariante sobre trazas de largo fijo y se prueba por inducción en la traza.
 
 ### 2.1 Watchdog: `hb_max` ticks sin heartbeat ⇒ PTN enclavado

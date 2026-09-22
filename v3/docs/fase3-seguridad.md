@@ -59,8 +59,8 @@ de configuración, J = justificación).
 | SR-3 | Ante una alarma cuya respuesta configurada es RTPS o JTT, el sistema **shall** sacar toda unidad de potencia plena en el mismo ciclo y **shall not** devolverla a potencia plena en el pulso. | `stop_no_full_power` | R-3, R-4 (F), A-9 | `stop_reduces_power`, **`soft_stop_ramps`**, `ramping_never_returns`, I2 | fuera |
 | SR-4 | Ninguna unidad **shall** energizarse fuera de la ventana de habilitación de la instancia, sin condiciones de plasma, o con una parada en curso. | — | R-12 (F), A-5, A-8 | I1, `heat_permissive`, `stop_overrides_heat`, `heat_frame` | — |
 | SR-5 | El DMS **shall not** armarse ni dispararse salvo con el PTN activo (y por SR-1, sin calentamiento comandado). | `dms_no_heat` | R-11 (F), [S6] | I4, `dms_frame`, **`dms_fire_frame`** | — |
-| SR-6 | Cuando una parada marcada para DMS llega al PTN, el DMS **shall** armarse; la espera del acuse **shall** estar acotada; una alarma repetida **shall not** reiniciarla. | — | R-11 (F), A-10, A-11 | `dms_armed_on_demand`, I5, `tack_frame`, `dms_monotone`, **`ack_timeout_fires`**, **`heatack_exact`** | fuera (50 ms real, [S6]) |
-| SR-7 | La ausencia de heartbeat del RTPS durante `hb_max` ciclos **shall** producir una parada PTN. | — | R-13 (F), A-12 | I6, **`watchdog_latches`**, **`heartbeat_resets_hb`**, **`hb_tick_exact`**, **`hb_frame`** | fuera |
+| SR-6 | Cuando una parada marcada para DMS llega al PTN, el DMS **shall** armarse; la espera del acuse **shall** estar acotada; una alarma repetida **shall not** reiniciarla. | — | R-11 (F), A-10, A-11 | `dms_armed_on_demand`, I5, `tack_frame`, `dms_monotone`, **`ack_timeout_fires`**, **`heatack_exact`**; **`dms_responds`** (armado ⇒ disparado en ≤ `ack_max` ticks, b5) | fuera (50 ms real, [S6]); la cota es en ticks |
+| SR-7 | La ausencia de heartbeat del RTPS durante `hb_max` ciclos **shall** producir una parada PTN. | — | R-13 (F), A-12 | I6, **`watchdog_latches`**, **`heartbeat_resets_hb`**, **`hb_tick_exact`**, **`hb_frame`**; **`watchdog_responds`** (`hb_max` ticks sin heartbeat ⇒ PTN, para toda traza, b5) | fuera; la cota es en ticks |
 | SR-8 | Una falla de comunicación **shall** producir una parada PTN desde cualquier estado cuando la instancia habilita el chequeo, y **shall not** hacer nada cuando lo deshabilita; una alarma ciega **shall** pasar por la tabla (revisión 2026-09-21). | — | R-13 (F), A-13, A-21, A-25 | `commfault_ptn`, **`f3b_commfault_masked_is_noop`**, `mask_*`, `asm_*_Blind` | fuera |
 | SR-9 | Una alarma local **shall** llevar la unidad afectada de potencia plena a potencia parcial (un PINI fuera) y **shall not** alterar fase, respuesta, DMS ni la otra unidad; la reducción **shall** persistir el pulso (revisión 2026-09-21: antes "inhibir"). | — | R-8, R-9 (F/J), A-6, A-7 | `local_is_local`, **`f2a_local_reduces`**, **`f2d_reduced_never_returns`** | — |
 | SR-16 | Una alarma concreta **shall** leer la Tabla 1 en la fase de programa; un JTT **shall** conmutar la forma de onda de terminación y **shall not** mover la fase de programa (revisión 2026-09-21). | — | R-1, R-4 (F), [S2] §3.4, A-24 | **`f1a_table_reads_prog`**, **`f1b_stop_keeps_prog`**, **`f1c_wave_ahead`**, **`f1d_wave_frame`** | — |
@@ -91,7 +91,7 @@ negativo (`fase3-diseno.md` §9b).
 | H-A3 la parada daña la pared | — | — | **inexpresable** en esta abstracción; es la motivación de [S1]; declarado |
 | H-B disrupción / MHD | `dms_armed_on_demand` (instancia 2) | — | en la instancia publicada MHD → None: la protección real corre fuera de la tabla primaria ([S6], [S7]) |
 | H-C gas con calentamiento | I4 ∧ I1 ∧ I2 (`dms_no_heat`), `dms_frame`, **`dms_fire_frame`** | — | estado comandado, no reportado (A-11, A-19) |
-| H-C2 el DMS no dispara | `dms_armed_on_demand`, **`ip2_arms_on_demand`**, **`ack_timeout_fires`**, **`heatack_exact`**, **`ack_counts`** | I5, **`ip1_low_never_arms`** | vivacidad (A-15); el umbral como número (R-14) |
+| H-C2 el DMS no dispara | `dms_armed_on_demand`, **`ip2_arms_on_demand`**, **`ack_timeout_fires`**, **`heatack_exact`**, **`ack_counts`**, **`dms_responds`** (b5) | I5, **`ip1_low_never_arms`** | vivacidad en tiempo real (A-15: la cota probada es en ticks); el umbral como número (R-14) |
 | H-D pérdida de protección | `commfault_ptn`, I6, **`watchdog_latches`**, **`heartbeat_resets_hb`**, **`hb_tick_exact`**, **`hb_frame`** | `no_spurious_stop` | fallas del propio PTN; alarma ciega y falla de comunicación fundidas (A-13) |
 | H-E fuera de ventana | I1, `heat_permissive`, `stop_overrides_heat`, `heat_frame`, **`plasma_is_input`**, **`plasma_frame`** | — | la independencia del PEWS real (A-5, A-17) |
 | H-F configuración | `pub_*`/`asm_*`, **`concretize_is_the_table`**, **`step_c_is_the_concrete_step`**, `fast_ptn`, C2, registro de configuración (A-23) | — | no hay ley de **buena formación** de configuraciones (p. ej. "ninguna fase con plasma mapea un disparador térmico a None"): trabajo futuro |
@@ -122,13 +122,15 @@ Lo distinguen las 29 leyes de demanda y de marco, la métrica de ajuste (cuánto
 de transición ejecuta); (2) capacidad sistemática de ninguna implementación (el C emitido no va a un PLC; el único
 vínculo es el testing diferencial, que es testing); (3) ausencia de paradas espurias (P10 es de marco; las alarmas son
 entradas libres); (4) nada bajo entradas inválidas (A-18); (5) nada de tiempo (A-15; los números reales están en A-15);
-(6) vivacidad; (7) corrección de las fuentes de alarma; (8) obediencia de la planta (A-19); (9) independencia entre
+(6) vivacidad no acotada (la respuesta **acotada en ticks** sí está probada desde el bloqueante 5: `watchdog_responds`,
+`dms_responds`; no que el pulso termine); (7) corrección de las fuentes de alarma; (8) obediencia de la planta (A-19); (9) independencia entre
 capas (A-17).
 
 Fraseo propuesto: "Para el modelo discreto abstracto definido en §X, bajo las hipótesis A-1…A-23 del Anexo B, probamos
 que toda secuencia finita de eventos modelados aplicada al estado inicial produce un estado que satisface I1–I6, para
-todo valor de los contadores abstractos. Es una propiedad de la especificación, no de una implementación. No establece
-temporización, vivacidad, comportamiento ante falla aleatoria de hardware, mensajes perdidos o malformados, cambio de
+todo valor de los contadores abstractos, y que el watchdog y el DMS armado responden dentro de `hb_max` y `ack_max`
+ticks respectivamente, para toda traza. Es una propiedad de la especificación, no de una implementación. No establece
+temporización, vivacidad no acotada, comportamiento ante falla aleatoria de hardware, mensajes perdidos o malformados, cambio de
 configuración durante el pulso, ni la corrección de las fuentes de alarma. En términos de IEC 61508 es evidencia que
 contribuye a un argumento de capacidad sistemática para la especificación y el diseño (61508-3, tablas A.1, A.2, A.9);
 no sostiene por sí sola un reclamo de SIL, y la función modelada es protección de máquina, no una función de seguridad
@@ -141,7 +143,7 @@ nuclear."
   **puntaje de mutación** (C6) sobre modelo y leyes; **test de adecuación del certificado** (un `cell_ok` que devuelve
   `True` incondicionalmente debe ser atrapado por la grilla en runtime); **re-verificación diversa** del certificado
   por fuerza bruta en Python escrito desde el documento, no desde el `.bend` (C5). Cross-check en nuXmv o TLA+/Apalache:
-  declarado como trabajo futuro (daría vivacidad "no reclamada" en vez de "no intentada").
+  declarado como trabajo futuro (confirmaría con otra herramienta las dos cotas de respuesta de `LAWS_JETPROT_LIVE.bend`).
 - `cell_ok` es un punto único de falla para las leyes reflejadas: por eso C5 y C6.
 
 ## 6. Comparación honesta con la práctica publicada
@@ -163,8 +165,9 @@ en 200 consultas guiadas, y la prueba lo cubría sin generar nada); (4) regresi�
 No reemplaza: las 71 pruebas, el comisionado, FAT/SAT, el análisis de tiempos, el análisis de fallas de hardware ni la
 evaluación independiente. Y se compara contra el *registro publicado*: CCFE seguramente hizo FMEA/HAZOP y tiene una
 autoridad de diseño que los papers no describen; el hueco que se cubre no es un hueco de su práctica. Un usuario de
-nuXmv o TLA+ construiría este modelo en un día y obtendría vivacidad gratis; la elección de herramienta se defiende por
-prueba en vez de *model checking* (universalidad genuina sobre los contadores), certificado y leyes en un artefacto, y
+nuXmv o TLA+ construiría este modelo en un día y obtendría vivacidad gratis (aquí las dos cotas de respuesta costaron
+una prueba por inducción de 842 líneas, pero valen para todo `hb_max`/`ack_max`, cosa que TLC no da); la elección de
+herramienta se defiende por prueba en vez de *model checking* (universalidad genuina sobre los contadores), certificado y leyes en un artefacto, y
 un modelo funcional total que sirve de oráculo ejecutable; y se neutraliza la objeción con el cross-check de §5.
 
 ## 7. Lo que un revisor hostil va a usar, y la respuesta

@@ -199,7 +199,8 @@ de la ronda 3 no la movieron de forma medible. La escalera de reflexión no camb
 
 ## 5. Límites de la evidencia
 
-Ver `v3/docs/fase3-seguridad.md` §4: sin tiempo real, sin vivacidad, sin fallas de hardware, sin mensajes
+Ver `v3/docs/fase3-seguridad.md` §4: sin tiempo real, sin vivacidad no acotada (desde el 2026-09-21 la respuesta
+acotada en ticks del watchdog y del DMS está probada sobre trazas: `LAWS_JETPROT_LIVE.bend`), sin fallas de hardware, sin mensajes
 perdidos ni malformados, sin modelo de planta detrás del acuse, sin independencia entre capas, sin matriz secundaria,
 sin umbral de corriente del DMV, sin bypass de entradas del PTN. **Un modelo que ignora todo evento también satisface el teorema de trazas.**
 Una versión anterior de este trabajo sostenía que el gate de vacuidad y las leyes de conformidad ya lo distinguían de
@@ -225,7 +226,7 @@ toolchain nativo.
 
 Estado comandado vs. reportado de las unidades (para verificar el acuse de R-11 como secuencia); leyes de buena
 formación de configuraciones y certificación de la regla en vez de la instancia; el umbral de corriente del DMV como
-veredicto; cross-check del certificado en nuXmv o TLA+/Apalache (vivacidad "no reclamada" en vez de "no intentada");
+veredicto; cross-check del certificado y de las dos cotas de respuesta en nuXmv o TLA+/Apalache;
 un segundo caso de estudio fuera de fusión (reactor de investigación o planta de detritiación) con el mismo método.
 
 ## Referencias

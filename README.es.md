@@ -46,7 +46,7 @@ umbral de corriente del DMV gatea el armado del DMS, y los dos chequeos de fiabi
   cableado al PTN (el camino que describen [S6]/[S7]), y la tabla publicada con los dos chequeos de fiabilidad
   deshabilitados.
 - **Certificado**: 43 columnas × 10 752 estados = **462 336 celdas por orden de urgencia**, los dos órdenes,
-  decididas por el verificador (1064 s para `PROOF_JETPROT.bend` en el checker JS); más un certificado de
+  decididas por el verificador (1098 s para `PROOF_JETPROT_LIVE.bend`, que importa la prueba por reflexión y los certificados, en el checker JS); más un certificado de
   10 752 estados para los corolarios y uno de 924 celdas para la capa concreta.
 - **Leyes**: **75** (`LAWS_JETPROT.bend`) + **137** de conformidad + 8 lemas de soundness + 2 teoremas de respuesta
   acotada, todas con `All terms check.` Seis cláusulas de invariante, las leyes de paso (qué no puede pasar), las de
@@ -72,7 +72,7 @@ umbral de corriente del DMV gatea el armado del DMS, y los dos chequeos de fiabi
   en la instancia que enmascara ese chequeo) es inobservable por construcción y el gate lo declara.
 - **Sensibilidad**: el orden de urgencia entre las dos respuestas blandas (la única elección libre del modelo) es un
   parámetro; toda ley se prueba para los dos órdenes.
-- **Reproducibilidad**: `py -3.14 v3/run.py quick` en unos 30 s, `all` en unos 37.3 min; `results.json`,
+- **Reproducibilidad**: `py -3.14 v3/run.py quick` en unos 30 s, `all --full` en unos 94 min (una hora es el censo de leyes por mutante de `--full`); `results.json`,
   `recheck.json` y `SHA256SUMS` son la corrida de referencia commiteada, con bloque de procedencia (versiones, el
   commit pinneado de Bend, la seed, el SHA-256 de cada input).
 
@@ -111,7 +111,8 @@ Versiones pinneadas: `env/SETUP.md`. Python: `py -3.14 -m pip install -r require
 
 ## 6. Límites (la lista corta; la larga está en `v3/docs/fase3-seguridad.md` §4)
 
-Sin tiempo, sin vivacidad, sin fallas de hardware, sin mensajes perdidos o malformados, sin modelo de planta detrás
+Sin tiempo, sin vivacidad no acotada (la respuesta acotada sí está probada: `hb_max` ticks sin heartbeat enclavan el
+PTN y un DMS armado dispara en `ack_max` ticks, en ticks abstractos, no en milisegundos), sin fallas de hardware, sin mensajes perdidos o malformados, sin modelo de planta detrás
 de los acuses, sin reclamo de independencia entre las capas software y cableada, sin matriz secundaria (no publicada),
 umbral de corriente del DMV fuera de alcance.
 

@@ -45,7 +45,7 @@ threshold gates the arming of the DMS, and the two reliability checks pass throu
   Table 1 of Stephen et al. 2011 as published, the same with mode lock routed to the PTN (the path [S6]/[S7]
   describe), and the published table with both reliability checks masked out.
 - **Certificate**: 43 columns × 10 752 states = **462 336 cells per urgency order**, both orders, decided by the
-  checker (1064 s for `PROOF_JETPROT.bend` on the JS checker); plus a 10 752-state certificate for the
+  checker (1098 s for `PROOF_JETPROT_LIVE.bend`, which imports the reflection proof and the certificates, on the JS checker); plus a 10 752-state certificate for the
   state corollaries and a 924-cell one for the concrete layer.
 - **Laws**: **75** (`LAWS_JETPROT.bend`) + **137** conformance laws + 8 soundness lemmas + 2 bounded-response
   theorems, all `All terms check.` Six invariant clauses, the step laws saying what cannot happen, the demand and
@@ -70,7 +70,7 @@ threshold gates the arming of the DMS, and the two reliability checks pass throu
   the instance that masks that check) is unobservable by construction and declared as such by the gate.
 - **Sensitivity**: the urgency order between the two soft responses -- the model's one free choice -- is a
   parameter; every law is proved for both orders.
-- **Reproducibility**: `py -3.14 v3/run.py quick` in about 30 s, `all` in about 37.3 min; `results.json`,
+- **Reproducibility**: `py -3.14 v3/run.py quick` in about 30 s, `all --full` in about 94 min (an hour of it is the per-law mutant census of `--full`); `results.json`,
   `recheck.json` and `SHA256SUMS` are the committed reference run with a provenance block (tool versions, the
   pinned Bend commit, the seed, the SHA-256 of every input).
 
@@ -108,7 +108,8 @@ the same. Pinned versions: `env/SETUP.md`. Python: `py -3.14 -m pip install -r r
 
 ## 6. Limits (the short list; the long one is in `v3/docs/fase3-seguridad.md` §4)
 
-No timing, no liveness, no hardware failure, no lost or malformed messages, no plant model behind the
+No timing, no unbounded liveness (bounded response is proven: `hb_max` ticks without a heartbeat latch the PTN and an
+armed DMS fires within `ack_max` ticks, in abstract ticks, not milliseconds), no hardware failure, no lost or malformed messages, no plant model behind the
 acknowledgements, no independence claim between the software and hardwired layers, no secondary stop matrix (not
 published), the DMV current threshold out of scope.
 
