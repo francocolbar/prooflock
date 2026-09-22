@@ -19,7 +19,7 @@ Real-Time Protection Sequencer de JET y su interfaz con el Pulse Termination Net
 nuclear; la evidencia es sobre una *especificación*, no sobre un sistema; aporta a un argumento de capacidad
 sistemática (IEC 61508-3, tablas A.1/A.2/A.9) y no sostiene ningún reclamo de SIL por sí sola; 21 de las 49 celdas de
 la matriz de configuración certificada son hipótesis nuestras porque la tabla publicada muestra 28. Todo esto está
-escrito antes que los resultados, en `v3/docs/fase3-seguridad.md`.
+escrito antes que los resultados, en `v3/docs/phase3-safety.md`.
 
 ## 2. Estructura
 
@@ -27,7 +27,7 @@ escrito antes que los resultados, en `v3/docs/fase3-seguridad.md`.
 |---|---|---|
 | `env/` | el runner de Bend pinneado a un commit (`env/bend.sh`, rechaza cualquier otro checkout), 13 chequeos de toolchain y hello-world | `bash env/check_env.sh` |
 | `v3/` | **el caso de estudio**: modelo, certificado, leyes, pruebas, tests negativos, puente, implementación de producción con bugs plantados, re-chequeo Python independiente, gate | `py -3.14 v3/run.py` |
-| `v3/docs/` | fuentes y citas (`fase3-fuente.md`), diseño y leyes (`fase3-diseno.md`), peligros / requisitos de seguridad / límites de la evidencia (`fase3-seguridad.md`), trazabilidad (`fase3-trazabilidad.md`), copias CC BY de los papers (`sources/`) | castellano |
+| `v3/docs/` | fuentes y citas (`phase3-sources.md`), diseño y leyes (`phase3-design.md`), peligros / requisitos de seguridad / límites de la evidencia (`phase3-safety.md`), trazabilidad (`phase3-traceability.md`), copias CC BY de los papers (`sources/`) | castellano |
 | `v2/num/` | base numérica probada: enteros canónicos con el anillo conmutativo completo (22 leyes), naturales grandes como listas de bits con sumador probado, enteros grandes | reutilizable |
 | `v2/heat/` | IR lineal probado + oráculo exacto para un stencil de calor 1D (primer ejercicio) | `py -3.14 v2/heat/run.py` |
 | `v2/seq/`, `v2/seq3/` | secuenciador de descarga de tokamak con 6 invariantes de protección probados para toda traza; `seq3` es el rediseño que abarató las pruebas (1593 → 323 líneas) | `py -3.14 v2/seq3/run.py` |
@@ -109,7 +109,7 @@ Versiones pinneadas: `env/SETUP.md`. Python: `py -3.14 -m pip install -r require
    implementación**: re-chequeo celda por celda, gates de vacuidad y de ajuste, el banco de mutantes, y testing
    diferencial contra una implementación escrita desde la prosa.
 
-## 6. Límites (la lista corta; la larga está en `v3/docs/fase3-seguridad.md` §4)
+## 6. Límites (la lista corta; la larga está en `v3/docs/phase3-safety.md` §4)
 
 Sin tiempo, sin vivacidad no acotada (la respuesta acotada sí está probada: `hb_max` ticks sin heartbeat enclavan el
 PTN y un DMS armado dispara en `ack_max` ticks, en ticks abstractos, no en milisegundos), sin fallas de hardware, sin mensajes perdidos o malformados, sin modelo de planta detrás
@@ -130,7 +130,7 @@ Las especificaciones, los modelos, las leyes y las pruebas fueron escritos por u
 dirigido y auditado por un autor humano; el verificador de pruebas (Bend 2) es el juez de toda afirmación bajo ley;
 las revisiones adversariales fueron pasadas automatizadas de otras instancias de la misma familia de modelos: **no son
 evaluación independiente en ningún sentido regulatorio, y no hubo evaluación humana independiente**. El humano decidió
-el alcance, las fuentes, las hipótesis y qué cuenta como cerrado. Los hallazgos de las cinco rondas adversariales están registrados en `v3/docs/fase3-diseno.md` §9, incluidos los
+el alcance, las fuentes, las hipótesis y qué cuenta como cerrado. Los hallazgos de las cinco rondas adversariales están registrados en `v3/docs/phase3-design.md` §9, incluidos los
 tres que cambiaron el propio conjunto de leyes (§9b) y las lecciones sobre el método (§9c).
 
 ## 8. Fuentes
@@ -138,7 +138,7 @@ tres que cambiaron el propio conjunto de leyes (§9b) y las lecciones sobre el m
 Stephen et al., ICALEPCS 2011, FRAAULT04 (CC BY 3.0) · Waterhouse et al., Fusion Eng. Des. 210 (2025) 114737 (CC BY 4.0) ·
 Edwards et al., Fusion Eng. Des. 146 (2019) 277 · Alves et al., ICALEPCS 2011, WEPMN014 (CC BY 3.0) · Reux et al.,
 Fusion Eng. Des. 88 (2013) 1101 · Stuart et al., Fusion Eng. Des. 168 (2021) 112412. Registros completos y licencias:
-`v3/docs/fase3-fuente.md` §2 y `v3/docs/sources/NOTICE`.
+`v3/docs/phase3-sources.md` §2 y `v3/docs/sources/NOTICE`.
 
 ## 9. Nombre
 

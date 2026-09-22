@@ -4,7 +4,7 @@
                                                         exact oracle (Bend, Nat)  ->  compared
 
 Usage:  py -3.14 bend-spike/heat/run.py            (from anywhere; needs bun + ~/.bend-src)
-Writes: kernel_heat.py (generated), results.json (numbers quoted in docs/fase1-hallazgos.md)
+Writes: kernel_heat.py (generated), results.json (numbers quoted in docs/phase1-findings.md)
 """
 import json
 import math

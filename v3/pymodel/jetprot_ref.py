@@ -1,4 +1,4 @@
-"""jetprot_ref.py - a Python re-execution of the model of docs/fase3-diseno.md §1 (rules 1-12,
+"""jetprot_ref.py - a Python re-execution of the model of docs/phase3-design.md §1 (rules 1-12,
 counter commands, the model invariant), written from the design document. This module is the
 MODEL only: the laws, the state corollaries and the conformance checks live in jetprot_laws.py
 and read spec_consts.py; this file must never import spec_consts (blocker 2). Used by recheck.py for:

@@ -1,6 +1,6 @@
 """jetprot_prod.py - the "production" implementation of the JET protection-chain logic, in
-plain Python, written from the natural-language specification (docs/fase3-fuente.md,
-docs/fase3-diseno.md §1) but NOT from jetprot.bend. It carries planted bugs (see BUGS) of the
+plain Python, written from the natural-language specification (docs/phase3-sources.md,
+docs/phase3-design.md §1) but NOT from jetprot.bend. It carries planted bugs (see BUGS) of the
 kind that survive code review:
 
   deescalation              : a soft stop request replaces the current response without

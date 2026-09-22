@@ -180,7 +180,7 @@ def demands_dms(e: S.Ev, bh: Bool, l: S.Level) -> Bool:
 
 # ---------------------------------------------------------------------------
 # The step laws as Bool properties of one cell (o, f, e, bt, bh) with f2 = step_fin(...)
-# (docs/fase3-diseno.md §2, P1..P21). Each is decided by computation in the certificate.
+# (docs/phase3-design.md §2, P1..P21). Each is decided by computation in the certificate.
 # ---------------------------------------------------------------------------
 
 # P1 latched

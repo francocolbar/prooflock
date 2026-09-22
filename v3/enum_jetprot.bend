@@ -3,7 +3,7 @@
 # statements with one small lemma per quantifier level (reflection).
 #
 # One cell = (order, control state, abstract event, verdicts). The next control state is
-# computed ONCE per cell and every property is evaluated on it (docs/fase3-diseno.md C1).
+# computed ONCE per cell and every property is evaluated on it (docs/phase3-design.md C1).
 # The counter verdicts (bt, bh) only reach the Tick arm of step_fin, so the certificate
 # enumerates them for Tick, and for the three events whose counter command is a
 # reset_if(...) on a guard of the state (Reset, CommFault{True, True}, Stop{LPtn, True}):
@@ -178,7 +178,7 @@ def check_fin(+o: S.Ord) -> Bool:
            all_jtt(o, S.Termination{})))))))
 
 # ---------------------------------------------------------------------------
-# The state corollaries (docs/fase3-diseno.md §2): under inv_fin, PTN and an armed/fired
+# The state corollaries (docs/phase3-design.md §2): under inv_fin, PTN and an armed/fired
 # DMS leave no unit powered, a stop leaves no unit delivering power (full or partial), and so
 # does the termination waveform. 10 752 control states, one level per field.
 # ---------------------------------------------------------------------------

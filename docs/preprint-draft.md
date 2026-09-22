@@ -1,235 +1,235 @@
-# Modelos de referencia verificados para lógica de protección de máquina: un caso de estudio sobre la cadena de protección de la pared de JET
+# Verified reference models for machine-protection logic: a case study on the JET wall-protection chain
 
-> **Nota (2026-09-21).** Los números de este borrador corresponden a la versión del 2026-09-19 (2 688 estados, 64 + 117
-> leyes, 61/62 mutantes). La revisión del bloqueante 4 (`docs/STATUS_2026-09-21.md`: dos vistas del tiempo, potencia
-> parcial, máscaras, umbral del DMV) cambió el modelo a 10 752 estados, 73 + 137 leyes, 8 lemas de soundness y 2 teoremas
-> de respuesta acotada; los números vigentes están en `README.md` §3 y en `v3/results.json`. Este borrador se reescribe
-> con ellos antes del preprint.
+> **Note (2026-09-21).** The numbers in this draft correspond to the version of 2026-09-19 (2 688 states, 64 + 117
+> laws, 61/62 mutants). The revision of blocker 4 (`docs/STATUS_2026-09-21.md`: two views of time, partial
+> power, masks, DMV threshold) changed the model to 10 752 states, 73 + 137 laws, 8 soundness lemmas and 2 bounded
+> response theorems; the current numbers are in `README.md` §3 and in `v3/results.json`. This draft will be rewritten
+> with them before the preprint.
 
 
-**Borrador de preprint, revisión 1 (2026-09-19).** Idioma de trabajo castellano; la versión para arXiv (cs.SE / cs.LO,
-con cross-list a physics.plasm-ph) se traduce al inglés al cierre. Los números de esta versión salen de
-`v3/results.json` y `v3/recheck.json`; las citas [S1]–[S7] son las de `v3/docs/fase3-fuente.md`.
+**Preprint draft, revision 1 (2026-09-19).** The working language was Spanish; the draft is now kept in English
+(translated 2026-09-22), and the arXiv version (cs.SE / cs.LO, with cross-list to physics.plasm-ph) is produced from it
+at closing. The numbers in this version come from `v3/results.json` and `v3/recheck.json`; the citations [S1]–[S7] are those of `v3/docs/phase3-sources.md`.
 
-## Resumen
+## Abstract
 
-Presentamos un método para escribir la lógica discreta de un sistema de protección de máquina como un modelo total y
-ejecutable cuyas propiedades se prueban con un verificador de pruebas para toda secuencia de eventos y para toda
-configuración, y para usar ese modelo como oráculo de referencia contra la implementación real. La idea técnica es
-partir el estado en un control finito y contadores gobernados por comandos, decidir toda propiedad del control por
-cómputo sobre el dominio completo —un certificado de 104 832 celdas por orden de urgencia que el verificador evalúa en
-segundos— y elevar el resultado a leyes universales por reflexión, de modo que el esfuerzo de prueba no crece con el
-tamaño del control. Lo aplicamos a una reconstrucción, desde publicaciones abiertas, del *Stop Selector* del Real-Time
-Protection Sequencer de JET, su interfaz con el Pulse Termination Network y el armado del sistema de mitigación de
-disrupciones: 2 688 estados de control, 24 variantes de evento, 64 leyes probadas —incluido el teorema de que ninguna
-traza sale del conjunto seguro, para cualquier matriz de configuración y para los dos órdenes de urgencia posibles—
-más 117 leyes de conformidad con la configuración publicada.
+We present a method for writing the discrete logic of a machine-protection system as a total, executable model
+whose properties are proved with a proof checker for every sequence of events and for every configuration, and for
+using that model as a reference oracle against the real implementation. The technical idea is to split the state
+into a finite control and counters governed by commands, to decide every property of the control by computation
+over the whole domain —a certificate of 104 832 cells per urgency order that the checker evaluates in seconds— and
+to lift the result to universal laws by reflection, so that the proof effort does not grow with the size of the
+control. We apply it to a reconstruction, from open publications, of the *Stop Selector* of the JET Real-Time
+Protection Sequencer, its interface with the Pulse Termination Network and the arming of the disruption mitigation
+system: 2 688 control states, 24 event variants, 64 proved laws —including the theorem that no trace leaves the safe
+set, for any configuration matrix and for both possible urgency orders— plus 117 laws of conformance with the
+published configuration.
 
-El resultado que consideramos más transferible no es el caso de estudio sino un hallazgo metodológico negativo. Un
-conjunto de leyes de seguridad —propiedades de la forma "nada malo pasa"— **lo satisface el modelo que no hace nada**,
-y ninguna cantidad de leyes ni de celdas certificadas revela eso. Una revisión adversarial construyó ese modelo
-degenerado contra nuestra primera versión y lo hizo pasar, junto con el gate de vacuidad que habíamos escrito
-justamente para detectarlo. La respuesta fueron 29 leyes de demanda y de marco, y dos medidas que sí ven la
-diferencia: el **ajuste** del conjunto de leyes (cuántos de los 2 688 estados siguientes admiten, en promedio: 15 antes,
-1,1 después) y un **banco de mutantes adversarial** escrito por revisores cuyo encargo era romperlo (21 de 37 defectos
-detectados antes, 61 de 62 después; el único sobreviviente es demostrablemente equivalente). Un puntaje de mutación
-contra un banco escrito junto con las leyes daba 17 de 17 desde el principio y no distinguía nada.
+The result we consider most transferable is not the case study but a negative methodological finding. A set of
+safety laws —properties of the form "nothing bad happens"— **is satisfied by the model that does nothing**, and no
+amount of laws or of certified cells reveals that. An adversarial review built that degenerate model against our
+first version and made it pass, together with the vacuity gate we had written precisely to detect it. The answer was
+29 demand and frame laws, and two measures that do see the difference: the **tightness** of the law set (how many of
+the 2 688 next states they admit, on average: 15 before, 1.1 after) and an **adversarial mutant bank** written by
+reviewers whose brief was to break it (21 of 37 defects detected before, 61 of 62 after; the only survivor is
+provably equivalent). A mutation score against a bank written alongside the laws gave 17 of 17 from the start and
+distinguished nothing.
 
-La evidencia se completa con diez tests negativos que el verificador rechaza con contraejemplo —incluido uno que
-afirma el certificado falso, para mostrar que se computa y no se saltea—, un re-chequeo independiente celda por celda
-del certificado desde otro lenguaje, y testing diferencial contra una implementación con seis defectos plantados. La
-función modelada es protección de inversión, no una función de seguridad nuclear; la evidencia es sobre una
-especificación, no sobre un sistema, y no sostiene ningún reclamo de SIL. Discutimos qué establece y qué no el teorema
-de trazas en términos de IEC 61508. Las especificaciones, los modelos y las pruebas fueron escritos por un sistema de
-IA dirigido y auditado por un autor humano, con el verificador como juez de toda afirmación bajo ley; las cinco rondas
-de revisión adversarial fueron también automatizadas y **no** constituyen evaluación independiente.
+The evidence is completed by ten negative tests that the checker rejects with a counterexample —including one that
+asserts the false certificate, to show that it is computed and not skipped—, an independent cell-by-cell re-check of
+the certificate from another language, and differential testing against an implementation with six planted defects.
+The modelled function is investment protection, not a nuclear safety function; the evidence is about a
+specification, not about a system, and supports no SIL claim. We discuss what the trace theorem does and does not
+establish in terms of IEC 61508. The specifications, the models and the proofs were written by an AI system directed
+and audited by a human author, with the checker as the judge of every claim under law; the five rounds of adversarial
+review were also automated and do **not** constitute independent assessment.
 
-## 1. Introducción
+## 1. Introduction
 
-*(Por escribir en la versión final; aquí el argumento.)* Los sistemas de protección de máquina de los grandes
-experimentos de fusión (JET, ASDEX Upgrade, KSTAR, ITER) combinan una capa cableada de secuencia fija con una capa
-programable cuya lógica de respuesta se configura por pulso. La evidencia publicada de su validación son pruebas de
-comportamiento por casos: [S3] describe 71 *pulse schedules* como pruebas del RTPS de JET, y [S6] documenta 5 + 4 + 7
-disrupciones perdidas en 2011–2012 por inhibiciones, ventanas mal configuradas y umbrales de corriente. La combinatoria
-de fases, disparadores, orden de llegada, fallas de comunicación, watchdog y contadores supera por órdenes de magnitud a
-cualquier conjunto de pruebas por casos, y la matriz cambia por pulso. Las plantas de fusión de potencia y la industria
-nuclear en general van a tener que presentar evidencia de la capacidad sistemática de este software a un regulador; la
-pregunta es qué forma puede tomar esa evidencia para que sea exhaustiva sobre la lógica, barata de rehacer por
-configuración, y honesta sobre lo que no cubre.
+*(To be written in the final version; here the argument.)* The machine-protection systems of the large fusion
+experiments (JET, ASDEX Upgrade, KSTAR, ITER) combine a hard-wired layer of fixed sequence with a programmable layer
+whose response logic is configured per pulse. The published evidence of their validation consists of case-based
+behavioural tests: [S3] describes 71 *pulse schedules* as tests of the JET RTPS, and [S6] documents 5 + 4 + 7
+disruptions missed in 2011–2012 due to inhibitions, misconfigured windows and current thresholds. The combinatorics of
+phases, triggers, arrival order, communication faults, watchdog and counters exceeds any case-based test set by orders
+of magnitude, and the matrix changes per pulse. Fusion power plants and the nuclear industry in general will have to
+present evidence of the systematic capability of this software to a regulator; the question is what form that
+evidence can take so that it is exhaustive over the logic, cheap to redo per configuration, and honest about what it
+does not cover.
 
-## 2. Método
+## 2. Method
 
-### 2.1 Control finito y comandos a contadores
+### 2.1 Finite control and commands to counters
 
-El estado es `St = Fin × ℕ × ℕ`, con `Fin` un producto de enumeraciones (fase, respuesta en curso, secuencia del DMS,
-condiciones de plasma, dos unidades de calentamiento) y dos contadores (ciclos sin heartbeat, ciclos esperando el
-acuse del DMS). Los contadores nunca entran al control: entran sus *veredictos* (`1 + n < límite`, dos booleanos) y el
-control responde con comandos `Keep | Reset | Inc`. Toda decisión es entonces finita.
+The state is `St = Fin × ℕ × ℕ`, with `Fin` a product of enumerations (phase, response in progress, DMS sequence,
+plasma conditions, two heating units) and two counters (cycles without heartbeat, cycles waiting for the DMS
+acknowledgement). The counters never enter the control: their *verdicts* do (`1 + n < limit`, two booleans) and the
+control answers with commands `Keep | Reset | Inc`. Every decision is therefore finite.
 
-### 2.2 Certificado por cómputo y reflexión
+### 2.2 Certificate by computation and reflection
 
-Para cada celda (orden de urgencia, estado de control, evento abstracto, veredictos) se computa el estado siguiente una
-vez y se evalúan sobre él la preservación del invariante, las "formas" de los comandos a los contadores y las 48 leyes
-de paso. La conjunción sobre el dominio —2 688 estados × 39 columnas = 104 832 celdas por orden— es una sola igualdad
-`check_fin(o) == True` que el verificador decide por normalización. Una escalera de lemas, uno por nivel de
-cuantificación, extrae de ese booleano la celda arbitraria; las proyecciones dan cada ley; un lema genérico de
-contadores da los invariantes de los contadores para todo valor; la inducción en la traza da el teorema. El costo de
-prueba es casi constante en el tamaño del control: agregar un evento o un estado agrega un brazo a un lema de nivel.
+For each cell (urgency order, control state, abstract event, verdicts) the next state is computed once and, on it,
+the preservation of the invariant, the "shapes" of the commands to the counters and the 48 step laws are evaluated.
+The conjunction over the domain —2 688 states × 39 columns = 104 832 cells per order— is a single equality
+`check_fin(o) == True` that the checker decides by normalisation. A ladder of lemmas, one per quantification level,
+extracts the arbitrary cell from that boolean; the projections give each law; a generic counter lemma gives the
+counter invariants for every value; induction on the trace gives the theorem. The proof cost is almost constant in the
+size of the control: adding an event or a state adds one arm to a level lemma.
 
-Dos detalles de implementación que no son detalles. **Primero**, los veredictos de los contadores se enumeran solo en
-las cinco columnas donde el verificador no puede descartarlos simbólicamente; que las otras diecinueve no los lean era
-una suposición verificada una vez a mano, y ahora es una ley probada. **Segundo**, la escalera no proyecta desde el
-certificado entero sino desde 56 rebanadas decididas por cómputo, porque el verificador compara formas normales
-completas: nombrar el certificado en un tipo cuesta evaluarlo de los dos lados de la comparación (§4).
+Two implementation details that are not details. **First**, the counter verdicts are enumerated only in the five
+columns where the checker cannot discard them symbolically; that the other nineteen do not read them was an assumption
+checked once by hand, and is now a proved law. **Second**, the ladder does not project from the whole certificate but
+from 56 slices decided by computation, because the checker compares complete normal forms: naming the certificate in
+a type costs evaluating it on both sides of the comparison (§4).
 
-### 2.3 Configuración como carga del evento
+### 2.3 Configuration as event payload
 
-La matriz fase × disparador → respuesta y la conexión del DMS no están dentro del paso: el alfabeto abstracto lleva la
-respuesta pedida y el bit de DMS en el evento, y una capa concreta mapea el alfabeto de la planta a través de una
-instancia de configuración. Las leyes valen entonces para toda configuración; la instancia publicada entra por 117
-leyes de conformidad —una por celda, separadas en publicadas (28, de las que 15 impresas y 13 leídas de marcas "ídem")
-y supuestas (21)—, más dos leyes sobre la capa concreta: que `concretize` es la configuración valor por valor, contra
-una transcripción literal de la matriz, y que `step_c` la usa con la instancia, el orden y la fase correctos.
+The phase × trigger → response matrix and the DMS connection are not inside the step: the abstract alphabet carries
+the requested response and the DMS bit in the event, and a concrete layer maps the plant alphabet through a
+configuration instance. The laws then hold for every configuration; the published instance enters through 117
+conformance laws —one per cell, separated into published (28, of which 15 printed and 13 read from "idem" marks)
+and assumed (21)—, plus two laws on the concrete layer: that `concretize` is the configuration value by value, against
+a literal transcription of the matrix, and that `step_c` uses it with the correct instance, order and phase.
 
-### 2.4 Lo que juzga el verificador y lo que juzga otra implementación
+### 2.4 What the checker judges and what another implementation judges
 
-Todo lo que está bajo ley lo decide el verificador. Lo que no puede estar bajo ley —que las leyes no sean vacuas, que
-el certificado se compute, que el modelo coincida con la prosa, que la implementación real coincida con el modelo— lo
-decide una segunda implementación en otro lenguaje: re-chequeo celda por celda de las 209 664 celdas del certificado,
-re-evaluación de cada ley sobre los estados siguientes que produce el modelo verificado, alcanzabilidad abstracta y
-concreta, conteo de celdas donde la hipótesis de cada ley vale, la métrica de ajuste, el banco de mutantes, y testing
-diferencial contra una implementación de producción con defectos plantados.
+Everything under law is decided by the checker. What cannot be under law —that the laws are not vacuous, that the
+certificate is computed, that the model matches the prose, that the real implementation matches the model— is
+decided by a second implementation in another language: cell-by-cell re-check of the 209 664 cells of the certificate,
+re-evaluation of every law over the next states produced by the verified model, abstract and concrete reachability,
+count of cells where the hypothesis of each law holds, the tightness metric, the mutant bank, and differential
+testing against a production implementation with planted defects.
 
-**Una advertencia sobre esa segunda implementación, porque nos equivocamos al describirla.** La nuestra se escribió
-después del modelo verificado y con él a la vista: es una **re-ejecución en otro lenguaje**, no una implementación
-N-versión independiente, y así hay que leer lo que su coincidencia demuestra (protege contra errores del evaluador,
-no contra un malentendido compartido de la especificación). Una auditoría lo detectó por evidencia textual —nuestro
-modelo "independiente" contenía una ley que el documento de diseño no menciona— y produjo, esa sí, una transcripción
-independiente desde el documento, que coincide en toda celda alcanzable.
+**A caveat about that second implementation, because we described it wrongly.** Ours was written after the verified
+model and with it in view: it is a **re-execution in another language**, not an independent N-version implementation,
+and that is how what its agreement demonstrates must be read (it protects against evaluator errors, not against a
+shared misunderstanding of the specification). An audit detected this from textual evidence —our "independent" model
+contained a law that the design document does not mention— and produced, that one indeed, an independent
+transcription from the document, which agrees on every reachable cell.
 
-## 3. Caso de estudio: la cadena de protección de la pared de JET
+## 3. Case study: the JET wall-protection chain
 
-### 3.1 Fuente y alcance
+### 3.1 Source and scope
 
-[S1] publica el *Stop Selector* del RTPS: siete fases, siete disparadores, tres respuestas (PTN, RTPS stop, JTT), la
-Tabla 1 (una configuración de ejemplo, "the primary stops table"), respuesta primaria/secundaria, protección local,
-alarmas ciegas y watchdog. [S2] agrega el enclavamiento de la salida del PTN, la secuencia del DMS (apagar calentamiento
-→ acuse o timeout → inyectar), la jerarquía de escalada y las ventanas de habilitación. [S6] agrega la regla "el DMV se
-puede conectar a cualquier parada enviada al PTN", la ventana y los umbrales del DMV, los tiempos (NBI 2 ms, RF 38 ms,
-50 ms en total, sin acuse de RF) y el registro de disrupciones perdidas. Se modela el Stop Selector con su interfaz al
-PTN y el armado del DMS; **no** el Stop Manager (las formas de onda de sobreescritura a los cinco actuadores), ni las
-capas de seguridad CISS/PSACS. Dieciséis requisitos textuales (R-0…R-15) y veintitrés hipótesis declaradas (A-1…A-23) con
-su dirección de conservadurismo están en el material suplementario.
+[S1] publishes the *Stop Selector* of the RTPS: seven phases, seven triggers, three responses (PTN, RTPS stop, JTT),
+Table 1 (an example configuration, "the primary stops table"), primary/secondary response, local protection, blind
+alarms and watchdog. [S2] adds the latching of the PTN output, the DMS sequence (switch off heating → acknowledgement
+or timeout → inject), the escalation hierarchy and the enable windows. [S6] adds the rule "the DMV can be connected to
+any stop sent to the PTN", the DMV window and thresholds, the timings (NBI 2 ms, RF 38 ms, 50 ms in total, no RF
+acknowledgement) and the record of missed disruptions. The Stop Selector is modelled with its interface to the PTN and
+the arming of the DMS; **not** the Stop Manager (the override waveforms to the five actuators), nor the CISS/PSACS
+safety layers. Sixteen textual requirements (R-0…R-15) and twenty-three declared hypotheses (A-1…A-23) with their
+direction of conservatism are in the supplementary material.
 
-### 3.2 Modelo y leyes
+### 3.2 Model and laws
 
-*(Detalle en `v3/docs/fase3-diseno.md` §2.)* El invariante tiene seis cláusulas: una unidad a potencia plena está en la
-ventana de habilitación, con condiciones de plasma y sin parada en curso; una unidad en rampa está bajo una parada
-blanda o en la terminación y nunca bajo PTN; un JTT en curso implica fase de terminación; el DMS solo se arma o dispara
-bajo PTN; la espera del acuse y los ciclos sin heartbeat están acotados. Veintiuna leyes de paso dicen qué no puede
-pasar —las paradas no se degradan, el paso que llega al PTN des-energiza, ninguna orden enciende nada con una parada en
-curso, el DMS se arma solo ante una demanda, bajo PTN el programa no avanza— y veintinueve leyes de demanda y de marco
-dicen qué tiene que pasar: una petición de parada se honra, una parada blanda rampa el calentamiento, el watchdog
-enclava independientemente de cómo esté cableado el DMS, un heartbeat siempre reinicia su contador, el fin de pulso se
-acepta cuando corresponde, y cada comando toca lo suyo y nada más. El teorema `traces_safe` cubre toda traza sobre el
-alfabeto abstracto —es decir, para cualquier configuración— y su corolario concreto, las dos instancias certificadas.
+*(Details in `v3/docs/phase3-design.md` §2.)* The invariant has six clauses: a unit at full power is in the enable
+window, with plasma conditions and no stop in progress; a unit in ramp-down is under a soft stop or in the termination
+and never under PTN; a JTT in progress implies termination phase; the DMS is only armed or fired under PTN; the wait
+for the acknowledgement and the cycles without heartbeat are bounded. Twenty-one step laws say what cannot happen
+—stops do not degrade, the step that reaches the PTN de-energises, no order switches anything on with a stop in
+progress, the DMS is armed only on a demand, under PTN the programme does not advance— and twenty-nine demand and
+frame laws say what has to happen: a stop request is honoured, a soft stop ramps the heating, the watchdog latches
+regardless of how the DMS is wired, a heartbeat always resets its counter, the end of pulse is accepted when
+appropriate, and each command touches its own and nothing else. The theorem `traces_safe` covers every trace over the
+abstract alphabet —that is, for any configuration— and its concrete corollary, the two certified instances.
 
-### 3.3 Resultados
+### 3.3 Results
 
-| Artefacto | Resultado |
+| Artefact | Result |
 |---|---|
-| Certificados (`finite_check`, `finite_check_alt`, `corollaries_check`) | 104 832 celdas por orden + 2 688 estados; 14–19 s y 0,3 s en el verificador |
-| Leyes por reflexión e inducción | 64 en `PROOF_JETPROT.bend` (1 034 líneas de código), 143 s |
-| Conformidad de la configuración | 117 leyes, `{==}` por celda, 0,3 s |
-| Tests negativos | 10/10 rechazados con contraejemplo; el gate exige que el verificador refute un `Bool` **y** nombre la ley |
-| Re-chequeo independiente | 209 664 celdas Bend = Python; 0 discrepancias; alcanzabilidad concreta 921 estados, todos en el invariante |
-| Vacuidad y **ajuste** | ninguna ley vacua; 374/400 celdas alcanzables con sucesor único (93,5 %), 1,1 admisibles de 2 688 |
-| Sensibilidad | 2 688 celdas difieren entre los dos órdenes de urgencia, 168 alcanzables; todas las leyes valen en ambos |
-| **Mutación adversarial** | **61/62**; el único sobreviviente difiere del modelo en 0 celdas (equivalente). El banco escrito junto con las leyes: 17/17, reportado como la medida débil |
-| Testing diferencial | 6 defectos × 2 instancias × 2 generadores: 14/16 configuraciones con defecto detectadas, 0 falsos positivos; el generador guiado los encuentra todos con trazas de 2–10 eventos, el aleatorio pierde varios en 3 000 |
-| Gate completo | `py -3.14 v3/run.py` → `all gates and checks ok: True`, ≈ 5–6 min |
+| Certificates (`finite_check`, `finite_check_alt`, `corollaries_check`) | 104 832 cells per order + 2 688 states; 14–19 s and 0.3 s in the checker |
+| Laws by reflection and induction | 64 in `PROOF_JETPROT.bend` (1 034 lines of code), 143 s |
+| Configuration conformance | 117 laws, `{==}` per cell, 0.3 s |
+| Negative tests | 10/10 rejected with counterexample; the gate requires that the checker refute a `Bool` **and** name the law |
+| Independent re-check | 209 664 cells Bend = Python; 0 mismatches; concrete reachability 921 states, all in the invariant |
+| Vacuity and **tightness** | no vacuous law; 374/400 reachable cells with a unique successor (93.5 %), 1.1 admissible out of 2 688 |
+| Sensitivity | 2 688 cells differ between the two urgency orders, 168 reachable; all laws hold in both |
+| **Adversarial mutation** | **61/62**; the only survivor differs from the model in 0 cells (equivalent). The bank written alongside the laws: 17/17, reported as the weak measure |
+| Differential testing | 6 defects × 2 instances × 2 generators: 14/16 defective configurations detected, 0 false positives; the guided generator finds them all with traces of 2–10 events, the random one misses several in 3 000 |
+| Full gate | `py -3.14 v3/run.py` → `all gates and checks ok: True`, ≈ 5–6 min |
 
-### 3.4 Lo que encontraron las revisiones
+### 3.4 What the reviews found
 
-Cinco rondas adversariales, tres sobre el diseño antes de escribir código y dos sobre el conjunto de leyes ya probado.
-Las primeras encontraron un campo de estado inalcanzable con su ley vacua, un invariante no inductivo por tres caminos,
-una ley de paso falsa en celdas inalcanzables (dos veces, porque es natural escribir "X(s′) implica Y(s′)" donde lo
-correcto es "no X(s) y X(s′) implica Y(s′)"), un subsistema restringido solo negativamente, el peligro principal de la
-fuente sin ninguna ley, y una infidelidad a la fuente: el JTT *rampa* el calentamiento, no lo corta.
+Five adversarial rounds, three on the design before writing code and two on the already-proved law set.
+The first ones found an unreachable state field with its vacuous law, an invariant that was not inductive along three
+paths, a false step law on unreachable cells (twice, because it is natural to write "X(s′) implies Y(s′)" where the
+correct form is "not X(s) and X(s′) implies Y(s′)"), a subsystem constrained only negatively, the main hazard of the
+source without any law, and an infidelity to the source: the JTT *ramps* the heating, it does not cut it.
 
-Las dos últimas son las que importan para el método, y ninguna es un error de transcripción.
+The last two are the ones that matter for the method, and neither is a transcription error.
 
-**El conjunto de leyes era todo negativo.** Una revisión construyó un modelo degenerado —ignorar toda parada no
-cableada al DMS, cortar en vez de rampar, no contar nunca el watchdog, no aceptar nunca el fin de pulso— y lo hizo
-pasar: las leyes **y** el gate de vacuidad que habíamos escrito para detectar exactamente eso. De 37 mutantes
-plausibles, 16 sobrevivían. La respuesta fueron 18 leyes de demanda y de marco.
+**The law set was entirely negative.** A review built a degenerate model —ignore every stop not wired to the DMS,
+cut instead of ramp, never count the watchdog, never accept the end of pulse— and made it pass: the laws **and** the
+vacuity gate we had written to detect exactly that. Of 37 plausible mutants, 16 survived. The answer was 18 demand
+and frame laws.
 
-**Las leyes de demanda dejaban ocho agujeros**, y una segunda pasada con 25 mutantes nuevos volvió a romperlas: 11
-sobrevivían. Los tres peores: nada exigía que un heartbeat reiniciara el contador del watchdog (una ley enmarcaba el
-control y el otro contador y se olvidaba de ese); el contador podía pasar de largo su límite sin que ninguna ley lo
-viera, porque el paso que lo habría expuesto enclava el PTN y vacía todas las hipótesis; y nada restringía la capa
-concreta, de modo que leer siempre la matriz de la primera instancia desactivaba en silencio la razón de existir de la
-segunda **sin cambiar el conjunto alcanzable**, con lo cual el teorema de trazas era ciego. Once leyes más.
+**The demand laws left eight holes**, and a second pass with 25 new mutants broke them again: 11 survived. The three
+worst: nothing required a heartbeat to reset the watchdog counter (one law framed the control and the other counter
+and forgot that one); the counter could run past its limit without any law seeing it, because the step that would
+have exposed it latches the PTN and empties every hypothesis; and nothing constrained the concrete layer, so that
+always reading the matrix of the first instance silently disabled the reason for the second one to exist **without
+changing the reachable set**, whereby the trace theorem was blind. Eleven more laws.
 
-También aparecieron dos leyes **auto-referenciales** —una escribía la guarda del fin de pulso llamando a la guarda del
-propio modelo, y por lo tanto la satisfacía cualquier guarda; otra comparaba la capa concreta contra una expectativa
-construida con la misma tabla— y una métrica de cobertura que era **cero por construcción**.
+Two **self-referential** laws also appeared —one wrote the end-of-pulse guard by calling the model's own guard, and
+was therefore satisfied by any guard; another compared the concrete layer against an expectation built with the same
+table— and a coverage metric that was **zero by construction**.
 
-## 4. Costos medidos
+## 4. Measured costs
 
-| | Fase 2 (`seq`) | Fase 2b (`seq3`) | Fase 3 (`v3`) |
+| | Phase 2 (`seq`) | Phase 2b (`seq3`) | Phase 3 (`v3`) |
 |---|---|---|---|
-| Modelo (líneas de código) | 323 | 425 | 1 116 |
-| Enumerador / certificados | 106 | 223 | 446 |
-| Leyes | 12 | 9 + 1 | 64 + 117 |
-| Pruebas (líneas de código) | 1 593 | 323 | 1 034 + 330 |
-| Celdas del certificado | 1 792 × 18 | 448 × 18 × 4 | 2 688 × 39 × 2 |
-| Tiempo de verificador por certificado | 5,5 s | 34 s | 14–19 s |
-| Iteraciones del probador | 2 + 4 + 2 | 5 | 6 (leyes de demanda) + 18 (ronda 3), ninguna de lógica |
-| Errores al escribir el modelo | — | — | 9, todos de sintaxis o de linealidad; 0 celdas falsas en la instanciación previa |
+| Model (lines of code) | 323 | 425 | 1 116 |
+| Enumerator / certificates | 106 | 223 | 446 |
+| Laws | 12 | 9 + 1 | 64 + 117 |
+| Proofs (lines of code) | 1 593 | 323 | 1 034 + 330 |
+| Certificate cells | 1 792 × 18 | 448 × 18 × 4 | 2 688 × 39 × 2 |
+| Checker time per certificate | 5.5 s | 34 s | 14–19 s |
+| Prover iterations | 2 + 4 + 2 | 5 | 6 (demand laws) + 18 (round 3), none of logic |
+| Errors while writing the model | — | — | 9, all of syntax or linearity; 0 false cells in the previous instantiation |
 
-Dos observaciones de costo que valen para quien repita el método. **Primera**: el patrón de la fase anterior no escala
-tal cual. Bend compara formas normales completas, sin atajo sintáctico, así que proyectar desde el certificado entero
-con argumentos simbólicos obliga al verificador a normalizarlo de los dos lados de cada comparación; medido, un solo
-paso delta a un término sintácticamente idéntico costaba 8,6 s, y la escalera literal de la fase anterior habría
-costado entre 15 y 30 minutos. Rebanar el certificado en 56 piezas decididas por cómputo lo baja a minutos y no
-debilita nada: las 56 rebanadas *son* el certificado, celda por celda. **Segunda**: agregar leyes al certificado cuesta
-tiempo de verificador, no líneas de prueba. Las 18 leyes de demanda llevaron la prueba de 83–113 s a 140–160 s; las 9
-de la ronda 3 no la movieron de forma medible. La escalera de reflexión no cambió en ninguna de las dos rondas.
+Two cost observations that hold for whoever repeats the method. **First**: the pattern of the previous phase does not
+scale as is. Bend compares complete normal forms, with no syntactic shortcut, so projecting from the whole certificate
+with symbolic arguments forces the checker to normalise it on both sides of each comparison; measured, a single delta
+step to a syntactically identical term cost 8.6 s, and the literal ladder of the previous phase would have cost
+between 15 and 30 minutes. Slicing the certificate into 56 pieces decided by computation brings it down to minutes and
+weakens nothing: the 56 slices *are* the certificate, cell by cell. **Second**: adding laws to the certificate costs
+checker time, not proof lines. The 18 demand laws took the proof from 83–113 s to 140–160 s; the 9 of round 3 did not
+move it measurably. The reflection ladder did not change in either of the two rounds.
 
-## 5. Límites de la evidencia
+## 5. Limits of the evidence
 
-Ver `v3/docs/fase3-seguridad.md` §4: sin tiempo real, sin vivacidad no acotada (desde el 2026-09-21 la respuesta
-acotada en ticks del watchdog y del DMS está probada sobre trazas: `LAWS_JETPROT_LIVE.bend`), sin fallas de hardware, sin mensajes
-perdidos ni malformados, sin modelo de planta detrás del acuse, sin independencia entre capas, sin matriz secundaria,
-sin umbral de corriente del DMV, sin bypass de entradas del PTN. **Un modelo que ignora todo evento también satisface el teorema de trazas.**
-Una versión anterior de este trabajo sostenía que el gate de vacuidad y las leyes de conformidad ya lo distinguían de
-semejante modelo; era falso, y es el hallazgo del §3.4. Lo que lo distingue son las 29 leyes de demanda y de marco, la
-métrica de ajuste y el banco de mutantes adversarial. Comparación con la práctica publicada ([S3]: 71 pruebas de comportamiento
-+ comisionado + experiencia operativa): las pruebas dan evidencia sobre el sistema real; el modelo da cobertura sobre la
-lógica, por configuración, en minutos. No reemplaza al comisionado, a FAT/SAT, al análisis de tiempos ni a la
-evaluación independiente.
+See `v3/docs/phase3-safety.md` §4: no real time, no unbounded liveness (since 2026-09-21 bounded response in
+watchdog and DMS ticks is proved over traces: `LAWS_JETPROT_LIVE.bend`), no hardware faults, no lost or malformed
+messages, no plant model behind the acknowledgement, no independence between layers, no secondary matrix, no DMV
+current threshold, no bypass of PTN inputs. **A model that ignores every event also satisfies the trace theorem.**
+An earlier version of this work claimed that the vacuity gate and the conformance laws already distinguished it from
+such a model; that was false, and it is the finding of §3.4. What distinguishes it are the 29 demand and frame laws,
+the tightness metric and the adversarial mutant bank. Comparison with published practice ([S3]: 71 behavioural tests
++ commissioning + operating experience): the tests give evidence about the real system; the model gives coverage over
+the logic, per configuration, in minutes. It does not replace commissioning, FAT/SAT, timing analysis or independent
+assessment.
 
-## 6. Autoría y cómo se hizo
+## 6. Authorship and how it was done
 
-Las especificaciones, los modelos, las leyes, las pruebas y las revisiones adversariales fueron producidas por un
-sistema de IA (Claude, Anthropic; instancias Opus 5 y Fable 5.1) dirigido por un autor humano que decidió el alcance,
-las fuentes, las hipótesis y qué cuenta como cerrado, y que auditó los resultados. El verificador de pruebas (Bend 2.0.6,
-backend JS) es el juez de toda afirmación bajo ley: la IA puede equivocarse al escribir, y se equivocó (véase §3.4); lo
-que el método garantiza es que ninguna equivocación en la capa bajo leyes pasa en silencio. Las revisiones
-automatizadas **no** constituyen evaluación independiente en sentido regulatorio y no hubo evaluación humana
-independiente; antes de la versión final se enviará la reconstrucción a los autores de [S1]/[S2] para una lectura de
-exactitud fáctica. Todo el material es reproducible desde el repositorio (Apache 2.0) en una máquina Windows sin
-toolchain nativo.
+The specifications, the models, the laws, the proofs and the adversarial reviews were produced by an AI system
+(Claude, Anthropic; Opus 5 and Fable 5.1 instances) directed by a human author who decided the scope, the sources,
+the hypotheses and what counts as closed, and who audited the results. The proof checker (Bend 2.0.6, JS backend)
+is the judge of every claim under law: the AI can make mistakes when writing, and it did (see §3.4); what the
+method guarantees is that no mistake in the layer under laws passes silently. The automated reviews do **not**
+constitute independent assessment in the regulatory sense and there was no independent human assessment; before
+the final version the reconstruction will be sent to the authors of [S1]/[S2] for a reading of factual accuracy.
+All the material is reproducible from the repository (Apache 2.0) on a Windows machine with no native
+toolchain.
 
-## 7. Trabajo futuro
+## 7. Future work
 
-Estado comandado vs. reportado de las unidades (para verificar el acuse de R-11 como secuencia); leyes de buena
-formación de configuraciones y certificación de la regla en vez de la instancia; el umbral de corriente del DMV como
-veredicto; cross-check del certificado y de las dos cotas de respuesta en nuXmv o TLA+/Apalache;
-un segundo caso de estudio fuera de fusión (reactor de investigación o planta de detritiación) con el mismo método.
+Commanded vs. reported state of the units (to verify the R-11 acknowledgement as a sequence); well-formedness laws
+for configurations and certification of the rule instead of the instance; the DMV current threshold as a verdict;
+cross-check of the certificate and of the two response bounds in nuXmv or TLA+/Apalache;
+a second case study outside fusion (research reactor or detritiation plant) with the same method.
 
-## Referencias
+## References
 
-[S1]–[S7] como en `v3/docs/fase3-fuente.md` §2; IEC 61508-3:2010; IEC 61513:2011; Alpern & Schneider, *Defining
-liveness* (1985); el repositorio de este trabajo.
+[S1]–[S7] as in `v3/docs/phase3-sources.md` §2; IEC 61508-3:2010; IEC 61513:2011; Alpern & Schneider, *Defining
+liveness* (1985); the repository of this work.

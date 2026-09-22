@@ -1,4 +1,4 @@
-"""recheck.py - the method gates that are decided OUTSIDE the Bend checker (docs/fase3-diseno.md §5):
+"""recheck.py - the method gates that are decided OUTSIDE the Bend checker (docs/phase3-design.md §5):
 
   C5  independent re-check of the certificate: every cell of the Bend model (bridge.mjs) is
       compared with the Python reference model (pymodel/jetprot_ref.py, written from the design

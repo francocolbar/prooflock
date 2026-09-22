@@ -1,4 +1,4 @@
-# LAWS_JETPROT.bend - the laws of the JET protection-chain model (docs/fase3-diseno.md §2).
+# LAWS_JETPROT.bend - the laws of the JET protection-chain model (docs/phase3-design.md §2).
 # Certificates by computation: finite_check (chosen order), finite_check_alt (the swapped
 # order, sensitivity C3 as a theorem), corollaries_check. Every step law is universal over
 # the order, the control state, the abstract event and BOTH verdicts, so it holds for every

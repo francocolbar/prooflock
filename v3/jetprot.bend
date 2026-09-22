@@ -1,7 +1,7 @@
 # jetprot.bend - a reference model of the JET wall-protection chain: the RTPS "Stop
 # Selector" (Stephen et al., ICALEPCS 2011), its interface to the Pulse Termination Network
 # (PTN) and the arming sequence of the Disruption Mitigation System (DMS). Design and
-# sources: docs/fase3-diseno.md, docs/fase3-fuente.md (requirements R-n, hypotheses A-n).
+# sources: docs/phase3-design.md, docs/phase3-sources.md (requirements R-n, hypotheses A-n).
 #
 # Pattern (v2/seq3): the state is a FINITE control `Fin` plus two counters driven by
 # commands; every decision is finite, so every property of `step_fin` is decided by the
@@ -422,7 +422,7 @@ def tack_of(s: St) -> Nat:
       tack
 
 # ---------------------------------------------------------------------------
-# Shared helpers (docs/fase3-diseno.md §1)
+# Shared helpers (docs/phase3-design.md §1)
 # ---------------------------------------------------------------------------
 
 def init_fin() -> Fin:
@@ -792,7 +792,7 @@ def run(trace: List<&2, Ev>, s: St) -> St:
   run_o(Ord1{}, trace, s)
 
 # ---------------------------------------------------------------------------
-# The concrete layer: configuration instances (docs/fase3-fuente.md R-5, A-4, A-10, A-21)
+# The concrete layer: configuration instances (docs/phase3-sources.md R-5, A-4, A-10, A-21)
 # ---------------------------------------------------------------------------
 
 # Table 1 of [S1]: 28 published cells (R-5) ...
@@ -993,7 +993,7 @@ def run_c(+i: Inst, trace: List<&2, CEv>, s: St) -> St:
       run_c(i, t, step_c(i, s, c))
 
 # ---------------------------------------------------------------------------
-# Invariants (docs/fase3-diseno.md §2): four on the control, two on the counters
+# Invariants (docs/phase3-design.md §2): four on the control, two on the counters
 # ---------------------------------------------------------------------------
 
 # I1: a unit delivering power (full or partial) is inside the window (waveform phase), with

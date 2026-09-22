@@ -1,5 +1,5 @@
 """spec_consts.py - what the SPECIFICATION fixes, transcribed from the requirements layer
-(v3/docs/fase3-fuente.md, R-n / A-n) and NOT from the model.
+(v3/docs/phase3-sources.md, R-n / A-n) and NOT from the model.
 
 Imported by the oracle only: jetprot_laws.py (the law set, the invariants, the C1/C3/V1
 conformance checks) and recheck.py. NEVER imported by jetprot_ref.py: the model keeps its own

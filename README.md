@@ -19,7 +19,7 @@ Network and the Disruption Mitigation System.
 function; the evidence is about a *specification*, not about a system; it contributes to a systematic-capability
 argument (IEC 61508-3 tables A.1/A.2/A.9) and supports no SIL claim by itself; 21 of the 49 cells of the certified
 configuration matrix are our hypotheses because the published table shows 28. All of this is written down before the
-results, in `v3/docs/fase3-seguridad.md`.
+results, in `v3/docs/phase3-safety.md`.
 
 ## 2. Layout
 
@@ -27,11 +27,11 @@ results, in `v3/docs/fase3-seguridad.md`.
 |---|---|---|
 | `env/` | the Bend runner pinned to one commit (`env/bend.sh`, refuses any other checkout), 13 toolchain and hello-world checks | `bash env/check_env.sh` |
 | `v3/` | **the case study**: model, certificate, laws, proofs, negative tests, bridge, production implementation with planted bugs, independent Python re-check, gate | `py -3.14 v3/run.py` |
-| `v3/docs/` | sources and quotations (`fase3-fuente.md`), design and laws (`fase3-diseno.md`), hazards / safety requirements / limits of evidence (`fase3-seguridad.md`), traceability (`fase3-trazabilidad.md`), CC BY copies of the source papers (`sources/`) | Spanish |
+| `v3/docs/` | sources and quotations (`phase3-sources.md`), design and laws (`phase3-design.md`), hazards / safety requirements / limits of evidence (`phase3-safety.md`), traceability (`phase3-traceability.md`), CC BY copies of the source papers (`sources/`) | Spanish |
 | `v2/num/` | proven numeric base: canonical integers with the full commutative ring (22 laws), big naturals as bit lists with a proven adder, big integers | reusable |
 | `v2/heat/` | proven linear IR + exact oracle for a 1-D heat stencil (the first exercise) | `py -3.14 v2/heat/run.py` |
 | `v2/seq/`, `v2/seq3/` | a tokamak discharge sequencer with 6 machine-protection invariants proved for every trace; `seq3` is the redesign that made the proofs cheap (1593 → 323 lines) | `py -3.14 v2/seq3/run.py` |
-| `docs/`, `heat/` | the first (historical) round of the spike, its closing report (`docs/spike-2026-09-18.md`, Spanish) and the preprint draft (`docs/preprint-draft.md`) | history |
+| `docs/`, `heat/` | the first (historical) round of the spike, its closing report (`docs/spike-2026-09-18.md`) and the preprint draft (`docs/preprint-draft.md`) | history |
 
 ## 3. The case study (v3) in numbers
 
@@ -106,7 +106,7 @@ the same. Pinned versions: `env/SETUP.md`. Python: `py -3.14 -m pip install -r r
    cell-by-cell re-check, vacuity and tightness gates, the mutation bank, and differential testing against an
    implementation written from the prose.
 
-## 6. Limits (the short list; the long one is in `v3/docs/fase3-seguridad.md` §4)
+## 6. Limits (the short list; the long one is in `v3/docs/phase3-safety.md` §4)
 
 No timing, no unbounded liveness (bounded response is proven: `hb_max` ticks without a heartbeat latch the PTN and an
 armed DMS fires within `ack_max` ticks, in abstract ticks, not milliseconds), no hardware failure, no lost or malformed messages, no plant model behind the
@@ -127,14 +127,14 @@ The specifications, the models, the laws and the proofs were written by an AI sy
 audited by a human author; the proof checker (Bend 2) is the judge of every claim under law; the adversarial reviews
 were automated passes by other instances of the same model family — **they are not independent assessment in any
 regulatory sense, and no human independent assessment has been performed**. The human decided the scope, the sources,
-the hypotheses and what counts as closed. The findings of the five adversarial rounds are recorded in `v3/docs/fase3-diseno.md` §9, including the three that changed the law set itself (§9b) and the lessons about the method (§9c).
+the hypotheses and what counts as closed. The findings of the five adversarial rounds are recorded in `v3/docs/phase3-design.md` §9, including the three that changed the law set itself (§9b) and the lessons about the method (§9c).
 
 ## 8. Sources
 
 Stephen et al., ICALEPCS 2011, FRAAULT04 (CC BY 3.0) · Waterhouse et al., Fusion Eng. Des. 210 (2025) 114737 (CC BY 4.0) ·
 Edwards et al., Fusion Eng. Des. 146 (2019) 277 · Alves et al., ICALEPCS 2011, WEPMN014 (CC BY 3.0) · Reux et al.,
 Fusion Eng. Des. 88 (2013) 1101 · Stuart et al., Fusion Eng. Des. 168 (2021) 112412. Full records and licences:
-`v3/docs/fase3-fuente.md` §2 and `v3/docs/sources/NOTICE`.
+`v3/docs/phase3-sources.md` §2 and `v3/docs/sources/NOTICE`.
 
 ## 9. Name
 
