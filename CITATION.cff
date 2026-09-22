@@ -15,7 +15,7 @@ authors:
   - family-names: "Colombo Barceló"
     given-names: "Franco"
 license: Apache-2.0
-repository-code: "https://github.com/PLACEHOLDER/prooflock"
+repository-code: "https://github.com/francocolbar/prooflock"
 version: "0.4.0"
 date-released: "2026-09-22"
 keywords:
