@@ -1,10 +1,12 @@
 // bridge.mjs - the Bend model of the JET protection chain as a JSON service, for the
-// differential testing (run.py) and the independent re-check (recheck.py).
+// differential testing (run.py) and the Python re-check (recheck.py, a re-execution in another language).
 //   node --import file:///C:/Users/<you>/.bend-src/bend2/main.ts bridge.mjs
 // One request per line on stdin, one JSON answer per line on stdout.
 // Revision 2026-09-21 (blocker 4): eight-field control state (prog, jtt, level, dms, plasma,
 // ip, nb, rf), the events Ip{ok} / CommFault{dms, en} / XIp{ok} / XAlarm{Blind}, three
 // configuration instances, and `concretize` taking the whole control state.
+// Revision 4 (2026-09-22): the fourth instance (Inst4, illustrative secondary table); concretize
+// reads the level in force (which table an alarm reads).
 import Seq from "./jetprot.bend";
 import readline from "node:readline";
 
@@ -19,7 +21,7 @@ const flat = (s) => ({
 const fin = (x) => C("Fin", { prog: C(x.prog), jtt: x.jtt, level: C(x.level), dms: C(x.dms), plasma: x.plasma, ip: x.ip, nb: C(x.nb), rf: C(x.rf) });
 const finFlat = (f) => ({ prog: tag(f.prog), jtt: f.jtt, level: tag(f.level), dms: tag(f.dms), plasma: f.plasma, ip: f.ip, nb: tag(f.nb), rf: tag(f.rf) });
 const nest = (x) => C("St", { fin: fin(x), hb: BigInt(x.hb), tack: BigInt(x.tack) });
-const inst = (i) => C(i === 3 ? "Inst3" : i === 2 ? "Inst2" : "Inst1");
+const inst = (i) => C(i === 4 ? "Inst4" : i === 3 ? "Inst3" : i === 2 ? "Inst2" : "Inst1");
 const ord = (o) => C(o === 2 ? "Ord2" : "Ord1");
 
 // --- events from flat JSON: concrete {$:"XAlarm", t:"Dhs"} / abstract {$:"Stop", req:"LPtn", dms:true} ---

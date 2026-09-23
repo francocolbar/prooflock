@@ -1,102 +1,115 @@
 # Phase 3 — Traceability: hazard → function → requirement → hypothesis → law → proof → negative → differential → limit
 
-Date: 2026-09-19 (revision 2, with the law set closed). This is the table a functional safety assessor
+Date: 2026-09-19 (revision 2, with the law set closed); updated 2026-09-22 for revision 4 of the hypothesis register (A-1…A-35, the named PTN and primary-stop laws, the secondary stop response) and regenerated §4 from the gate of that day; updated 2026-09-23: §4 regenerated from the reference run of that day (Bend 2.0.25, parallel gate, equivalence of surviving mutants computed by the gate), the hypothesis dependencies of §3 completed (A-8, A-9, A-11, A-12) and the basis of `p1a_ptn_latched` given as R-0 plus [N1]; A-9 added to SR-5 in §1 (for `dms_no_heat`); §4 then regenerated again from the run of 09:26–09:46, whose C6 `equivalence` also compares `concretize`, and its times once more from the gate re-run after that day's closing code fixes (11:12–11:34), then from the re-runs of 12:01–12:22 and 12:52–13:13 (every other figure of §4 unchanged). This is the table a functional safety assessor
 asks for. Sources: `phase3-safety.md` (hazards H-*, requirements SR-*), `phase3-sources.md` (quotes R-*, hypotheses A-*),
-`phase3-design.md` (laws). Artefacts: `LAWS_JETPROT.bend` (75 laws since 2026-09-21; there were 64), `LAWS_JETPROT_CONF.bend` (137; there were 117),
+`phase3-design.md` (laws). Artefacts: `LAWS_JETPROT.bend` (81 laws since 2026-09-22; 75 on 2026-09-21, 64 before), `LAWS_JETPROT_CONF.bend` (143; 137 and 117 before),
 `LAWS_JETPROT_LIVE.bend` (2 bounded response theorems, b5),
-`PROOF_JETPROT*.bend`, `tests/jetprot_bug1..10*.bend`, `prod/jetprot_prod.py` (6 planted defects),
-`pymodel/mutants.py` (adversarial bank of 62), `recheck.py` (C2, C3, C5, C6), `run.py` (single gate).
+`LAWS_JETPROT_SOUND.bend` (8), `PROOF_JETPROT*.bend`, `tests/jetprot_bug1..12*.bend`, `prod/jetprot_prod.py` (9 planted defects),
+`pymodel/mutants.py` (adversarial bank of 76), `recheck.py` (C2, C3, C5, C6), `run.py` (single gate), `compare_runs.py` (comparison of two runs).
 
 **Naming convention.** `I1`…`I6` are clauses of the invariant `inv_fin`/`inv_all`, not law identifiers: they are
 proved by the preservation laws `pres_fin`, `pres_i5`, `pres_i6` and by the theorem `traces_safe`. Everything else in
-the "Law" column is the literal name of a `law` in one of the two files.
+the "Law" column is the name of a `law` in one of the `LAWS_JETPROT*.bend` files; the demand and frame laws D1–D18 and
+E2–E11 are written without their `dN_`/`eN_` prefix (`stop_honoured` is the law `d1_stop_honoured`).
 
 ## 1. Safety requirement → law → proof → negative → differential
 
 | SR | Requirement (shall / shall not) | Hazard | Derives from | Hypothesis | Law | Proof | Negative | Planted bug |
 |---|---|---|---|---|---|---|---|---|
 | SR-1 | When a PTN stop arrives by any path, every unit **shall** leave power in the same cycle | H-C, H-A1 | R-0, R-11 | A-9, A-19 | `ptn_deenergizes`; corollary `ptn_no_heat`; clause I1 | reflection over `finite_check` / `_alt`; `corollaries_check` | bug3, bug5 | `commfault_leaves_heating` |
-| SR-2 | A stop **shall not** be replaced by one of lower authority during the pulse | H-G, H-J | R-0, R-7 | A-1, A-2 | `latched`; **`stop_honoured`** (two-sided); `reset_accepted`, `reset_refused` | reflection | bug1, **bug9** | `deescalation` |
+| SR-2 | A stop **shall not** be replaced by one of lower authority during the pulse | H-G, H-J | R-0, R-7, [N1] PDF pp.13–14 | A-1, A-2, A-14 | `latched`; **`stop_honoured`** (two-sided; its demand half is SR-19); `reset_accepted`, `reset_refused`; named apart (revision 4): `p1a_ptn_latched` (R-0; [N1] PDF p.14), `p1b_stop_never_cleared` (R-0 for the PTN; for soft stops our reading, A-14), `piw_after_ptn_is_noop` (the "invalid task" of [N1] PDF p.13, formalised by us as a no-op, A-14) | reflection | bug1, bug11 | `deescalation` |
 | SR-3 | On an RTPS or JTT response, every unit **shall** leave full power in the same cycle and **shall not** return | H-A1 (heating) | R-3, R-4 | A-9 | `stop_reduces_power`; **`soft_stop_ramps`**; `ramping_never_returns`; clause I2 | reflection | bug2, bug7, **bug10** | `rtps_keeps_full_power` |
-| SR-4 | No unit **shall** energize outside the window, without plasma, or with a stop in progress; and **shall not** change state without a command, a plasma loss, the programme, the end of pulse or a stop that changes the response | H-E, H-L | R-12 | A-5, A-8 | clause I1; `heat_permissive`; `stop_overrides_heat`; `heat_frame`; **`heaton_is_local`**; **`f4_units_frame`** (b4) | preservation; reflection | — | — |
-| SR-5 | The DMS **shall not** arm or fire except with the PTN active | H-C | R-11, [S6] | A-11 | clause I4; `dms_frame`; corollary `dms_no_heat`; **`dms_fire_frame`** | preservation; reflection | bug4 | — |
+| SR-4 | No unit **shall** energize outside the window, without plasma, or with a stop in progress; and **shall not** change state without a command, a plasma loss, the programme, the end of pulse or a stop that changes the response | H-E, H-L | R-12 | A-5, A-8, A-9 | clause I1; `heat_permissive`; `stop_overrides_heat`; `heat_frame`; **`heaton_is_local`**; **`f4_units_frame`** (b4) | preservation; reflection | — | — |
+| SR-5 | The DMS **shall not** arm or fire except with the PTN active | H-C | R-11, [S6] | A-9 (the heating stays off after the injection, `dms_no_heat`), A-11 | clause I4; `dms_frame`; corollary `dms_no_heat`; **`dms_fire_frame`** | preservation; reflection | bug4 | — |
 | SR-6 | A stop marked for DMS that reaches the PTN **shall** arm it; the wait **shall** be bounded; a repeated alarm **shall not** restart it | H-C2 | R-11 | A-10, A-11 | `dms_armed_on_demand`; clause I5; `tack_frame`; `dms_monotone`; **`ack_timeout_fires`**, **`ack_counts`**, **`heatack_exact`**, **`tack_inc_frame`**, **`tack_reset_frame`**; **`dms_responds`** (b5: armed ⇒ fired in ≤ `ack_max` ticks without `Reset`) | reflection; `cnt_go`; induction over the trace (`PROOF_JETPROT_LIVE_CORE`) | bug6 | `repeated_alarm_restarts_ack` |
 | SR-7 | `hb_max` cycles without heartbeat **shall** produce PTN | H-D | R-13 | A-12 | clause I6; **`watchdog_latches`**, **`hb_counts`**, **`hb_tick_exact`**, **`heartbeat_resets_hb`**, **`hb_frame`**; **`watchdog_responds`** (b5: `hb_max` ticks without `Heartbeat` or `Reset` ⇒ PTN, from any state of the invariant) | `cnt_go`; concrete reachability (C5); induction over the trace (`PROOF_JETPROT_LIVE_CORE`) | — | `watchdog_off_by_one` |
-| SR-8 | A communication fault **shall** produce PTN from any state | H-D | R-13 | A-13 | `commfault_ptn` | reflection | bug3 | `commfault_leaves_heating` |
-| SR-9 | A local alarm **shall** take its unit from full power to **partial** power (one PINI out, R-9) and nothing else; the reduction **shall** last the pulse (a reduced unit **shall not** return to full power) | H-A2 | R-8, R-9 | A-6, A-7 | `local_is_local` (b4); **`f2a_local_reduces`**, **`f2d_reduced_never_returns`** | reflection | — | `plasma_ok_restores_reduced` |
-| SR-16 | A concrete alarm **shall** read Table 1 in the Level-1 programme phase; a JTT **shall** switch the waveform and **shall not** move the programme phase | H-A1, H-F | R-1, R-4, [S2] §3.4 | A-24 | **`f1a_table_reads_prog`**, **`f1b_stop_keeps_prog`**, **`f1c_wave_ahead`**, **`f1d_wave_frame`**, **`f1e_jtt_exact`**, `stop_phase_exact` (b4), `phase_frame` (b4) | by cases (F1a, F1c); reflection | — | `jtt_moves_program_phase` |
-| SR-17 | A communication fault **shall** produce PTN when the instance enables the check and **shall not** do anything when it disables it; a blind alarm **shall** go through the table | H-D, H-H | R-13, [S1] p.1296 | A-13, A-21, A-25 | `commfault_ptn` (b4), **`f3b_commfault_masked_is_noop`**, `mask_inst1/2_checks_on`, `mask_inst3_checks_off`, `asm_*_Blind`, `blind_masked_no_response` | reflection; `{==}` | — | third instance in `prod/` |
-| SR-18 | The DMS **shall not** arm with the plasma current below the DMV threshold, and **shall** arm on a demand above it | H-C2 | R-14, [S6] | (A-22 withdrawn) | **`ip1_low_never_arms`**, **`ip2_arms_on_demand`**, **`ip3_ip_is_input`**, **`ip4_ip_frame`**, `dms_armed_on_demand` (b4), `dms_frame` (b4) | reflection; P16 | — | `arms_below_threshold` |
+| SR-8 | A communication fault **shall** produce PTN from any state when the instance enables the check, and **shall not** do anything when it disables it; a blind alarm **shall** go through the table (revision 2026-09-21; this row absorbs the former SR-17, as in `phase3-safety.md`) | H-D, H-H | R-13, [S1] p.1296 | A-13, A-21, A-25 | `commfault_ptn` (b4), **`f3b_commfault_masked_is_noop`**, `mask_inst1/2_checks_on`, `mask_inst3_checks_off`, `asm_*_Blind`, `blind_masked_no_response` | reflection; `{==}` | bug3 | `commfault_leaves_heating`; third instance in `prod/` |
+| SR-9 | A local alarm **shall** take its unit from full power to **partial** power (one PINI out, R-9) and nothing else; the reduction **shall** last the pulse (a reduced unit **shall not** return to full power) | H-A2 | R-8, R-9 | A-6, A-7, A-33, A-34 | `local_is_local` (b4); **`f2a_local_reduces`**, **`f2d_reduced_never_returns`** (one step only: through `Off` the reduction is forgotten, A-34, so "last the pulse" is not established) | reflection | — | `plasma_ok_restores_reduced` |
+| SR-16 | A concrete alarm **shall** read Table 1 in the Level-1 programme phase (under a stop in force, the instance's secondary table, revision 4); a JTT **shall** switch the waveform and **shall not** move the programme phase | H-A1, H-F | R-1, R-4, R-6, [S2] §3.4 | A-3, A-24, A-30 | **`f1a_table_reads_prog`**, **`f1b_stop_keeps_prog`**, **`f1c_wave_ahead`**, **`f1d_wave_frame`**, **`f1e_jtt_exact`**, `stop_phase_exact` (b4), `phase_frame` (b4) | by cases (F1a, F1c); reflection | — | `jtt_moves_program_phase` |
+| SR-18 | The DMS **shall not** arm without the DMV arming verdict (current OR stored energy above threshold), and **shall** arm on a demand with it | H-C2 | R-14, [S6], [S7] | A-22 (redefined in revision 4) | **`ip1_low_never_arms`**, **`ip2_arms_on_demand`**, **`ip3_ip_is_input`**, **`ip4_ip_frame`**, `dms_armed_on_demand` (b4), `dms_frame` (b4) | reflection; P16 | — | `arms_below_threshold` |
+| SR-19 | A stop request **shall** be honoured: the response becomes the most urgent of the current one and the requested one (numbered SR-16 in `phase3-safety.md` until revision 4) | H-A1, H-G | R-5, R-7, [N1] PDF p.13 | A-2; A-3, A-35 (instance 4) | **`stop_honoured`**; the parts about the PTN and the primary stop, named apart (revision 4): `d1a_ptn_honoured` (a PTN request from any state, a soft stop in progress included; its same-step switch-off is A-9), `d1b_primary_honoured` (the primary stop); concrete, instance 4 only: `inst4_second_alarm_ptn` | reflection; by cases through `d1a_ptn_honoured` (`inst4_second_alarm_ptn`) | **bug9**, bug12 | `secondary_ignored_during_stop` |
 | SR-10 | The response **shall not** change except by alarm, communication fault, expired watchdog or end of pulse | H-H | R-13 | A-12, A-13 | `no_spurious_stop` | reflection | — | — |
-| SR-11 | The certified configuration **shall** match the published one, with the assumed cells identified, and the concrete layer **shall** use it as is | H-F | R-5 | A-4 | `pub_*` (28), `asm_*` (21), `inst2_*` (49), `dms_*` (16), `fast_ptn`, **`concretize_is_the_table`**, **`step_c_is_the_concrete_step`** | `PROOF_JETPROT_CONF` (`{==}` per cell) | — | third transcription in `prod/` |
+| SR-11 | The certified configuration **shall** match the published one, with the assumed cells identified, and the concrete layer **shall** use it as is | H-F | R-5, R-6 | A-4, A-16, A-35 | `pub_*` (28), `asm_*` (21 + 7 `_Blind`), `inst2_*` (56, of which 42 `inst2_same_*`), `dms_*` (17), `inst3_uses_table1`, `fast_ptn`, **`concretize_is_the_table`**, **`step_c_is_the_concrete_step`**; revision 4: `inst4_table`, `inst4_mask`, `sec_legacy`, `sec_inst4`, `sec_monotone`, `sec_primary_ptn`, `inst4_second_alarm_ptn` | `PROOF_JETPROT_CONF` (`{==}` per cell); `PROOF_JETPROT` (by cases) | bug12 | third transcription in `prod/`; `secondary_ignored_during_stop` |
 | SR-12 | Under PTN the programme **shall not** advance; **shall not** rewind; and **shall** advance exactly one phase | H-J | R-0 | A-5 | `advance_frozen`; `phase_monotone`; **`advance_is_one_step`**, **`phase_frame`**, **`stop_phase_exact`**, **`advance_units`** | reflection | — | — |
 | SR-13 | The end of pulse **shall** release the interlocks only with the pulse finished and no mitigation armed, and **shall** be accepted when those conditions hold | H-J | A-14, [S1] supervisor | A-14 | `reset_guarded`; `reset_refused_mid_pulse`; **`reset_accepted_when_safe`** (guard written literally) | reflection; rewriting | — | — |
 | SR-14 | For every sequence of events, the state **shall** satisfy I1–I6 | all | all | all | `traces_safe`, `traces_safe_concrete`; `inv_init`; `pres_fin`, `pres_i5`, `pres_i6` | induction on the trace | — | the two oracles of the differential |
 | SR-15 | The plasma conditions **shall** reflect their input and **shall not** change by any other path | H-E | R-12 | A-8 | **`plasma_is_input`**, **`plasma_frame`** | reflection | — | — |
 
 In **bold**, the laws that were added after two adversarial reviews showed that the previous set
-was purely negative (`phase3-design.md` §9b, H28–H29).
+was purely negative (`phase3-design.md` §9b, H28–H29). The SR numbers are those of `phase3-safety.md` §2: SR-17 is not
+used (its content, the masked communication fault and the blind alarm, is part of SR-8).
 
-**Out of scope, declared**: the secondary response (R-6 → A-16); the acknowledgement as a sequence, not only as a bound
+**Out of scope, declared**: the content of JET's secondary table (R-6 → A-16; the mechanism is modelled since revision 4, A-3, with the previous reading in instances 1–3 and an illustrative table in instance 4, A-35) and the freeze of the stop configuration at the primary stop (A-24, A-30); the acknowledgement as a sequence, not only as a bound
 (R-11 partial → A-11); the bypass of the PTN inputs and outputs and the misconfigured windows (R-15 → A-21; the
 masks of the two reliability checks are modelled since 2026-09-21); every deadline (A-15); the independence
-between layers (A-17). The DMV current threshold (R-14) is no longer out of scope (A-22 withdrawn; SR-18).
+between layers (A-17). The DMV enabling condition (R-14) is no longer out of scope (A-22, SR-18); since revision 4 it is read as current OR stored energy above threshold.
 
 ## 2. Source quote → how it is used
 
 | Quote | Class | Use | Status |
 |---|---|---|---|
-| R-0 | architecture | PTN at the top of the order; `to_ptn`; `ptn_deenergizes`, `advance_frozen` | covered |
+| R-0 | architecture | PTN at the top of the order; `to_ptn`; `ptn_deenergizes`, `advance_frozen`; the PTN latch of `p1a_ptn_latched` and `p1b_stop_never_cleared` | covered |
 | R-1 | context / data | the seven phases, as a configuration instance (A-5) | covered |
 | R-2 | requirement | the seven triggers | covered; the missing columns are A-4 |
 | R-3 | requirement | the three response levels; `soft_apply`, `to_ptn` | covered |
 | R-4 | requirement | the JTT jumps to termination and **ramps** the heating | covered (`soft_stop_ramps`; it was finding H16) |
-| R-5 | configuration data | 28 published cells + 21 assumed; the 117 conformance laws | covered (15 printed + 13 by ditto) |
-| R-6 | justification | — | **out of scope** (A-3, A-16): there is no published secondary matrix |
+| R-5 | configuration data | 28 published cells + 21 assumed (A-4) + 7 `Blind` (A-25); the 143 conformance laws | covered (15 printed + 13 by ditto) |
+| R-6 | justification | the secondary stop response: `sec_table`, `sec_legacy`, `sec_inst4`, `sec_monotone`, `sec_primary_ptn`, `inst4_second_alarm_ptn` | **mechanism covered since revision 4** (A-3); the content of JET's secondary table is out of scope, since it is not published (A-16; instance 4 is illustrative, A-35) |
 | R-7 | requirement | escalation by maximum (A-2); the DMS wiring is configuration ([S6]) | covered as our policy |
 | R-8, R-9 | requirement | `Local`, `Reduced`, `local_is_local`, `f2a_local_reduces`, `f2d_reduced_never_returns` | covered: a local alarm reduces (one PINI out) and does not switch off (A-6, A-7, revision 2026-09-21); compensation with other PINIs is not modelled |
 | R-10 | architecture | interlock; guarded `Reset` | covered; the bypass **out of scope** (A-21) |
 | R-11 | requirement | `arm_dms`, `HeatAck`, `ack_max`, I4, I5 and the six DMS laws | **partial**: atomicity and bound, not the acknowledgement as a sequence (A-11) |
 | R-12 | requirement | `heat_win`, `plasma`, I1, `heat_permissive`, `plasma_is_input` | covered as an abstraction (A-5, A-8); PEWS is not modelled as an independent system |
 | R-13 | requirement | `CommFault{dms, en}`, `Blind`, the masks, the watchdog and its five laws | covered (A-12, A-13, A-21, A-25): both checks go through the instance's mask |
-| R-14 | requirement | `dms_window` (waveform phase), `ip`, IP1–IP4 | covered since 2026-09-21: the current threshold gates the arming (A-22 withdrawn) |
+| R-14 | requirement | `dms_window` (waveform phase), `ip`, IP1–IP4 | covered since 2026-09-21: the DMV arming verdict gates the arming (A-22; current OR stored energy since revision 4) |
+| [N1] PDF p.14 | requirement | `p1a_ptn_latched` ("a PIW stop can never preempt a PTN stop"); `sec_primary_ptn` ("any primary PTN stop can never be followed by a PIW secondary") | covered (revision 4) |
+| [N1] PDF p.13 | requirement | the PTN half of `d1a_ptn_honoured` (PTN stops "can be triggered even after a PIW stop is in execution"; the same-step switch-off is A-9); `piw_after_ptn_is_noop` (the "invalid task", stated for the shape-controller simulator; the no-op, counters included, is our formalisation, A-14); `d1b_primary_honoured` ("RTPS will select the stop and send it to SC") | covered (revision 4); "a maximum of two in sequence" holds by construction under our reading (two PIW, i.e. soft, stops; A-2), not as a law; the frozen stop configuration is stated for the shape controller and not modelled (A-24, A-30) |
+| [N1] Fig. 7 caption, PDF p.23 | usage statistic | the illustrative secondary table of instance 4 (A-35) | not a requirement: the preferred secondary, not JET's table |
 | R-15 | operational evidence | — | not a requirement: it is the argument for the method (certify the configuration of each pulse) |
 
 ## 3. Hypothesis → laws that depend on it
 
 | A-n | Dependent laws | What happens if it is false |
 |---|---|---|
-| A-1 | `latched`, `stop_honoured`, `soft_stop_ramps`, `stop_phase_exact` | The order is a **model parameter**: every law is proved for both (`finite_check` and `finite_check_alt`). The behavioural difference is 2 688 cells, 168 reachable. |
-| A-2 | `latched`, `stop_honoured` | They stop describing JET (R-6 allows suppressing escalations). |
+| A-1 | `latched`, `stop_honoured`, `soft_stop_ramps`, `stop_phase_exact` | The order is a **model parameter**: every abstract law is proved for both (`finite_check` and `finite_check_alt`); the concrete layer and the configuration are certified under the chosen order, `Ord1`, only (`traces_safe_concrete`, `fast_ptn`, `ip2_arms_on_demand`, `inst4_second_alarm_ptn`, `step_c_is_the_concrete_step`; the both-hotspots cells, A-32). The behavioural difference is 10 752 cells, 276 reachable (C3, 2026-09-22). |
+| A-2 | `latched`, `stop_honoured` | They stop describing JET (R-6 allows suppressing escalations); the JET-documented parts stay in `p1a_ptn_latched`, `d1b_primary_honoured` and the PTN half of `d1a_ptn_honoured`; `p1b_stop_never_cleared` and `piw_after_ptn_is_noop` add our reading (A-14). |
+| A-3, A-16, A-35 | `sec_legacy`, `sec_inst4`, `sec_monotone`, `sec_primary_ptn`, `inst4_table`, `inst4_mask`, `inst4_second_alarm_ptn`, `f1a_table_reads_prog`, `concretize_is_the_table` | If JET's secondary table differs, only the instance data and these conformance laws change; the abstract laws and the certificate do not. |
 | A-4 | `asm_*`, `fast_ptn` | 21 cells change; the laws over the abstract alphabet do not depend on it. |
-| A-5 | I1, `heat_permissive`, `phase_monotone`, `advance_frozen`, `advance_is_one_step`, `advance_units` | The window and the phases are instance; recertify. |
-| A-6 | `local_is_local`, `f2a_local_reduces`, `f2d_reduced_never_returns` | A reduced unit does not return to full power (conservative); compensation with other PINIs is not expressed. |
+| A-5, A-27 | I1, `heat_permissive`, `phase_monotone`, `advance_frozen`, `advance_is_one_step`, `advance_units` | The phases are instance; the heating window is model code shared by both units (A-27): a per-unit, per-instance window is a model change; recertify. |
+| A-6 | `local_is_local`, `f2a_local_reduces`, `f2d_reduced_never_returns` | A reduced unit does not return to full power in one step (conservative); through `Off` it does (A-34); compensation with other PINIs is not expressed. |
 | A-7 | `f2d_reduced_never_returns` | Policy more restrictive than JET's on un-reducing, declared. |
 | A-13, A-21, A-25 | `commfault_ptn`, `f3b_commfault_masked_is_noop`, `mask_*`, `asm_*_Blind`, `blind_masked_no_response` | The mask is configuration certified per instance; the `Blind` row is assumed. |
-| A-24 | `f1a_table_reads_prog`, `f1b_stop_keeps_prog`, `f1c_wave_ahead`, `f1d_wave_frame`, `stop_phase_exact`, `phase_frame`, `heat_permissive`, I2, I3 | If the table were indexed by the waveform phase (the previous reading), a `Slow` after a JTT would escalate to PTN. |
-| A-8 | I1, `plasma_is_input` | I1 says less than it seems (global Ip vs per-PINI density). |
-| A-9 | I1, I2, `ptn_deenergizes`, `stop_reduces_power`, `ramping_never_returns`, `soft_stop_ramps`, `advance_units` | The real effect is a waveform (A-19). |
+| A-24 | `f1a_table_reads_prog`, `f1b_stop_keeps_prog`, `f1c_wave_ahead`, `f1d_wave_frame`, `stop_phase_exact`, `phase_frame`, `heat_permissive`, I2, I3 | If the table were indexed by the waveform phase (the previous reading), a `Slow` after a JTT would escalate to PTN. If it were frozen at the phase of the primary stop ([N1], shape-controller side), a DHS or both-hotspots alarm after an RTPS stop begun in Heating 1 would give PTN instead of being ignored, and the Termination-row escalations to PTN would disappear (A-24, A-30). |
+| A-8 | I1, `plasma_is_input`, `heat_permissive` | I1 says less than it seems (global Ip vs per-PINI density); it is conservative for heat loads only if `plasma_ok` is the AND of every permissive. |
+| A-9 | I1, I2, `ptn_deenergizes`, `ptn_no_heat`, `d1a_ptn_honoured` (the same-step switch-off), `stop_reduces_power`, `ramping_never_returns`, `heat_permissive` (its "no stop" clause), `stop_overrides_heat`, `soft_stop_ramps`, `stop_no_full_power`, `termination_no_full_power`, `advance_units`; `dms_no_heat` (the heating stays off after the injection) | The real effect is a waveform (A-19). |
 | A-10 | `dms_armed_on_demand`, `dms_frame`, `dms_fire_frame` | The instance decides which stops carry the DMS bit. |
-| A-11 | I4, I5, and the acknowledgement laws | The acknowledgement as a sequence is left out. |
-| A-12, A-13 | I6 and the five watchdog laws; `commfault_ptn` | Two demand paths merged into one. |
-| A-14 | `reset_guarded`, `reset_refused_mid_pulse`, `reset_accepted_when_safe` | `latched` loses content. |
-| A-15…A-23 | none (declared limits) | — |
+| A-11 | I4, I5, and the acknowledgement laws; the counter commands of `advance_frozen` and `piw_after_ptn_is_noop` | The acknowledgement as a sequence is left out. |
+| A-12, A-13 | I6 and the five watchdog laws; `commfault_ptn`; the counter commands of `advance_frozen` and `piw_after_ptn_is_noop` (A-12) | The watchdog PTN is unmitigated (no DMS); the two detection sides of a communication fault (SC or RTPS, [N1]) are merged into one step. |
+| A-14 | `reset_guarded`, `reset_refused_mid_pulse`, `reset_accepted_when_safe`; `p1b_stop_never_cleared` (soft stops), `piw_after_ptn_is_noop` (the no-op) | `latched` loses content; `p1b_stop_never_cleared` keeps only its PTN half (R-0). |
+| A-15…A-20, A-23 | none (declared limits) | — |
+| A-22 | `ip1_low_never_arms`, `ip2_arms_on_demand`, `ip3_ip_is_input`, `ip4_ip_frame`, `dms_armed_on_demand`, `dms_frame` | None changes: they are about the Boolean `ip`; only its reading changes (current OR stored energy). |
+| A-28, A-29 | I1, `advance_units`, `termination_no_full_power`, `f4_units_frame` | Switching off on a permissive loss or at the window edge is forced by I1; the ramp on entering Termination is `advance_units`. |
+| A-30 | `stop_honoured` on concrete traces, `f1a_table_reads_prog` | Which row a second alarm reads (see A-24). |
+| A-31, A-32 | `pub_*_Slow` (7), `asm_*_BothHs` (7) | JET fact plus our inference; the both-hotspots cells are a lower bound under `Ord1`. |
+| A-33, A-34 | `f2a_local_reduces`, `local_is_local`, `f2d_reduced_never_returns` | One reduction level; F2d holds one step at a time, not over the pulse. |
 
-## 4. Measured status (from `results.json` and `recheck.json`, gate of 2026-09-19)
+## 4. Measured status (from `results.json` and `recheck.json`, reference run `run.py all --full` of 2026-09-23: `--jobs 12`, Bend 2.0.25)
 
 | Artefact | Result |
 |---|---|
-| `PROOF_JETPROT.bend` | `All terms check.`, 143 s. 64 laws: reflection over the certificate, the counter lemma and the induction on the trace |
-| `PROOF_JETPROT_CONF.bend` | `All terms check.`, 0.3 s. 117 conformance laws |
-| Certificates `_FIN`, `_FIN_ALT`, `_COR` | 104 832 cells per order + 2 688 states; 14–19 s and 0.3 s. They are **libraries**, not gates: each one discharges a single law and only `PROOF_JETPROT.bend` can give green |
-| Negatives `bug1..bug10` | 10/10 rejected, each one by refuting a `Bool` **and** citing the name of its law |
-| C5 | **209 664 cells** Bend = Python; 0 discrepancies; 0 law failures on the states Bend produces; identical concrete layer; concrete reachability 921 states (`hb ≤ 2`, `tack ≤ 1`), all in `inv_all` |
-| C2 | 323 reachable abstract states; no vacuous law; **tightness: 374/400 cells with a unique successor (93.5 %), 1.1 admissible successors out of 2 688**; counter commands fixed in 195/400 (1.51 of 9). Warnings below threshold: `heat_frame`, `advance_to_termination_ramps` |
-| C3 | 2 688 cells differ between the two orders, 168 reachable; all laws hold in both |
-| C6 | **Adversarial bank: 61/62**, sole survivor `M06`, verified equivalent (differs in 0 of 209 664 cells). Model flags: 17/17, reported as the weak measure |
-| Differential | 6 planted defects × 2 instances × 2 generators; found in 14/16 configurations with a defect, 0 false positives in the 2 without a defect; the guided generator finds them all with traces of 2–10 events, the random one misses several |
-| Full gate | `py -3.14 v3/run.py` → `all gates and checks ok: True`, ≈ 5–6 min |
+| `PROOF_JETPROT_LIVE.bend` (the gate; imports `PROOF_JETPROT.bend` and, through it, the certificates `_FIN`, `_FIN_ALT`, `_COR`) | `All terms check.`, 1 221.9 s beside the Python stages (795.8 s in the serial run of 2026-09-22). The 81 laws of `LAWS_JETPROT.bend` (reflection over the certificate, the counter lemma, the induction on the trace, the concrete laws by cases) and the 2 bounded-response laws of `LAWS_JETPROT_LIVE.bend` |
+| `PROOF_JETPROT_CONF.bend` | `All terms check.`, 1.6 s (0.7 s serially). 143 conformance laws |
+| `PROOF_JETPROT_SOUND.bend` | `All terms check.`, 0.8 s (0.3 s serially). 8 soundness laws |
+| Certificates | 462 336 cells per order (10 752 states × 43 columns), both orders; 10 752 states for the corollaries; 5 376 cells for the concrete layer (4 instances × 7 × 2 × 4 levels × 24 events). The three certificate files are **libraries**, not gates |
+| Smoke test | `all ok` |
+| Negatives `bug1..bug12` | 12/12 "REJECTED (as it must be)", each one by refuting a `Bool` **and** citing the name of its law |
+| C5 | **924 672 cells** Bend = Python; 0 mismatches; 0 law failures on the states Bend produces; 0 concretize mismatches; concrete reachability 804 / 804 / 804 / 744 states (instances 1–4; `hb ≤ 2`, `tack ≤ 1`), all in `inv_all` |
+| C2 | 372 reachable abstract states under `Ord1` (326 under `Ord2`); no vacuous law; **tightness: 397/400 cells with a unique successor (99.3 %), 1.01 admissible successors out of 10 752**; counter commands fixed in 243/400 (1.39 of 9; 212/400 before revision 4). Warning below threshold: `advance_to_termination_ramps` (16 reachable cells; it refutes nothing in the sample) |
+| C3 | 10 752 cells differ between the two orders, 276 reachable; every abstract law is proved for both (the concrete layer runs `Ord1` only, A-1) |
+| C6 | **Adversarial bank: 75/76** (M01–M37 36/37, N01–N25 25/25, M63–M73 11/11, W01–W03 3/3; defects of the Python reference model, judged by the oracle `pymodel/jetprot_laws.py`), sole survivor `M06`, computed equivalent by the gate: its `step_fin`, `upd_hb` and `upd_tack` differ from the model's on 0 of 924 672 certificate cells, its step with the counters (`step_st`) on 0 of 12 042 240 cells with concrete counter values, and its `concretize` on 0 of 1 032 192 (instance, control state, plant event) cells (`C6.equivalence`); a survivor with a differing cell would fail the gate. Model flags: 17/17, reported as the weak measure. Laws per kill (`--full`): 31 mutants are caught by a single law or check (M72 only by `S1_inv_all_is_spec`, the check that the model's invariant is the specification's) |
+| Differential | 88 runs: (9 planted defects + no defect + all defects) × 4 instances × 2 generators; 35 of 40 defective configurations found, 0 false positives in the 4 without a defect; 5 unobservable by construction and declared by the gate (`commfault_leaves_heating` in instance 3, `secondary_ignored_during_stop` in instances 1–3, `deescalation` in instance 4) |
+| Full gate | `py -3.14 v3/run.py all --full` with the default `--jobs` (12) → `all: ok in 1222.4 s` (every Python stage had ended by 1 200.6 s); `results.json`, `recheck.json` and `SHA256SUMS` (42 files) rewritten, `sha256sum -c SHA256SUMS` 42 OK. The serial path, `--jobs 1`, on 2026-09-22 with Bend 2.0.24: `all: ok in 7305.5 s` (the `--full` mutant census took 5884.4 s). `compare_runs.py` between the two: the same verdicts, counts, census lists and differential traces over 6 433 leaves; apart from wall times and run metadata they differ only in the Bend version and commit, the hashes of the files edited in between (17 inputs, plus the gate scripts), the new `C6.equivalence` field and the descriptions of five mutants (M63, M64, M65, M67, M68) whose assumption numbers were corrected |
 
 **Declared future work**: the C4 gate (guarded `LocalClear`, the sensitivity of A-7) is not implemented; the
 commanded vs. reported state of the units (to verify the R-11 acknowledgement as a sequence); the DMV current
-threshold; the cross-check of the certificate in nuXmv or TLA+/Apalache.
+threshold (done since 2026-09-21, SR-18); the cross-check of the certificate in nuXmv or TLA+/Apalache; the candidate model changes of `SUPUESTOS_EVALUACION.md`, each conditional on a question to JET: the RTPS-side freeze (Q1), the content of the secondary table (Q2–Q4), the DMV window (Q7) and per-unit heating windows (Q8), counted local reductions (Q5).

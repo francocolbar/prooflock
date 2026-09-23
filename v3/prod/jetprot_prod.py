@@ -14,14 +14,20 @@ kind that survive code review:
   repeated_alarm_restarts_ack: a repeated stop request restarts the acknowledgement wait -> P18
   jtt_moves_program_phase   : an accepted JTT rewrites the program phase, so later alarms
                               read the Termination row of Table 1                       -> F1
-  arms_below_threshold      : the DMS arms whatever the plasma current                   -> IP1
+  arms_below_threshold      : the DMS arms whatever the DMV arming verdict               -> IP1
+  secondary_ignored_during_stop: instance 4 reads its primary table also while a stop is in
+                              force, so its PTN secondary is never requested   -> inst4_second_alarm_ptn
 
 Differential testing (run.py) compares this implementation against the Bend golden model on
 random concrete traces and evaluates the Bend invariants on the states it produces.
 
 Revision 2026-09-21 (blocker 4): program phase + termination-waveform flag, partial power
-(`Reduced`), the DMV current threshold (`ip`, input XIp), the blind stop alarm and the masks
+(`Reduced`), the DMV arming verdict (`ip`, input XIp), the blind stop alarm and the masks
 of the two reliability checks per instance.
+
+Revision 4 (2026-09-22): the secondary stop response. An alarm while a stop is in force reads the
+instance's secondary table: instances 1-3 the primary entry again, instance 4 (illustrative) the
+PTN wherever the primary entry asks for any response.
 """
 
 HB_MAX = 3
@@ -30,7 +36,7 @@ PHASES = ["Breakdown", "IpRise", "Limiter", "Xpoint", "Heating1", "Heating2", "T
 RANK = {"None": 0, "JTT": 1, "RTPS": 2, "PTN": 3}
 BUGS = {"deescalation": False, "commfault_leaves_heating": False, "rtps_keeps_full_power": False,
         "plasma_ok_restores_reduced": False, "watchdog_off_by_one": False, "repeated_alarm_restarts_ack": False,
-        "jtt_moves_program_phase": False, "arms_below_threshold": False}
+        "jtt_moves_program_phase": False, "arms_below_threshold": False, "secondary_ignored_during_stop": False}
 
 # Table 1 of Stephen et al. 2011 (a third, independent transcription) + the assumed cells + the blind row
 _T1 = {
@@ -45,9 +51,11 @@ _T1 = {
 _T1["BothHs"] = [a if RANK[a] >= RANK[b] else b for a, b in zip(_T1["Mchs"], _T1["Dhs"])]
 _T2 = dict(_T1, Mhd=["None", "None", "None", "PTN", "PTN", "PTN", "PTN"])
 _T2["MhdB"] = _T2["Mhd"]
-TABLES = {1: _T1, 2: _T2, 3: _T1}
+TABLES = {1: _T1, 2: _T2, 3: _T1, 4: _T1}
 # which reliability checks each instance enables: (communication fault, blind alarms)
-MASKS = {1: (True, True), 2: (True, True), 3: (False, False)}
+MASKS = {1: (True, True), 2: (True, True), 3: (False, False), 4: (True, True)}
+# the secondary table of each instance: the primary entry again, or PTN wherever the primary asks for anything
+PTN_SECONDARY = {4}
 DMS_TRIGGERS = {"Fast", "Mhd", "MhdB"}
 DMS_WINDOW = {"Xpoint", "Heating1", "Heating2", "Termination"}
 HEAT_WINDOW = {"Heating1", "Heating2"}
@@ -115,6 +123,8 @@ def step(s, e, inst=1):
         if t == "Blind" and not MASKS[inst][1]:
             return s
         req = TABLES[inst][t][PHASES.index(s["prog"])]
+        if s["level"] != "None" and inst in PTN_SECONDARY and req != "None" and not BUGS["secondary_ignored_during_stop"]:
+            req = "PTN"
         return stop(s, req, t in DMS_TRIGGERS and wave(s) in DMS_WINDOW)
     if k == "XLocal":
         u = e["u"].lower()

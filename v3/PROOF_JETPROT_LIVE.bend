@@ -10,7 +10,8 @@
 #   P15        <- L0.dms_monotone
 #   P18        <- L0.tack_frame
 #   E11        <- L0.e11_heatack_exact
-# Checking this file re-checks PROOF_JETPROT.bend and its certificates (about 12 minutes).
+# Checking this file re-checks PROOF_JETPROT.bend and its certificates (the longest check of the
+# gate; measured times in README section 4).
 import Base
 import ./jetprot.bend as S
 import ./spec_jetprot.bend as Spec

@@ -1,18 +1,23 @@
-"""mutants.py - the adversarial mutation suite: 73 defects a careless engineer could plausibly
+"""mutants.py - the adversarial mutation suite: 76 defects a careless engineer could plausibly
 write, each one a patch over the reference model in jetprot_ref.py (revised 2026-09-21 for the
 eight-field state of blocker 4: prog, jtt, level, dms, plasma, ip, nb, rf; the three mutants that
 spoke of `Inhibited` now speak of `Reduced`) (62 from two adversarial
 reviews, plus 11 defects of the constants and of the oracle added on 2026-09-21, see the third
-batch at the end).
+batch at the end; and 3 defects of the secondary stop response of revision 4, the fourth batch).
 
-Provenance, stated because it matters for what the score means: M01-M37 and N01-N25 were written
-by two INDEPENDENT adversarial reviews whose brief was to break the law set, not to match it. The
-17 flags in `jetprot_ref.MUT` were written alongside the laws and are therefore a weaker measure:
-a suite chosen to fit the laws will always score well. When the first bank was written the law set
-killed 21 of 37; the demand laws (D1-D18) took it to 36/37 and 14/25; the round-3 laws (E1-E11,
-C1, C3, V1) took the combined bank to 61/62. The single survivor, M06, is an EQUIVALENT mutant:
-its transition relation differs from the model's on 0 of 209 664 cells, because `arm` is only ever
-applied to an already-`to_ptn`'d state, so its added guard is a tautology at every call site.
+Provenance, stated because it matters for what the score means: M01-M37 and N01-N25 were written by
+two separate automated adversarial reviews (README §7) whose brief was to break the law set, not to
+match it. The 17 flags in `jetprot_ref.MUT` were written alongside the laws and are therefore a
+weaker measure: a suite chosen to fit the laws will always score well. When the first bank was
+written the law set killed 21 of 37; the demand laws (D1-D18) took it to 36/37 and 14/25; the
+round-3 laws (E1-E11, C1, C3, V1) took the combined bank to 61/62. The single survivor, M06, is an
+EQUIVALENT mutant: its abstract transition relation (step_fin, upd_hb, upd_tack) differs from the
+model's on 0 of 924 672 cells (both orders x 10 752 states x 43 certificate columns), because `arm`
+is only ever applied to an already-`to_ptn`'d state, so its added guard is a tautology at every
+call site. The gate does not take this from the name: recheck.py C6 compares EVERY surviving mutant
+with the model on those 924 672 cells, on 12 042 240 concrete cells for the counter layer
+(verdicts, apply, step_st) and on 1 032 192 (instance, control state, plant event) cells for
+concretize (C6.equivalence), and accepts a survivor only if it differs on none of them.
 
 Each entry is (name, plausibility 1-5, description, patch) where patch() returns a dict of
 jetprot_ref module-level names to override.
@@ -742,17 +747,20 @@ def _s73_table(inst, p, t):
 
 
 MUTANTS_S = [
- ("M63_hb_max_4", 5, "HB_MAX = 4: the watchdog tolerates one missed heartbeat more than A-11 allows",
+ ("M63_hb_max_4", 5, "HB_MAX = 4: the watchdog tolerates one missed heartbeat more than A-12 allows",
   lambda: {"HB_MAX": 4}),
- ("M64_ack_max_3", 5, "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-13 allows",
+ ("M64_ack_max_3", 5, "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-11 allows",
   lambda: {"ACK_MAX": 3}),
- ("M65_init_plasma_true", 4, "the initial state has plasma_ok = True (R-5: no plasma at Breakdown)",
+ ("M65_init_plasma_true", 4,
+  "the initial state has plasma_ok = True (the model starts at Breakdown, A-5, A-12, before any Plasma event: no plasma yet)",
   lambda: {"INIT": ("Breakdown", False, "LNone", "DmsIdle", True, False, "Off", "Off")}),
  ("M66_init_iprise", 3, "the initial phase is IpRise instead of Breakdown",
   lambda: {"INIT": ("IpRise", False, "LNone", "DmsIdle", False, False, "Off", "Off")}),
- ("M67_heat_win_xpoint", 4, "the heating window also admits Xpoint (A-6: Heating1 and Heating2 only)",
+ ("M67_heat_win_xpoint", 4, "the heating window also admits Xpoint (A-5, A-27: Heating1 and Heating2 only)",
   lambda: {"heat_win": _s67_heat_win}),
- ("M68_dms_window_no_term", 4, "the DMS arming window drops Termination (R-13 / [S6] include it)",
+ ("M68_dms_window_no_term", 4,
+  "the DMS arming window drops Termination (the model's window includes it, A-10 / R-14; "
+  "[S6] closes it \"generally\" at the end of the post-heating phase)",
   lambda: {"dms_req": _s68_dms_req}),
  ("M69_rank2_jtt_ge_rtps", 4, "urgency order 2 ranks JTT and RTPS equal (a tie: neither pre-empts the other)",
   lambda: {"RANK": {1: dict(O_RANK[1]), 2: {"LNone": 0, "LJtt": 1, "LRtps": 1, "LPtn": 3}}}),
@@ -767,3 +775,37 @@ MUTANTS_S = [
 ]
 
 MUTANTS = MUTANTS_M + MUTANTS_N + MUTANTS_S
+
+
+# ---------------------------------------------------------------------------
+# Fourth batch (revision 4, 2026-09-22): the secondary stop response of the concrete layer
+# (sec_table; instance 4 is the illustrative PTN-preferred one, A-35). Same convention.
+# ---------------------------------------------------------------------------
+def _w01_concretize(inst, s, c):
+    if c[0] == "XAlarm":
+        return ("Stop", R.masked_table(inst, s[R.P], c[1]), R.dms_req(R.wave(s), c[1]))   # <-- secondary never read
+    return O_conc(inst, s, c)
+
+
+def _w02_concretize(inst, s, c):
+    if c[0] == "XAlarm":
+        return ("Stop", R.sec_table(inst, s[R.P], c[1]), R.dms_req(R.wave(s), c[1]))      # <-- secondary read with no stop in force
+    return O_conc(inst, s, c)
+
+
+def _w03_concretize(inst, s, c):
+    if c[0] == "XAlarm" and s[R.L] != "LNone":
+        return ("Stop", R.sec_table(inst, R.wave(s), c[1]), R.dms_req(R.wave(s), c[1]))   # <-- secondary read at the waveform phase
+    return O_conc(inst, s, c)
+
+
+MUTANTS_W = [
+ ("W01_inst4_secondary_ignored", 5, "concretize reads the primary table also under a stop: instance 4's secondary table is never read",
+  lambda: {"concretize": _w01_concretize}),
+ ("W02_secondary_read_without_stop", 4, "concretize reads the secondary table also when no stop is in force",
+  lambda: {"concretize": _w02_concretize}),
+ ("W03_secondary_read_at_wave_phase", 4, "under a stop, the secondary table is read at the waveform phase instead of the programme phase",
+  lambda: {"concretize": _w03_concretize}),
+]
+
+MUTANTS = MUTANTS_M + MUTANTS_N + MUTANTS_S + MUTANTS_W

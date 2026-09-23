@@ -532,526 +532,2715 @@ def Laws.blind_masked_no_response(p):
     case S.Termination{}:
       {==}
 
-# fast_ptn: masked_table(i, p, Fast) = LPtn in every instance, so stop_fin takes the PTN
-# branch arm_if(dms_req(wave_go(j, p), Fast), to_ptn(f)); the split follows what the step
-# reads: the instance, the program phase, the waveform flag, the DMS state and the ip flag.
+# fast_ptn: masked_table(i, p, Fast) = LPtn in every instance, and so is every secondary entry
+# (revision 4), so stop_fin takes the PTN branch arm_if(dms_req(wave_go(j, p), Fast), to_ptn(f));
+# the split follows what the step reads: the instance, the program phase, the waveform flag, the
+# level in force (which table the alarm reads), the DMS state and the ip flag.
 def Laws.fast_ptn(i, s):
   match i:
     case S.Inst1{}:
       match s:
         case S.St{S.Fin{p, j, l, d, pl, ip, nb, rf}, hb, tack}:
-          match p j d ip:
-            case S.Breakdown{} True{} S.DmsIdle{} True{}:
+          match p j l d ip:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Breakdown{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Breakdown{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} False{}:
               {==}
     case S.Inst2{}:
       match s:
         case S.St{S.Fin{p, j, l, d, pl, ip, nb, rf}, hb, tack}:
-          match p j d ip:
-            case S.Breakdown{} True{} S.DmsIdle{} True{}:
+          match p j l d ip:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Breakdown{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Breakdown{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} False{}:
               {==}
     case S.Inst3{}:
       match s:
         case S.St{S.Fin{p, j, l, d, pl, ip, nb, rf}, hb, tack}:
-          match p j d ip:
-            case S.Breakdown{} True{} S.DmsIdle{} True{}:
+          match p j l d ip:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Breakdown{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Breakdown{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Breakdown{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Breakdown{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Breakdown{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.IpRise{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.IpRise{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.IpRise{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.IpRise{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Limiter{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Limiter{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Limiter{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Limiter{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.Xpoint{} True{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.Xpoint{} True{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsIdle{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsIdle{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsArmed{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsArmed{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.Xpoint{} False{} S.DmsFired{} True{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.Xpoint{} False{} S.DmsFired{} False{}:
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating1{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Heating1{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating1{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Heating1{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating2{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} True{}:
               {==}
-            case S.Heating2{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} False{}:
               {==}
-            case S.Heating2{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} True{}:
               {==}
-            case S.Heating2{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsIdle{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsIdle{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsArmed{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsArmed{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} False{}:
               {==}
-            case S.Termination{} True{} S.DmsFired{} True{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} True{}:
               {==}
-            case S.Termination{} True{} S.DmsFired{} False{}:
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsIdle{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsIdle{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsArmed{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsArmed{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} False{}:
               {==}
-            case S.Termination{} False{} S.DmsFired{} True{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} True{}:
               {==}
-            case S.Termination{} False{} S.DmsFired{} False{}:
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+    case S.Inst4{}:
+      match s:
+        case S.St{S.Fin{p, j, l, d, pl, ip, nb, rf}, hb, tack}:
+          match p j l d ip:
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Breakdown{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.IpRise{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Limiter{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Xpoint{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating1{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Heating2{} False{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} True{} S.LPtn{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LNone{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LJtt{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LRtps{} S.DmsFired{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsIdle{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsArmed{} False{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} True{}:
+              {==}
+            case S.Termination{} False{} S.LPtn{} S.DmsFired{} False{}:
               {==}
 
 def Laws.concretize_is_the_table():
@@ -1060,3 +3249,1703 @@ def Laws.concretize_is_the_table():
 # C3: step_c(i, s, c) = step(s, concretize(i, fin_of(s), c)) and step = step_o(Ord1).
 def Laws.step_c_is_the_concrete_step(i, s, c):
   {==}
+
+# --- revision 4: the secondary stop response ---
+
+def Laws.inst4_table(p, t):
+  match p t:
+    case S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Breakdown{} S.Blind{}:
+      {==}
+    case S.IpRise{} S.Slow{}:
+      {==}
+    case S.IpRise{} S.Fast{}:
+      {==}
+    case S.IpRise{} S.Mhd{}:
+      {==}
+    case S.IpRise{} S.MhdB{}:
+      {==}
+    case S.IpRise{} S.Mchs{}:
+      {==}
+    case S.IpRise{} S.Dhs{}:
+      {==}
+    case S.IpRise{} S.BothHs{}:
+      {==}
+    case S.IpRise{} S.Blind{}:
+      {==}
+    case S.Limiter{} S.Slow{}:
+      {==}
+    case S.Limiter{} S.Fast{}:
+      {==}
+    case S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Limiter{} S.Blind{}:
+      {==}
+    case S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Heating1{} S.Slow{}:
+      {==}
+    case S.Heating1{} S.Fast{}:
+      {==}
+    case S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Heating1{} S.Blind{}:
+      {==}
+    case S.Heating2{} S.Slow{}:
+      {==}
+    case S.Heating2{} S.Fast{}:
+      {==}
+    case S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Heating2{} S.Blind{}:
+      {==}
+    case S.Termination{} S.Slow{}:
+      {==}
+    case S.Termination{} S.Fast{}:
+      {==}
+    case S.Termination{} S.Mhd{}:
+      {==}
+    case S.Termination{} S.MhdB{}:
+      {==}
+    case S.Termination{} S.Mchs{}:
+      {==}
+    case S.Termination{} S.Dhs{}:
+      {==}
+    case S.Termination{} S.BothHs{}:
+      {==}
+    case S.Termination{} S.Blind{}:
+      {==}
+
+def Laws.inst4_mask():
+  {==}
+
+def Laws.sec_legacy(p, t):
+  match p t:
+    case S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Breakdown{} S.Blind{}:
+      {==}
+    case S.IpRise{} S.Slow{}:
+      {==}
+    case S.IpRise{} S.Fast{}:
+      {==}
+    case S.IpRise{} S.Mhd{}:
+      {==}
+    case S.IpRise{} S.MhdB{}:
+      {==}
+    case S.IpRise{} S.Mchs{}:
+      {==}
+    case S.IpRise{} S.Dhs{}:
+      {==}
+    case S.IpRise{} S.BothHs{}:
+      {==}
+    case S.IpRise{} S.Blind{}:
+      {==}
+    case S.Limiter{} S.Slow{}:
+      {==}
+    case S.Limiter{} S.Fast{}:
+      {==}
+    case S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Limiter{} S.Blind{}:
+      {==}
+    case S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Heating1{} S.Slow{}:
+      {==}
+    case S.Heating1{} S.Fast{}:
+      {==}
+    case S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Heating1{} S.Blind{}:
+      {==}
+    case S.Heating2{} S.Slow{}:
+      {==}
+    case S.Heating2{} S.Fast{}:
+      {==}
+    case S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Heating2{} S.Blind{}:
+      {==}
+    case S.Termination{} S.Slow{}:
+      {==}
+    case S.Termination{} S.Fast{}:
+      {==}
+    case S.Termination{} S.Mhd{}:
+      {==}
+    case S.Termination{} S.MhdB{}:
+      {==}
+    case S.Termination{} S.Mchs{}:
+      {==}
+    case S.Termination{} S.Dhs{}:
+      {==}
+    case S.Termination{} S.BothHs{}:
+      {==}
+    case S.Termination{} S.Blind{}:
+      {==}
+
+def Laws.sec_inst4(p, t):
+  match p t:
+    case S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Breakdown{} S.Blind{}:
+      {==}
+    case S.IpRise{} S.Slow{}:
+      {==}
+    case S.IpRise{} S.Fast{}:
+      {==}
+    case S.IpRise{} S.Mhd{}:
+      {==}
+    case S.IpRise{} S.MhdB{}:
+      {==}
+    case S.IpRise{} S.Mchs{}:
+      {==}
+    case S.IpRise{} S.Dhs{}:
+      {==}
+    case S.IpRise{} S.BothHs{}:
+      {==}
+    case S.IpRise{} S.Blind{}:
+      {==}
+    case S.Limiter{} S.Slow{}:
+      {==}
+    case S.Limiter{} S.Fast{}:
+      {==}
+    case S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Limiter{} S.Blind{}:
+      {==}
+    case S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Heating1{} S.Slow{}:
+      {==}
+    case S.Heating1{} S.Fast{}:
+      {==}
+    case S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Heating1{} S.Blind{}:
+      {==}
+    case S.Heating2{} S.Slow{}:
+      {==}
+    case S.Heating2{} S.Fast{}:
+      {==}
+    case S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Heating2{} S.Blind{}:
+      {==}
+    case S.Termination{} S.Slow{}:
+      {==}
+    case S.Termination{} S.Fast{}:
+      {==}
+    case S.Termination{} S.Mhd{}:
+      {==}
+    case S.Termination{} S.MhdB{}:
+      {==}
+    case S.Termination{} S.Mchs{}:
+      {==}
+    case S.Termination{} S.Dhs{}:
+      {==}
+    case S.Termination{} S.BothHs{}:
+      {==}
+    case S.Termination{} S.Blind{}:
+      {==}
+
+def Laws.sec_monotone(o, i, p, t):
+  match o i p t:
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst1{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst2{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst3{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord1{} S.Inst4{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst1{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst2{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst3{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Ord2{} S.Inst4{} S.Termination{} S.Blind{}:
+      {==}
+
+def Laws.sec_primary_ptn(i, p, t):
+  match i p t:
+    case S.Inst1{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Blind{}:
+      {==}

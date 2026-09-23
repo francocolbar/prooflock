@@ -16,6 +16,11 @@ are gone: no pulse event produced it any more, A-26);
 a masked communication check is the identity (F3); the DMS arms only above the DMV current
 threshold `ip` (R-14). Laws whose statement changed are marked "(b4)".
 
+Revision 4 (2026-09-22): what P1 and D1 say about the PTN and the primary stop ([N1], De Tommasi
+et al. 2013) is stated in named laws (JET_FACT_LAWS, a historical name: P1a and D1b restate JET
+sources; D1a, P1b and PIW_after_ptn_is_noop add our formalisation, A-9/A-14), the first four DERIVED; `ip` is read as
+the DMV arming verdict (plasma current, or per [S7] current OR stored energy, above threshold: A-22).
+
 Everything in this module is evaluated by recheck.py (C2, C5, C6) and by the mutation
 oracle `recheck.catching_laws`; it is what a mutant has to fool.
 """
@@ -88,7 +93,7 @@ def _other(w):
 
 def demands(e, bh, l):
     """does this event demand the DMS: a PTN stop wired to it, an enabled comm fault wired to it, or
-    a watchdog expiry wired to it (the current threshold is a separate hypothesis, IP1/P16)"""
+    a watchdog expiry wired to it (the DMV arming verdict is a separate hypothesis, IP1/P16)"""
     k = e[0]
     if k == "Stop":
         return e[1] == "LPtn" and e[2]
@@ -180,10 +185,10 @@ LAWS = {
                            and C.PHASES.index(wave(s2)) >= C.PHASES.index(wave(s))),
     "P15_dms_monotone": (lambda o, s, e, bt, bh, s2: e[0] != "Reset",
                          lambda o, s, e, bt, bh, s2: C.DMSS.index(s2[D]) >= C.DMSS.index(s[D])),
-    # (b4) a demand arms the DMS when the current is above the DMV threshold (IP2, abstract form)
+    # (b4) a demand arms the DMS when the DMV arming verdict holds (IP2, abstract form; A-22)
     "P16_dms_armed_on_demand": (lambda o, s, e, bt, bh, s2: s[D] == "DmsIdle" and s[IP] and demands(e, bh, s[L]),
                                 lambda o, s, e, bt, bh, s2: s2[D] == "DmsArmed"),
-    # (b4) nothing else arms it, and never below the threshold
+    # (b4) nothing else arms it, and never without the DMV arming verdict
     "P17_dms_frame": (lambda o, s, e, bt, bh, s2: s[D] == "DmsIdle" and s2[D] != "DmsIdle",
                       lambda o, s, e, bt, bh, s2: s[IP] and demands(e, bh, s[L])),
     "P18_tack_frame": (lambda o, s, e, bt, bh, s2: s[D] == "DmsArmed" and e[0] not in ("Tick", "Reset"),
@@ -312,7 +317,7 @@ FRAME_LAWS |= {"E2_dms_fire_frame", "E7_tack_inc_frame", "E8_tack_reset_frame"}
 
 
 # ---------------------------------------------------------------------------
-# Blocker 4 (fidelity): F1 program/waveform, F2 partial power, F3 masks, IP the DMV threshold
+# Blocker 4 (fidelity): F1 program/waveform, F2 partial power, F3 masks, IP the DMV arming verdict
 # ---------------------------------------------------------------------------
 FIDELITY_LAWS = {
     # F1b a stop request never moves the PROGRAM phase (the JTT switches the waveform: A-24)
@@ -334,16 +339,17 @@ FIDELITY_LAWS = {
     # F2a a local alarm takes its unit from full to PARTIAL power, never off (R-9)
     "F2a_local_reduces": (lambda o, s, e, bt, bh, s2: e[0] == "Local" and _u(s, e[1]) == "On",
                           lambda o, s, e, bt, bh, s2: _u(s2, e[1]) == "Reduced"),
-    # F2d a unit at partial power never returns to full power in the pulse (R-9 as modelled, A-6)
+    # F2d a unit at partial power never returns to full power in one step (R-9 as modelled, A-7; a one-step
+    # law: through Off the reduction is forgotten, A-34)
     "F2d_reduced_never_returns": (lambda o, s, e, bt, bh, s2: e[0] != "Reset" and "Reduced" in (s[NB], s[RF]),
                                   lambda o, s, e, bt, bh, s2: all(not (s[i] == "Reduced" and s2[i] == "On") for i in (NB, RF))),
     # F3b a communication check that the instance disables is the identity, counters included (A-21)
     "F3b_commfault_masked_is_noop": (lambda o, s, e, bt, bh, s2: e[0] == "CommFault" and not e[2],
                                      lambda o, s, e, bt, bh, s2: s2 == s and R.upd_hb(s, e, bh) == "CKeep" and R.upd_tack(s, e, bt, bh) == "CKeep"),
-    # IP1 below the DMV current threshold the DMS never arms, whatever the event (R-14)
+    # IP1 without the DMV arming verdict (current, or per [S7] current OR stored energy; A-22) the DMS never arms (R-14)
     "IP1_ip_low_never_arms": (lambda o, s, e, bt, bh, s2: not s[IP] and s[D] == "DmsIdle",
                               lambda o, s, e, bt, bh, s2: s2[D] == "DmsIdle"),
-    # IP3 the current verdict is an input ...
+    # IP3 the DMV arming verdict is an input ...
     "IP3_ip_is_input": (lambda o, s, e, bt, bh, s2: e[0] == "Ip",
                         lambda o, s, e, bt, bh, s2: s2[IP] == e[1]),
     # IP4 ... and only that input, or the accepted end of pulse, moves it
@@ -354,8 +360,46 @@ FIDELITY_LAWS = {
 LAWS.update(FIDELITY_LAWS)
 FRAME_LAWS |= {"F1b_stop_keeps_prog", "F1d_wave_frame", "F1e_jtt_exact", "F4_units_frame", "F3b_commfault_masked_is_noop", "IP1_ip_low_never_arms", "IP4_ip_frame"}
 
-# Laws that are DERIVED rather than independent evidence, and why. Reported by the gates so
-# the write-up cannot present them as independent (audit #5 §5, §8).
+
+# ---------------------------------------------------------------------------
+# Revision 4 (2026-09-22): what P1 and D1 say about the PTN and the primary stop ([N1], De Tommasi
+# et al. 2013, EFDA-JET-PR(13)06; PDF pages of the preprint), as named cell laws. None changes the model.
+# P1a..D1b are implied by P1, D1, P2 and the frame laws together, so they are DERIVED. The
+# counter part of PIW_after_ptn_is_noop is NOT implied by the earlier laws: none forbade an
+# increment of the heartbeat counter on a Stop while the PTN is latched (the tightness sweep
+# showed it: counter commands pinned on 243 of 400 sampled cells instead of 212), so that law is
+# not DERIVED. They separate what JET documents (the PTN is latched and pre-empts everything; the
+# primary is honoured), plus our declared formalisation (D1a's same-step switch-off, A-9; P1b for
+# soft stops and the PIW-after-PTN no-op, A-14), from our policy between the
+# two soft levels (the soft-over-soft part of P1 and D1: A-1, A-2, A-16).
+# ---------------------------------------------------------------------------
+JET_FACT_LAWS = {
+    # P1a a latched PTN stays latched until the end of pulse ([N1] p.14: "a PIW stop can never preempt a PTN stop")
+    "P1a_ptn_latched": (lambda o, s, e, bt, bh, s2: s[L] == "LPtn" and e[0] != "Reset",
+                        lambda o, s, e, bt, bh, s2: s2[L] == "LPtn"),
+    # P1b a stop in force is never cleared except by the end of pulse (R-0 for the PTN; soft stops: our reading, A-14)
+    "P1b_stop_never_cleared": (lambda o, s, e, bt, bh, s2: s[L] != "LNone" and e[0] != "Reset",
+                               lambda o, s, e, bt, bh, s2: s2[L] != "LNone"),
+    # D1a a PTN request is honoured from any state, with both units unpowered ([N1] p.13: PTN
+    # stops "can be triggered even after a PIW stop is in execution"; the same-step switch-off is A-9)
+    "D1a_ptn_honoured": (lambda o, s, e, bt, bh, s2: e[0] == "Stop" and e[1] == "LPtn",
+                         lambda o, s, e, bt, bh, s2: s2[L] == "LPtn" and unpowered(s2[NB]) and unpowered(s2[RF])),
+    # D1b with no stop in force, a soft request becomes the response (the primary stop is honoured)
+    "D1b_primary_honoured": (lambda o, s, e, bt, bh, s2: s[L] == "LNone" and e[0] == "Stop" and e[1] in ("LJtt", "LRtps"),
+                             lambda o, s, e, bt, bh, s2: s2[L] == e[1]),
+    # PIW-after-PTN a non-PTN request while the PTN is latched changes nothing, counters included
+    # ([N1] p.13 calls a PIW request "after a PTN stop was already being executed" an "invalid task",
+    # said of the shape-controller simulator; the no-op, counters included, is our formalisation, A-14)
+    "PIW_after_ptn_is_noop": (lambda o, s, e, bt, bh, s2: s[L] == "LPtn" and e[0] == "Stop" and e[1] != "LPtn",
+                              lambda o, s, e, bt, bh, s2: s2 == s and R.upd_hb(s, e, bh) == "CKeep" and R.upd_tack(s, e, bt, bh) == "CKeep"),
+}
+
+LAWS.update(JET_FACT_LAWS)
+FRAME_LAWS |= {"PIW_after_ptn_is_noop"}
+
+# Laws that are DERIVED rather than independent evidence, and why. No gate reads this list (it is
+# not in results.json); it is the canonical list the documents cite, so the write-up cannot present
+# them as independent (audit #5 §5, §8).
 DERIVED = {
     "D3_advance_to_termination_ramps": "subsumed by E4_advance_units (which covers all six advances)",
     "D5_hb_counts": "one half of E6_hb_tick_exact",
@@ -364,6 +408,21 @@ DERIVED = {
                                     "self-reference (P20 quotes the model's own reset_ok, D10 spells the guard out)",
     "F1b_stop_keeps_prog": "the Stop case of D12_phase_frame; kept as the named statement of A-24",
     "F2a_local_reduces": "the reduction half of P9_local_is_local; kept as the named statement of R-9",
+    # revision 4: what P1 and D1 say about the PTN and the primary stop ([N1]), named so they can be cited
+    # apart from our policy
+    "P1a_ptn_latched": "the PTN case of P1_latched (PTN is the top of both orders); named statement of [N1] p.14",
+    "P1b_stop_never_cleared": "the None case of P1_latched (None is the bottom of both orders)",
+    "D1a_ptn_honoured": "the PTN case of D1_stop_honoured plus P2 (from below the PTN) and P6 + pres (from a latched "
+                        "PTN, on states that satisfy the invariant); named statement of [N1] p.13",
+    "D1b_primary_honoured": "the level-None case of D1_stop_honoured",
+    # audit of 2026-09-22: checked on the Python model over every (state, event, nb', rf'), the only
+    # things the four laws read (10 752 x 28 x 16 cells), and over the certificate cells of both orders
+    # x the 16 unit successors: 0 counterexamples
+    "P4_ramping_never_returns": "implied by P5_heat_permissive and P7_heat_frame: a unit regains power only by its "
+                                "own HeatOn (P7), which P5 accepts only from Off",
+    "P6_stop_overrides_heat": "implied by P5_heat_permissive and P7_heat_frame: under a stop P5's permission (window, "
+                              "plasma, no stop in force) is False, so no HeatOn is accepted (P5) and nothing "
+                              "else gives power (P7)",
 }
 
 
@@ -371,20 +430,34 @@ DERIVED = {
 # Outside the cell property: the concrete layer and the verdict domain
 # ---------------------------------------------------------------------------
 
+def spec_primary(i, p, t):
+    """the masked primary entry of instance i (the spec's own reading of TABLE and MASKS)"""
+    return "LNone" if (t == "Blind" and not C.MASKS[i][1]) else C.TABLE[i][t][C.PHASES.index(p)]
+
+
+def spec_secondary(i, p, t):
+    """the secondary entry of instance i (revision 4), from the rule in spec_consts.SECONDARY"""
+    prim = spec_primary(i, p, t)
+    if C.SECONDARY[i] == "ptn":
+        return "LNone" if prim == "LNone" else "LPtn"
+    return prim
+
+
 def concretize_conforms(limit=20):
-    """C1: `concretize` is the configuration, value by value: Table 1 read on the PROGRAM phase
-    (F1a), the DMS window on the waveform phase, the blind row and the masks of the instance (F3),
-    the current verdict as an input. Returns the offending cells, at most `limit`."""
+    """C1: `concretize` is the configuration, value by value: the primary table (no stop in force) or
+    the instance's secondary table (a stop in force, revision 4) read on the PROGRAM phase (F1a), the
+    DMS window on the waveform phase, the blind row and the masks of the instance (F3), the DMV
+    arming verdict as an input. Returns the offending cells, at most `limit`."""
     bad = []
-    for i in (1, 2, 3):
+    for i in C.INSTANCES:
         for p in C.PHASES:
-            for j in (False, True):
+            for j, lv in ((j, lv) for j in (False, True) for lv in C.LEVELS):
                 for ip in (True, False):
-                    s = (p, j, "LNone", "DmsIdle", True, ip, "Off", "Off")
+                    s = (p, j, lv, "DmsIdle", True, ip, "Off", "Off")
                     w = "Termination" if j else p
                     for c in R.CEVENTS:
                         if c[0] == "XAlarm":
-                            lvl = "LNone" if (c[1] == "Blind" and not C.MASKS[i][1]) else C.TABLE[i][c[1]][C.PHASES.index(p)]
+                            lvl = spec_primary(i, p, c[1]) if lv == "LNone" else spec_secondary(i, p, c[1])
                             want = ("Stop", lvl, c[1] in C.DMS_TRIG and w in C.DMS_WINDOW)
                         elif c[0] == "XCommFault":
                             want = ("CommFault", C.DMS_ON_COMMFAULT, C.MASKS[i][0])
@@ -403,7 +476,7 @@ def step_c_conforms(limit=20):
     """C3: step_c is the abstract step, under the instance's declared order, on the state BEFORE
     the transition, through that instance's configuration."""
     bad = []
-    for i in (1, 2, 3):
+    for i in C.INSTANCES:
         for s in R.all_states():
             for hb in range(C.HB_MAX + 2):
                 for tack in range(C.ACK_MAX + 2):
@@ -414,6 +487,26 @@ def step_c_conforms(limit=20):
                             bad.append((i, st, c))
                             if len(bad) >= limit:
                                 return bad
+    return bad
+
+
+def inst4_second_alarm_ptn(limit=20):
+    """inst4_second_alarm_ptn (revision 4, concrete): in instance 4, an alarm during a soft stop whose
+    primary entry asks for any response latches the PTN in the same step (every state, counters in
+    and just beyond their range)."""
+    bad = []
+    for s in R.all_states():
+        if s[L] not in ("LJtt", "LRtps"):
+            continue
+        for t in C.TRIGS:
+            if spec_primary(4, s[P], t) == "LNone":
+                continue
+            for hb in range(C.HB_MAX + 1):
+                for tack in range(C.ACK_MAX + 1):
+                    if R.step_c(4, (s, hb, tack), ("XAlarm", t))[0][L] != "LPtn":
+                        bad.append((s, hb, tack, t))
+                        if len(bad) >= limit:
+                            return bad
     return bad
 
 

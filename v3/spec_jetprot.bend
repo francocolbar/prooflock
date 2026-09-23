@@ -11,7 +11,7 @@
 # `fin_eq(f, f2) == True{}` a statement about f and f2, not about the predicate.
 #
 # Revision 2026-09-21 (blocker 4): eight-field control state (program phase, termination
-# waveform flag, level, DMS, plasma, DMV current threshold, two units); `Reduced` (partial
+# waveform flag, level, DMS, plasma, DMV arming verdict, two units); `Reduced` (partial
 # power) and no `Inhibited`; the communication check carries its enable bit; properties that
 # read a phase say WHICH one: the program phase (`prog_of`, Table 1, the programme) or the
 # waveform phase (`wave_of`, the permissive, the DMS window, the end of pulse).
@@ -165,8 +165,9 @@ def is_local_of(e: S.Ev, w: S.Who) -> Bool:
       False{}
 
 # does this event demand the DMS (a stop that reaches PTN and is wired to it, an enabled
-# communication fault wired to it, a watchdog expiry wired to it)? The current threshold is
-# a separate hypothesis (P16, P17, IP1).
+# communication fault wired to it, a watchdog expiry wired to it)? The DMV arming verdict (plasma
+# current, or per [S7] current OR stored energy, above threshold; A-22) is a separate hypothesis
+# (P16, P17, IP1).
 def demands_dms(e: S.Ev, bh: Bool, l: S.Level) -> Bool:
   match e:
     case S.Stop{req, dms}:
@@ -183,7 +184,9 @@ def demands_dms(e: S.Ev, bh: Bool, l: S.Level) -> Bool:
 # (docs/phase3-design.md §2, P1..P21). Each is decided by computation in the certificate.
 # ---------------------------------------------------------------------------
 
-# P1 latched
+# P1 latched. The PTN part is a JET fact (P1a below) and the never-back-to-None part is mixed (P1b:
+# R-0 for the PTN, our reading A-14 for soft stops); the order between the two soft levels is HYP
+# A-1/A-2 (our policy, not JET-documented; A-16)
 def pr_p1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
   S.implies(Bool.not(is_reset(e)), lvl_le(o, S.level_of(f), S.level_of(f2)))
 
@@ -268,11 +271,13 @@ def pr_p14(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
 def pr_p15(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
   S.implies(Bool.not(is_reset(e)), dms_le(S.dms_of(f), S.dms_of(f2)))
 
-# P16 dms_armed_on_demand (positive): a demand arms the DMS when the current is above the threshold
+# P16 dms_armed_on_demand (positive): a demand arms the DMS when the DMV arming verdict holds
+# (plasma current, or per [S7] current OR stored energy, above threshold; A-22)
 def pr_p16(+f: S.Fin, +e: S.Ev, +bh: Bool, +f2: S.Fin) -> Bool:
   S.implies(Bool.and(S.is_idle(S.dms_of(f)), Bool.and(S.ip_of(f), demands_dms(e, bh, S.level_of(f)))), S.is_armed(S.dms_of(f2)))
 
-# P17 dms_frame: nothing arms the DMS but a demand above the threshold
+# P17 dms_frame: nothing arms the DMS but a demand with the DMV arming verdict (plasma current, or
+# per [S7] current OR stored energy, above threshold; A-22)
 def pr_p17(+f: S.Fin, +e: S.Ev, +bh: Bool, +f2: S.Fin) -> Bool:
   S.implies(Bool.and(S.is_idle(S.dms_of(f)), Bool.not(S.is_idle(S.dms_of(f2)))), Bool.and(S.ip_of(f), demands_dms(e, bh, S.level_of(f))))
 
@@ -427,7 +432,9 @@ def reset_guard(+f: S.Fin) -> Bool:
   Bool.and(Bool.or(S.is_ptn(S.level_of(f)), S.is_term(S.wave_of(f))), Bool.not(S.is_armed(S.dms_of(f))))
 
 # D1 a stop request is honoured: the level becomes the least upper bound of the response in
-# force and the requested one (two-sided, where P1 is one-sided)
+# force and the requested one (two-sided, where P1 is one-sided). The primary half is a JET fact
+# (D1b below); the PTN half, D1a, is mixed ([N1] p.13 plus the A-9 switch-off); soft over soft =
+# the maximum is HYP A-1/A-2/A-16 (our policy)
 def pr_d1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
   S.implies(is_stop(e), lvl_eq(S.level_of(f2), lvl_lub(o, S.level_of(f), ev_req(e))))
 
@@ -557,6 +564,7 @@ def e3_phase(jtt_accepted: Bool, w: S.Phase) -> S.Phase:
       w
 
 # E3 a stop moves the waveform phase to Termination exactly when an accepted JTT asks for it
+# ("accepted" = more urgent under o: HYP A-2, our policy, not JET-documented)
 def pr_e3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
   +req = ev_req(e)
   S.implies(is_stop(e),
@@ -611,7 +619,7 @@ def pr_e11(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
 
 # ---------------------------------------------------------------------------
 # Blocker 4 (fidelity to [S1]/[S2]/[S6]): F1 program/waveform, F2 partial power, F3 masks,
-# IP the DMV current threshold. Cell properties like the others.
+# IP the DMV arming verdict (A-22). Cell properties like the others.
 # ---------------------------------------------------------------------------
 
 # F1b a stop request never moves the PROGRAM phase (the JTT switches the waveform: A-24)
@@ -626,6 +634,7 @@ def pr_f1d(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
 # F1e the termination-waveform flag is exactly determined: set by an accepted JTT, cleared by the
 # end of pulse (D10), kept otherwise. Found by the tightness metric after the revision: two states
 # with prog = Termination that differ only in jtt behave the same, so nothing pinned the flag.
+# ("accepted" = more urgent under o: HYP A-2, our policy, not JET-documented)
 def pr_f1e(+o: S.Ord, +f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
   +req = ev_req(e)
   S.implies(Bool.not(is_reset(e)), beq(S.jtt_of(f2), Bool.or(S.jtt_of(f), Bool.and(is_stop(e), Bool.and(S.is_jtt(req), S.lvl_lt(o, S.level_of(f), req))))))
@@ -669,8 +678,9 @@ def pr_f2a(+f: S.Fin, e: S.Ev, +f2: S.Fin) -> Bool:
     case _:
       True{}
 
-# F2d a unit at partial power never returns to full power in the pulse (R-9 as modelled: the PINI
-# stays off; conservative, A-6). Without it a Plasma{True} that restored On would pass every law.
+# F2d a unit at partial power never returns to full power in one step (R-9 as modelled, A-7; a one-step
+# law: through Off the reduction is forgotten, A-34). Without it a Plasma{True} that restored On would
+# pass every law.
 def f2d_unit(u: S.Heat, u2: S.Heat, e: S.Ev) -> Bool:
   S.implies(Bool.and(S.is_reduced(u), Bool.not(is_reset(e))), Bool.not(S.is_on(u2)))
 
@@ -681,14 +691,56 @@ def pr_f2d(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
 def pr_f3b(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
   S.implies(is_comm_masked(e), Bool.and(fin_eq(f, f2), Bool.and(S.is_keep(S.upd_hb(f, e, bh)), S.is_keep(S.upd_tack(f, e, bt, bh)))))
 
-# IP1 below the DMV current threshold the DMS never arms, whatever the event (R-14)
+# IP1 without the DMV arming verdict (plasma current, or per [S7] current OR stored energy, above
+# threshold; A-22) the DMS never arms, whatever the event (R-14)
 def pr_ip1(+f: S.Fin, +f2: S.Fin) -> Bool:
   S.implies(Bool.and(Bool.not(S.ip_of(f)), S.is_idle(S.dms_of(f))), S.is_idle(S.dms_of(f2)))
 
-# IP3 the current verdict is an input ...
+# IP3 the DMV arming verdict (plasma current, or per [S7] current OR stored energy, above
+# threshold; A-22) is an input ...
 def pr_ip3(+e: S.Ev, +f2: S.Fin) -> Bool:
   S.implies(is_ip(e), beq(S.ip_of(f2), ev_ip(e)))
 
 # IP4 ... and only that input, or the accepted end of pulse, moves it
 def pr_ip4(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
   S.implies(Bool.not(beq(S.ip_of(f), S.ip_of(f2))), Bool.or(is_ip(e), Bool.and(is_reset(e), reset_guard(f))))
+
+# ---------------------------------------------------------------------------
+# Revision 4 (2026-09-22): what P1 and D1 say about the PTN and the primary stop ([N1], De
+# Tommasi et al. 2013, EFDA-JET-PR(13)06; PDF pages of the preprint), as named cell properties.
+# They split P1 and D1 into what JET documents (P1a, D1b; with our declared formalisation in D1a,
+# P1b and PIW-after-PTN: A-9, A-14) and what is our policy between the two soft levels (A-1, A-2,
+# A-16). None changes the model; P1a, P1b, D1a and D1b are DERIVED (pymodel/jetprot_laws.py,
+# DERIVED); PIW-after-PTN is derived for the control state but adds the counter frame.
+# ---------------------------------------------------------------------------
+
+# P1a a latched PTN stays latched until the end of pulse ([N1] p.14: "a PIW stop can never
+# preempt a PTN stop")
+def pr_p1a(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
+  S.implies(Bool.and(S.is_ptn(S.level_of(f)), Bool.not(is_reset(e))), S.is_ptn(S.level_of(f2)))
+
+# P1b a stop in force is never cleared except by the end of pulse (mixed: R-0 for the PTN latch;
+# for soft stops our reading, A-14)
+def pr_p1b(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
+  S.implies(Bool.and(Bool.not(S.is_none(S.level_of(f))), Bool.not(is_reset(e))), Bool.not(S.is_none(S.level_of(f2))))
+
+# D1a a PTN request is honoured from ANY state, soft stop in progress included, and leaves both
+# units unpowered ([N1] p.13: PTN stops "can be triggered even after a PIW stop is in execution";
+# the same-step switch-off is A-9)
+def pr_d1a(+e: S.Ev, +f2: S.Fin) -> Bool:
+  S.implies(Bool.and(is_stop(e), S.is_ptn(ev_req(e))),
+          Bool.and(S.is_ptn(S.level_of(f2)), Bool.and(S.unpowered(S.nb_of(f2)), S.unpowered(S.rf_of(f2)))))
+
+# D1b with no stop in force, a soft request (JTT or RTPS) becomes the response: the primary
+# stop is honoured whatever the urgency order
+def pr_d1b(+f: S.Fin, +e: S.Ev, +f2: S.Fin) -> Bool:
+  S.implies(Bool.and(S.is_none(S.level_of(f)), Bool.and(is_stop(e), S.is_soft(ev_req(e)))),
+          lvl_eq(S.level_of(f2), ev_req(e)))
+
+# PIW after PTN: a request that is not a PTN, while the PTN is latched, changes nothing, counters
+# included ([N1] p.13 calls a PIW request "after a PTN stop was already being executed" an
+# "invalid task", said of the shape-controller simulator; the no-op, counters included, is our
+# formalisation, A-14)
+def pr_piw_noop(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
+  S.implies(Bool.and(S.is_ptn(S.level_of(f)), Bool.and(is_stop(e), Bool.not(S.is_ptn(ev_req(e))))),
+          Bool.and(fin_eq(f, f2), Bool.and(S.is_keep(S.upd_hb(f, e, bh)), S.is_keep(S.upd_tack(f, e, bt, bh)))))

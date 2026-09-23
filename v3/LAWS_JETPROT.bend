@@ -3,8 +3,10 @@
 # order, sensitivity C3 as a theorem), corollaries_check. Every step law is universal over
 # the order, the control state, the abstract event and BOTH verdicts, so it holds for every
 # configuration and every counter value. The step laws are P1..P21, the demand and frame laws
-# D1..D18 and E2..E11, the fidelity laws F1..IP4 (blocker 4), and V1 (verdict_frame_*)
-# justifies the certificate's reduced column set.
+# D1..D18 and E2..E11, the fidelity laws F1..IP4 (blocker 4), the five named PTN and primary-stop
+# laws of revision 4 (P1a and D1b restate JET sources; D1a, P1b and PIW-after-PTN add our
+# formalisation: A-9, A-14),
+# and V1 (verdict_frame_*) justifies the certificate's reduced column set.
 # Proven in PROOF_JETPROT_FIN.bend, PROOF_JETPROT_FIN_ALT.bend, PROOF_JETPROT_COR.bend and
 # PROOF_JETPROT.bend.
 
@@ -17,8 +19,8 @@ import ./enum_jetprot.bend as E
 
 # C1: for EVERY order, control state, abstract event and pair of counter verdicts, the
 # control invariants are preserved, the counter commands have the right shape, and the step
-# laws P1..P21, D1..D18, E2..E11 and F1b..IP4 hold (2 x 462 336 cells: 10 752 control states
-# x 43 columns)
+# laws P1..P21, D1..D18, E2..E11, F1b..IP4 and the named PTN/primary-stop laws of revision 4 hold
+# (2 x 462 336 cells: 10 752 control states x 43 columns)
 law finite_check:
   {E.check_fin(S.Ord1{}) == True{} : Bool}
 
@@ -58,21 +60,25 @@ law pres_i6:
   for +e: S.Ev
   {S.i6_hb(S.step_o(o, s, e)) == True{} : Bool}
 
-# P21, the theorem: every trace over the abstract alphabet (any configuration) stays safe
+# T, the theorem: every trace over the abstract alphabet (any configuration) stays safe
 law traces_safe:
   for +o: S.Ord
   for +trace: List<&2, S.Ev>
   {S.inv_all(S.run_o(o, trace, S.init())) == True{} : Bool}
 
-# the same over the concrete alphabet through either configuration instance
+# the same over the concrete alphabet through every configuration instance (Inst1..Inst4)
 law traces_safe_concrete:
   for +i: S.Inst
   for +trace: List<&2, S.CEv>
   {S.inv_all(S.run_c(i, trace, S.init())) == True{} : Bool}
 
-# --- the step laws (P1..P20), universal over the cell (order, state, event, verdicts) ---
+# --- the step laws (P1..P21), universal over the cell (order, state, event, verdicts) ---
 
-# P1: stops never degrade (e != Reset => level' >= level)
+# P1: stops never degrade (e != Reset => level' >= level). Three contents: the PTN stays latched
+# (JET fact, P1a below); a stop never returns to None (mixed: R-0 for the PTN, our reading A-14
+# for soft stops, P1b below); that between the two soft levels the level never goes down in the
+# chosen order is HYP A-1/A-2 (our policy, not JET-documented: JET resolves a second alarm with
+# a configured secondary table, A-16)
 law latched:
   for +o: S.Ord
   for +f: S.Fin
@@ -181,7 +187,8 @@ law dms_monotone:
   for +bh: Bool
   {Spec.pr_p15(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
-# P16: a demand wired to the DMS arms it when the current is above the DMV threshold (IP2, abstract form)
+# P16: a demand wired to the DMS arms it when the DMV arming verdict holds (plasma current, or per [S7]
+# current OR stored energy, above threshold; A-22) (IP2, abstract form)
 law dms_armed_on_demand:
   for +o: S.Ord
   for +f: S.Fin
@@ -190,7 +197,8 @@ law dms_armed_on_demand:
   for +bh: Bool
   {Spec.pr_p16(f, e, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
-# P17: nothing else arms the DMS, and nothing does below the threshold
+# P17: nothing else arms the DMS, and nothing does without the DMV arming verdict (plasma current, or
+# per [S7] current OR stored energy, above threshold; A-22)
 law dms_frame:
   for +o: S.Ord
   for +f: S.Fin
@@ -238,7 +246,10 @@ law reset_refused_mid_pulse:
 
 # --- the DEMAND and FRAME laws (D1..D18, audit #4): the sequencer does its job ---
 
-# D1: a stop request is honoured -- the level becomes the more urgent of the one in force and the requested one
+# D1: a stop request is honoured -- the level becomes the more urgent of the one in force and the requested one.
+# The primary (level None) half is a JET fact (D1b below); the PTN half is named separately as D1a below
+# (mixed: [N1] p.13 plus the A-9 switch-off of both units);
+# soft over soft = the maximum under the chosen order is HYP A-1/A-2/A-16 (our policy, physically two-sided)
 law d1_stop_honoured:
   for +o: S.Ord
   for +f: S.Fin
@@ -403,16 +414,33 @@ law d18_heartbeat_frame:
 # --- the remaining DEMAND and FRAME laws (E2..E11, audit #5; E1 went with `Inhibited`, A-26) ---
 #
 # These close the eight holes D1..D18 still left open (eleven of twenty-five new mutants survived
-# them). Five of the laws above are DERIVED rather than independent evidence and are kept only so
-# the earlier write-up stays checkable; a report must not present them as independent (audit #5
-# sections 5 and 8; the list is `DERIVED` in pymodel/jetprot_ref.py):
-#   D3_advance_to_termination_ramps  subsumed by e4_advance_units (which covers all six advances)
-#   D5_hb_counts                     one half of e6_hb_tick_exact
-#   D9_heatack_fires                 one half of e11_heatack_exact
-#   D10_reset_accepted_when_safe     pointwise implied by P20_reset_guarded; its job is to break
-#                                    P20's self-reference (P20 quotes the model's own reset_ok,
-#                                    D10 spells the guard out)
-#   D12_phase_frame                  its Stop clause is subsumed by e3_stop_phase_exact
+# them). The numbers E9 and E10 were never used: no file of the repository (laws, spec, oracle,
+# results, docs) mentions them, so the gap is in the numbering only, not a withdrawn law.
+#
+# Some laws of this file are DERIVED rather than independent evidence and are kept as named
+# statements; a report must not present them as independent (audit #5 sections 5 and 8). The
+# canonical list is `DERIVED` in pymodel/jetprot_laws.py. Eight predate revision 4 (the last two,
+# ramping_never_returns and stop_overrides_heat, were found derived by the audit of 2026-09-22):
+#   d3_advance_to_termination_ramps  (above) in e4_advance_units, which covers all six advances
+#   d5_hb_counts                     (above) one half of e6_hb_tick_exact
+#   d9_heatack_fires                 (above) one half of e11_heatack_exact
+#   d10_reset_accepted_when_safe     (above) pointwise implied by P20 reset_guarded; its job is to
+#                                    break P20's self-reference (P20 quotes the model's own
+#                                    reset_ok, D10 spells the guard out)
+#   f1b_stop_keeps_prog              (below) the Stop case of d12_phase_frame, the named statement
+#                                    of A-24
+#   f2a_local_reduces                (below) the reduction half of P9 local_is_local, the named
+#                                    statement of R-9
+#   ramping_never_returns            (above) implied by P5 heat_permissive and P7 heat_frame: a
+#                                    unit regains power only by its own HeatOn (P7), which P5
+#                                    accepts only from Off
+#   stop_overrides_heat              (above) implied by P5 heat_permissive and P7 heat_frame: under
+#                                    a stop no HeatOn is accepted (P5) and nothing else gives
+#                                    power (P7)
+# and four of the five named PTN/primary-stop laws of revision 4 (below: p1a, p1b, d1a, d1b) are named cases
+# of P1, D1, P2 and the frame laws. The fifth, piw_after_ptn_is_noop, is derived for the control
+# state but not for the counters: no earlier law forbade an increment of the heartbeat counter on
+# a Stop while the PTN is latched, so it is independent evidence.
 
 # E2: the DMS fires only on the plant acknowledgement or on the acknowledgement timeout
 law e2_dms_fire_frame:
@@ -423,7 +451,8 @@ law e2_dms_fire_frame:
   for +bh: Bool
   {Spec.pr_e2(f, e, bt, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
-# E3: a stop moves the WAVEFORM phase to Termination exactly when an accepted JTT asks for it
+# E3: a stop moves the WAVEFORM phase to Termination exactly when an accepted JTT asks for it.
+# "Accepted" means more urgent under o: HYP A-2 (our policy, not JET-documented)
 law e3_stop_phase_exact:
   for +o: S.Ord
   for +f: S.Fin
@@ -488,18 +517,24 @@ law e11_heatack_exact:
 
 # --- the fidelity laws of blocker 4 (docs/STATUS_2026-09-21.md): F1 the two views of time
 # ([S2] 3.4, A-24), F2 partial power (R-9), F3 the masked reliability checks (R-13, A-21), IP
-# the DMV current threshold (R-14). F1b, F1d, F2a, F3b, IP1, IP3, IP4 are cell laws decided by
+# the DMV arming verdict (R-14; plasma current, or per [S7] current OR stored energy, above
+# threshold; A-22). F1b, F1d, F2a, F3b, IP1, IP3, IP4 are cell laws decided by
 # the certificate (group g_f, with F1e, F2d and F4); F1a, F1c and IP2 are proven directly. ---
 
-# F1a: a concrete alarm reads Table 1 on the PROGRAM phase, whatever the waveform flag and
-# the rest of the state (A-24). Stated against the enumerator's independent transcription of
-# the matrix and the masks, so a read on the waveform phase, a wrong cell or an ignored mask
-# all refute it.
+# F1a: a concrete alarm reads its table on the PROGRAM phase, whatever the waveform flag and
+# the rest of the state (A-24): the primary table (Table 1) when no stop is in force, the
+# instance's secondary table when one is (revision 4; for Inst1..Inst3 the secondary IS the
+# primary entry, so for them this is the law of revisions 1-3). Stated against the enumerator's
+# independent transcription of the matrix, the masks and the secondary rule, so a read on the
+# waveform phase, a wrong cell, an ignored mask, a secondary read with no stop in force or a
+# primary read under a stop all refute it. That the tables are read at the advancing programme
+# phase, also during a stop, is HYP A-24/A-30 (our reading, not JET-documented: [N1] describes,
+# for the shape controller, a stop configuration frozen at the primary stop's time window).
 law f1a_table_reads_prog:
   for +i: S.Inst
   for +f: S.Fin
   for +t: S.Trig
-  {Spec.lvl_eq(Spec.ev_req(S.concretize(i, f, S.XAlarm{t})), E.m_alarm(i, S.prog_of(f), t)) == True{} : Bool}
+  {Spec.lvl_eq(Spec.ev_req(S.concretize(i, f, S.XAlarm{t})), E.m_pick(E.m_is_none(S.level_of(f)), i, S.prog_of(f), t)) == True{} : Bool}
 
 # F1b: a stop request never moves the program phase (the JTT switches the waveform)
 law f1b_stop_keeps_prog:
@@ -525,7 +560,8 @@ law f1d_wave_frame:
   {Spec.pr_f1d(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # F1e: the waveform flag is exactly determined: set by an accepted JTT, cleared by the end of
-# pulse, kept otherwise (the tightness metric found two states that differed only in the flag)
+# pulse, kept otherwise (the tightness metric found two states that differed only in the flag).
+# "Accepted" means more urgent under o: HYP A-2 (our policy, not JET-documented)
 law f1e_jtt_exact:
   for +o: S.Ord
   for +f: S.Fin
@@ -554,7 +590,8 @@ law f2a_local_reduces:
   for +bh: Bool
   {Spec.pr_f2a(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
-# F2d: a unit at partial power never returns to full power in the pulse (R-9 as modelled, A-6)
+# F2d: a unit at partial power never returns to full power in one step (R-9 as modelled, A-7; a one-step
+# law: through Off the reduction is forgotten, A-34)
 law f2d_reduced_never_returns:
   for +o: S.Ord
   for +f: S.Fin
@@ -573,7 +610,8 @@ law f3b_commfault_masked_is_noop:
   for +bh: Bool
   {Spec.pr_f3b(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
-# IP1: below the DMV current threshold the DMS never arms, whatever the event (R-14)
+# IP1: without the DMV arming verdict (plasma current, or per [S7] current OR stored energy, above
+# threshold; A-22) the DMS never arms, whatever the event (R-14)
 law ip1_low_never_arms:
   for +o: S.Ord
   for +f: S.Fin
@@ -582,8 +620,8 @@ law ip1_low_never_arms:
   for +bh: Bool
   {Spec.pr_ip1(f, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
-# IP2 (demand, concrete form): with the current above the threshold, the DMS idle, and a
-# concrete alarm that the instance maps to PTN and wires to the DMS inside the window, the
+# IP2 (demand, concrete form): with the DMV arming verdict (plasma current, or per [S7] current OR
+# stored energy, above threshold; A-22), the DMS idle, and a concrete alarm that the instance maps to PTN and wires to the DMS inside the window, the
 # alarm arms the DMS in the same step. The abstract form is P16.
 law ip2_arms_on_demand:
   for +i: S.Inst
@@ -595,7 +633,20 @@ law ip2_arms_on_demand:
   for +h_req: {S.dms_req(S.wave_of(f), t) == True{} : Bool}
   {S.is_armed(S.dms_of(S.fin_of(S.step_c(i, S.St{f, 0n, 0n}, S.XAlarm{t})))) == True{} : Bool}
 
-# IP3: the current verdict is an input -- Ip{ok} writes ok ...
+# inst4_second_alarm_ptn (revision 4, concrete): in the illustrative instance 4 (A-35), an alarm
+# that arrives during a soft stop (JTT or RTPS) and whose primary entry asks for any response
+# latches the PTN in the same step: the case of A-16 (a DHS read as JTT during an RTPS stop, which
+# instances 1-3 ignore) gives PTN here. Mechanism documented ([S1] R-6, primary and secondary stop
+# responses); the content of the secondary table is fabricated (JET's is unpublished).
+law inst4_second_alarm_ptn:
+  for +s: S.St
+  for +t: S.Trig
+  for +h_soft: {S.is_soft(S.level_of(S.fin_of(s))) == True{} : Bool}
+  for +h_cfg: {S.is_none(S.masked_table(S.Inst4{}, S.prog_of(S.fin_of(s)), t)) == False{} : Bool}
+  {S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, s, S.XAlarm{t})))) == True{} : Bool}
+
+# IP3: the DMV arming verdict (plasma current, or per [S7] current OR stored energy, above threshold;
+# A-22) is an input -- Ip{ok} writes ok ...
 law ip3_ip_is_input:
   for +o: S.Ord
   for +f: S.Fin
@@ -612,6 +663,71 @@ law ip4_ip_frame:
   for +bt: Bool
   for +bh: Bool
   {Spec.pr_ip4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+
+# --- revision 4 (2026-09-22): what P1 and D1 say about the PTN and the primary stop, as named laws ---
+#
+# Main source [N1]: De Tommasi et al. 2013, EFDA-JET-PR(13)06 (PDF pages of the preprint). P1a and D1b
+# restate JET sources; D1a (same-step switch-off: A-9), P1b (soft stops: our reading, A-14) and
+# PIW-after-PTN (the no-op, counters included: our formalisation, A-14) are mixed. Each is a
+# cell law decided by the certificate (group g_j inside g_f). Four are DERIVED (named cases of P1,
+# D1, P2 and the frame laws); piw_after_ptn_is_noop is derived for the control state only (its
+# counter part is new). They are stated apart so that what JET documents can be
+# cited without the soft-over-soft policy of P1 and D1 (A-1, A-2, A-16). The cap of "a maximum of
+# two in sequence" ([N1] p.13; that it counts soft stops only is our reading) is not a separate law:
+# with two soft levels and a strict order it holds by construction (A-2).
+
+# P1a: a latched PTN stays latched until the end of pulse. [N1] p.14: "a PIW stop can never
+# preempt a PTN stop".
+law p1a_ptn_latched:
+  for +o: S.Ord
+  for +f: S.Fin
+  for +e: S.Ev
+  for +bt: Bool
+  for +bh: Bool
+  {Spec.pr_p1a(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+
+# P1b: a stop in force (JTT, RTPS or PTN) is never cleared except by the end of pulse (mixed: R-0
+# for the PTN latch; for soft stops our reading, A-14)
+law p1b_stop_never_cleared:
+  for +o: S.Ord
+  for +f: S.Fin
+  for +e: S.Ev
+  for +bt: Bool
+  for +bh: Bool
+  {Spec.pr_p1b(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+
+# D1a: a PTN request is honoured from ANY state, a soft stop in progress included, and leaves
+# both units unpowered. [N1] p.13: PTN stops "can be triggered even after a PIW stop is in
+# execution" (mixed: the same-step switch-off of both units is A-9).
+law d1a_ptn_honoured:
+  for +o: S.Ord
+  for +f: S.Fin
+  for +e: S.Ev
+  for +bt: Bool
+  for +bh: Bool
+  {Spec.pr_d1a(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+
+# D1b: with no stop in force, a soft request (JTT or RTPS) becomes the response: the primary stop
+# is honoured, under either urgency order
+law d1b_primary_honoured:
+  for +o: S.Ord
+  for +f: S.Fin
+  for +e: S.Ev
+  for +bt: Bool
+  for +bh: Bool
+  {Spec.pr_d1b(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
+
+# PIW after PTN: a request that is not a PTN, while the PTN is latched, changes nothing, both
+# counter commands included. [N1] p.13 calls a PIW request "after a PTN stop was already being
+# executed" an "invalid task" (said of the shape-controller simulator); the no-op, counters
+# included, is our formalisation (A-14).
+law piw_after_ptn_is_noop:
+  for +o: S.Ord
+  for +f: S.Fin
+  for +e: S.Ev
+  for +bt: Bool
+  for +bh: Bool
+  {Spec.pr_piw_noop(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}
 
 # --- V1: the verdict domain of the certificate (audit #5, H13 as a theorem) ---
 #

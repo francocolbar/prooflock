@@ -1,10 +1,12 @@
 """recheck.py - the method gates that are decided OUTSIDE the Bend checker (docs/phase3-design.md §5):
 
-  C5  independent re-check of the certificate: every cell of the Bend model (bridge.mjs) is
-      compared with the Python reference model (pymodel/jetprot_ref.py, written from the design
-      document) and every law is re-evaluated in Python on the Bend-produced next state; the
-      concrete layer (concretize) is compared on every (instance, phase, event); the concrete
-      reachable set (Fin, hb, tack) is enumerated and checked against inv_all.
+  C5  re-check of the certificate by re-execution in another language (not an independent
+      implementation: docs/phase3-design.md §9a H23): every cell of the Bend model (bridge.mjs)
+      is compared with the Python reference model (pymodel/jetprot_ref.py, a port of the Bend
+      model) and the 62 cell checks of pymodel/jetprot_laws.py (LAWS) are re-evaluated in Python
+      on the Bend-produced next state; the concrete layer (concretize) is compared on every
+      (instance, phase, event); the concrete reachable set (Fin, hb, tack) is enumerated and
+      checked against inv_all.
   C2  vacuity / coverage: per law, the number of certificate cells and of reachable cells where
       the hypothesis holds (zero = vacuous, below threshold = warning); whether the conclusion is
       falsifiable somewhere in the domain; the cells constrained by no non-frame law; identity
@@ -13,11 +15,19 @@
   C6  the mutation score: planted defects in the reference model vs the law set. The laws, the
       invariants and the conformance checks live in pymodel/jetprot_laws.py and read the
       specification constants (pymodel/spec_consts.py), never the model ones, so a mutated
-      constant cannot drag the oracle along (that is how HB_MAX = 4 survived before).
+      constant cannot drag the oracle along (that is how HB_MAX = 4 survived before). A mutant
+      that survives is accepted only if it is EQUIVALENT, and that is computed: its step_fin,
+      upd_hb and upd_tack are compared with the model's on all 924 672 certificate cells, its
+      counter layer (verdicts, apply, step_st) on 12 042 240 concrete cells and its concretize
+      on 1 032 192 (instance, control state, plant event) cells (C6.equivalence); a single
+      differing cell fails the gate.
 
-Usage: py -3.14 bend-spike/v3/recheck.py [--full]   Writes: recheck.json. Exit 0 iff all gates pass.
+Usage: py -3.14 v3/recheck.py [--full] [--jobs N]   Writes: recheck.json. Exit 0 iff all gates pass.
        --full also runs every mutant against the WHOLE law set (no early exit) to report how
-       many laws catch each one (laws_per_kill); about 8x slower.
+       many laws catch each one (laws_per_kill); serially the census went from about 540 s to
+       5 884 s (runs of 2026-09-22 and 2026-09-23, on different days: the ratio is indicative).
+       --jobs N runs C5, C2, C3 and the C6 census in a pool of N processes (default cpu_count - 4);
+       --jobs 1 is the serial path. The results are the same, in the same order, either way.
 """
 import json
 import os
@@ -54,6 +64,8 @@ def catching_laws(early=True):
         return sorted(caught)
     if L.concretize_conforms() and hit("C1_concretize_is_the_configuration"):
         return sorted(caught)
+    if L.inst4_second_alarm_ptn() and hit("inst4_second_alarm_ptn"):
+        return sorted(caught)
     for o in (1, 2):
         for s in R.all_states():
             for e in R.EVENTS:
@@ -67,7 +79,7 @@ def catching_laws(early=True):
                 if h(s) and not c(s) and hit("cor_" + n):
                     return sorted(caught)
     # the preservation laws and the trace theorem, over the concrete reachable set
-    for inst in (1, 2, 3):
+    for inst in C.INSTANCES:
         states, _ = R.reachable_concrete(inst)
         for st in states:
             if not L.inv_all(st) and hit("traces_safe_concrete"):
@@ -153,19 +165,21 @@ def c5(bridge, results):
                     lawfail += 1
                     if lawfail <= 5:
                         print(f"[C5] LAW FAILS on Bend cell o={o} s={s} e={e}: {fails}")
-    # the concrete layer: the fields concretize reads (program phase, waveform flag) x the plant events
+    # the concrete layer: the fields concretize reads (program phase, waveform flag, level in force:
+    # which table an alarm reads, revision 4) x the plant events
     cmism = 0
-    for inst in (1, 2, 3):
+    for inst in C.INSTANCES:
         for ph in R.PHASES:
             for j in (False, True):
-                s = (ph, j, "LNone", "DmsIdle", True, True, "Off", "Off")
-                for c in R.CEVENTS:
-                    ev = ev_from_json(bridge.ask({"concretize": {"inst": inst, "fin": fin_to_json(s), "cev": cev_to_json(c)}})["ev"])
-                    if ev != R.concretize(inst, s, c):
-                        cmism += 1
+                for lv in R.LEVELS:
+                    s = (ph, j, lv, "DmsIdle", True, True, "Off", "Off")
+                    for c in R.CEVENTS:
+                        ev = ev_from_json(bridge.ask({"concretize": {"inst": inst, "fin": fin_to_json(s), "cev": cev_to_json(c)}})["ev"])
+                        if ev != R.concretize(inst, s, c):
+                            cmism += 1
     # concrete reachability (the Python model, now known to agree with Bend cell by cell)
     reach = {}
-    for inst in (1, 2, 3):
+    for inst in C.INSTANCES:
         states, edges = R.reachable_concrete(inst)
         reach[inst] = {"states": len(states), "max_hb": max(x[1] for x in states), "max_tack": max(x[2] for x in states),
                        "all_inv_all": all(L.inv_all(x) for x in states),
@@ -178,7 +192,7 @@ def c5(bridge, results):
                      "concretize_mismatches": cmism, "concrete_reachability": reach, "seconds": round(time.perf_counter() - t0, 1), "ok": ok}
     print(f"[C5] {cells} Bend cells vs Python: {mism} mismatches, {lawfail} law failures; concretize mismatches {cmism}; "
           f"concrete reachable inst1={reach[1]['states']} (hb<={reach[1]['max_hb']}, tack<={reach[1]['max_tack']}), "
-          f"inst2={reach[2]['states']}; all satisfy inv_all: {all(v['all_inv_all'] for v in reach.values())}  [{results['C5']['seconds']} s] -> {'ok' if ok else 'FAIL'}")
+          f"inst2={reach[2]['states']}, inst3={reach[3]['states']}, inst4={reach[4]['states']}; all satisfy inv_all: {all(v['all_inv_all'] for v in reach.values())}  [{results['C5']['seconds']} s] -> {'ok' if ok else 'FAIL'}")
     return ok
 
 
@@ -297,28 +311,28 @@ def c3(results):
     return True
 
 
-def c6(results, full=False):
-    """Mutation score against the ADVERSARIAL bank: 62 defects written by two independent reviews
-    whose brief was to break the law set, plus 11 defects of the constants and of the oracle itself
-    (M63-M73, blocker 2), plus the 17 flags that were written alongside the laws. The flag number is
+def c6(results, full=False, jobs=1):
+    """Mutation score against the ADVERSARIAL bank of 76 defects: 62 written by two separate
+    automated reviews (README §7) whose brief was to break the law set, 11 defects of the constants
+    and of the oracle itself (M63-M73, blocker 2) and 3 of the secondary stop response (W01-W03,
+    revision 4); plus the 17 flags that were written alongside the laws. The flag number is
     the weaker measure and is reported as such. Every public symbol of the model is restored after
-    each mutant, so a patch may replace constants as well as functions."""
+    each mutant, so a patch may replace constants as well as functions.
+    jobs > 1 runs the census in a process pool (c6_tasks / c6_assemble); jobs == 1 is the serial loop."""
+    if jobs > 1:
+        t0 = time.perf_counter()
+        parts = {}
+        run_pool(c6_tasks(full), jobs, lambda tag, res: c6_progress(parts, tag, res))
+        return c6_assemble(results, parts, full, t0)
     import mutants
     t0 = time.perf_counter()
     ORIG = {k: getattr(R, k) for k in dir(R) if not k.startswith("_")}
-    bank = {}
-    for name, plaus, desc, patch in mutants.MUTANTS:
-        try:
-            for k, v in patch().items():
-                assert k in ORIG, (name, k)
-                setattr(R, k, v)
-            rec = {"plausibility": plaus, "description": desc, "caught_by": catching_laws()}
-            if full:
-                rec["caught_by_all"] = catching_laws(early=False)
-            bank[name] = rec
-        finally:
-            vars(R).update(ORIG)
-    survivors = [n for n, v in bank.items() if not v["caught_by"]]
+    bank, equivalence = {}, {}
+    for entry in mutants.MUTANTS:
+        name, rec, eq = run_mutant(entry, full, ORIG)
+        bank[name] = rec
+        if eq is not None:
+            equivalence[name] = eq
     flags = {}
     for m in R.MUT:
         try:
@@ -326,18 +340,121 @@ def c6(results, full=False):
             flags[m] = catching_laws()
         finally:
             R.MUT[m] = False
+    return c6_summary(results, bank, flags, full, t0, equivalence=equivalence)
+
+
+def run_mutant(entry, full, ORIG):
+    """One mutant of the bank, the same code in the serial loop and in a pool worker: patch the
+    model, run the law set, restore every public symbol. A SURVIVOR (no law catches it) is then
+    compared with the unmutated model cell by cell (step_relation_diff); a caught mutant needs no
+    comparison, and its third value is None."""
+    name, plaus, desc, patch = entry
+    over = patch()
+    try:
+        for k, v in over.items():
+            assert k in ORIG, (name, k)
+            setattr(R, k, v)
+        rec = {"plausibility": plaus, "description": desc, "caught_by": catching_laws()}
+        if full:
+            rec["caught_by_all"] = catching_laws(early=False)
+    finally:
+        vars(R).update(ORIG)
+    eq = None if rec["caught_by"] else step_relation_diff(over, ORIG)
+    return name, rec, eq
+
+
+def step_relation_diff(over, ORIG):
+    """How many cells of the certificate domain -- both urgency orders x the 10 752 control states x
+    the 43 certificate columns (every event, with the four verdict pairs exactly where the
+    certificate takes them: verdicts_for), 924 672 cells -- give a different step_fin, upd_hb or
+    upd_tack once the patch `over` is applied. 0 means the mutant's transition relation IS the
+    model's, so no law can tell them apart: an equivalent mutant, now computed rather than accepted
+    by name. The domain is the unmutated model's (ORIG); the patch is applied per control state and
+    the model restored before the reference values are computed, so memory stays flat.
+    The counter layer (verdicts, apply, step_st) is compared on 12 042 240 concrete cells: both
+    orders x 10 752 states x hb 0..HB_MAX+1 x tack 0..ACK_MAX+1 x the 28 events, where the
+    verdicts come from the counters, not from verdicts_for (C3 cannot pin this layer: it checks
+    step_c against the model's own step_st, which moves with the mutant). concretize is compared on
+    every instance x control state x plant event, 1 032 192 cells (C1 checks it on 112 control
+    states per instance only, and C3 against the mutant's own concretize); S0 pins INIT, S1 the
+    invariant, C3 step_c = step_st o concretize."""
+    states, events, verdicts_for = ORIG["all_states"](), ORIG["EVENTS"], ORIG["verdicts_for"]
+    cols = [(e, bt, bh) for e in events for bt, bh in verdicts_for(e)]
+    cells = differing = 0
+    try:
+        for o in (1, 2):
+            for s in states:
+                for k, v in over.items():
+                    setattr(R, k, v)
+                try:
+                    mut = [(R.step_fin(o, s, e, bt, bh), R.upd_hb(s, e, bh), R.upd_tack(s, e, bt, bh)) for e, bt, bh in cols]
+                finally:
+                    vars(R).update(ORIG)
+                ref = [(R.step_fin(o, s, e, bt, bh), R.upd_hb(s, e, bh), R.upd_tack(s, e, bt, bh)) for e, bt, bh in cols]
+                cells += len(cols)
+                differing += sum(1 for a, b in zip(mut, ref) if a != b)
+    finally:
+        vars(R).update(ORIG)
+    counters = [(hb, tack) for hb in range(ORIG["HB_MAX"] + 2) for tack in range(ORIG["ACK_MAX"] + 2)]
+    ccells = cdiff = 0
+    try:
+        for o in (1, 2):
+            for s in states:
+                for k, v in over.items():
+                    setattr(R, k, v)
+                try:
+                    mut = [R.step_st(o, (s, hb, tack), e) for hb, tack in counters for e in events]
+                finally:
+                    vars(R).update(ORIG)
+                ref = [R.step_st(o, (s, hb, tack), e) for hb, tack in counters for e in events]
+                ccells += len(ref)
+                cdiff += sum(1 for a, b in zip(mut, ref) if a != b)
+    finally:
+        vars(R).update(ORIG)
+    kcells = kdiff = 0
+    try:
+        for s in states:
+            for k, v in over.items():
+                setattr(R, k, v)
+            try:
+                mut = [R.concretize(i, s, c) for i in C.INSTANCES for c in ORIG["CEVENTS"]]
+            finally:
+                vars(R).update(ORIG)
+            ref = [R.concretize(i, s, c) for i in C.INSTANCES for c in ORIG["CEVENTS"]]
+            kcells += len(ref)
+            kdiff += sum(1 for a, b in zip(mut, ref) if a != b)
+    finally:
+        vars(R).update(ORIG)
+    return {"cells": cells, "differing": differing, "concrete_cells": ccells, "concrete_differing": cdiff,
+            "concretize_cells": kcells, "concretize_differing": kdiff}
+
+
+def c6_summary(results, bank, flags, full, t0, t_end=None, equivalence=None):
+    """The C6 verdict and its record, from the bank (in mutants.MUTANTS order), the flags (in R.MUT
+    order) and the cell comparison of every survivor with the model (equivalence, by name)."""
+    survivors = [n for n, v in bank.items() if not v["caught_by"]]
     flag_survivors = [n for n, v in flags.items() if not v]
-    # M06 is an equivalent mutant: its transition relation differs from the model's on 0 cells,
-    # so no law can distinguish it. Verified rather than assumed.
-    equivalent = [n for n in survivors if n.startswith("M06")]
+    # A survivor is accepted only as an EQUIVALENT mutant, and that is computed, not assumed from its
+    # name: its step_fin, upd_hb and upd_tack must equal the model's on every one of the 924 672
+    # certificate cells, its step_st on every one of the 12 042 240 concrete cells and its
+    # concretize on every one of the 1 032 192 (instance, control state, plant event) cells
+    # (step_relation_diff). A survivor that differs on even one cell fails C6.
+    equivalence = {n: (equivalence or {}).get(n) for n in survivors}
+    missing = [n for n, v in equivalence.items() if v is None]
+    if missing:
+        raise RuntimeError(f"C6: no cell comparison for the survivors {missing}")
+    equivalent = [n for n in survivors
+                  if all(equivalence[n][k] == 0 for k in ("differing", "concrete_differing", "concretize_differing"))]
     ok = set(survivors) <= set(equivalent) and not flag_survivors
     batches = {"M01-M37 (review 1)": [n for n in bank if n[:3] <= "M37"], "N01-N25 (review 2)": [n for n in bank if n.startswith("N")],
-               "M63-M73 (constants and oracle)": [n for n in bank if n.startswith("M6") or n.startswith("M7")]}
+               "M63-M73 (constants and oracle)": [n for n in bank if n.startswith("M6") or n.startswith("M7")],
+               "W01-W03 (revision 4, secondary)": [n for n in bank if n.startswith("W")]}
     by_batch = {b: {"killed": sum(1 for n in ns if bank[n]["caught_by"]), "total": len(ns)} for b, ns in batches.items()}
     results["C6"] = {"bank": bank, "killed": len(bank) - len(survivors), "total": len(bank),
                      "by_batch": by_batch, "survivors": survivors, "known_equivalent": equivalent,
+                     "equivalence": equivalence,
                      "flags_killed": len(flags) - len(flag_survivors), "flags_total": len(flags),
-                     "flag_survivors": flag_survivors, "seconds": round(time.perf_counter() - t0, 1), "ok": ok}
+                     "flag_survivors": flag_survivors, "seconds": round((t_end or time.perf_counter()) - t0, 1), "ok": ok}
     if full:
         per = {n: len(v["caught_by_all"]) for n, v in bank.items() if v["caught_by_all"]}
         hist = {}
@@ -346,20 +463,229 @@ def c6(results, full=False):
         results["C6"]["laws_per_kill"] = {"per_mutant": per, "histogram": dict(sorted(hist.items())),
                                           "killed_by_a_single_law": sorted(n for n, k in per.items() if k == 1)}
     batch_txt = "; ".join(f"{b}: {v['killed']}/{v['total']}" for b, v in by_batch.items())
+    eq_txt = ", ".join(f"{n} differs from the model on {v['differing']} of {v['cells']} cells,"
+                       f" {v['concrete_differing']} of {v['concrete_cells']} concrete cells"
+                       f" and {v['concretize_differing']} of {v['concretize_cells']} concretize cells"
+                       for n, v in equivalence.items())
     print(f"[C6] adversarial bank: {len(bank) - len(survivors)}/{len(bank)} killed ({batch_txt})"
-          f"{'; survivors ' + str(survivors) + ' (equivalent: ' + str(equivalent) + ')' if survivors else ''}; "
+          f"{'; survivors ' + str(survivors) + ' (' + eq_txt + '; equivalent: ' + str(equivalent) + ')' if survivors else ''}; "
           f"model flags: {len(flags) - len(flag_survivors)}/{len(flags)} -> {'ok' if ok else 'FAIL'}")
     return ok
 
 
-def main(full=False):
+# ---------------------------------------------------------------------------------------------
+# Parallel execution (--jobs N > 1). Tasks go to a spawn-safe process pool as (function, args)
+# with picklable arguments only: a mutant or a flag is named by its INDEX (mutants.MUTANTS holds
+# closures). Each worker imports the modules once and keeps its own ORIG snapshot, taken exactly
+# as the serial loop takes it (after `import mutants`, before any patch), and restores it after
+# every mutant. The parent assembles every result in the canonical serial order; any worker
+# exception stops the pool and propagates, so a mutant can never be silently dropped.
+# ---------------------------------------------------------------------------------------------
+_WORKER = {}
+
+
+def default_jobs():
+    return max(1, (os.cpu_count() or 1) - 4)
+
+
+def _census_state():
+    if "ORIG" not in _WORKER:
+        import mutants
+        _WORKER["mutants"] = mutants
+        _WORKER["ORIG"] = {k: getattr(R, k) for k in dir(R) if not k.startswith("_")}
+    return _WORKER["mutants"], _WORKER["ORIG"]
+
+
+def mutant_task(i, full):
+    """Worker: mutant number i of mutants.MUTANTS, exactly one iteration of the serial loop
+    (run_mutant): (name, record, cell comparison if it survives else None)."""
+    mutants, ORIG = _census_state()
+    return run_mutant(mutants.MUTANTS[i], full, ORIG)
+
+
+def flag_task(j):
+    """Worker: model flag number j of R.MUT, exactly one iteration of the serial flag loop."""
+    _census_state()
+    m = list(R.MUT)[j]
+    try:
+        R.MUT[m] = True
+        caught = catching_laws()
+    finally:
+        R.MUT[m] = False
+    return m, caught
+
+
+def check_task(which):
+    """Worker: C5, C2 or C3 on its own, with its printed report captured and handed back."""
+    import contextlib
+    import io
+    buf, sub = io.StringIO(), {}
+    with contextlib.redirect_stdout(buf):
+        if which == "C5":
+            bridge = Bridge()
+            ok = c5(bridge, sub)
+            bridge.close()
+        elif which == "C2":
+            ok = c2(sub)
+        else:
+            ok = c3(sub)
+    return which, sub[which], ok, buf.getvalue()
+
+
+def mutant_tasks(full):
+    """The 76 mutants as pool tasks (the long ones: submit them first)."""
+    import mutants
+    return [(mutant_task, (i, full), ("mut", i)) for i in range(len(mutants.MUTANTS))]
+
+
+def flag_tasks():
+    """The 17 model flags as pool tasks."""
+    return [(flag_task, (j,), ("flag", j)) for j in range(len(R.MUT))]
+
+
+def c6_tasks(full):
+    return mutant_tasks(full) + flag_tasks()
+
+
+def c6_progress(parts, tag, res):
+    """Store one census result and print progress ([C6] k/76)."""
+    import mutants
+    kind, i = tag
+    if kind == "mut":
+        name, rec, eq = res
+        assert name == mutants.MUTANTS[i][0], (i, name)
+        parts[tag] = res
+        k, n = sum(1 for t in parts if t[0] == "mut"), len(mutants.MUTANTS)
+        say(f"[C6] {k}/{n} {name} -> {'caught by ' + str(len(rec['caught_by'])) + ' law(s)' if rec['caught_by'] else 'SURVIVES'}"
+            + (f", {len(rec['caught_by_all'])} of the whole set" if "caught_by_all" in rec else "")
+            + (f"; differs from the model on {eq['differing']} of {eq['cells']} cells, {eq['concrete_differing']}"
+               f" of {eq['concrete_cells']} concrete cells and {eq['concretize_differing']} of"
+               f" {eq['concretize_cells']} concretize cells" if eq is not None else ""))
+    else:
+        m, caught = res
+        assert m == list(R.MUT)[i], (i, m)
+        parts[tag] = res
+        k, n = sum(1 for t in parts if t[0] == "flag"), len(R.MUT)
+        say(f"[C6] flag {k}/{n} {m} -> {'caught' if caught else 'SURVIVES'}")
+
+
+def c6_assemble(results, parts, full, t0, t_end=None):
+    """The bank in mutants.MUTANTS order and the flags in R.MUT order, then the serial summary."""
+    import mutants
+    n, nf = len(mutants.MUTANTS), len(R.MUT)
+    missing = [i for i in range(n) if ("mut", i) not in parts] + [f"flag{j}" for j in range(nf) if ("flag", j) not in parts]
+    if missing:
+        raise RuntimeError(f"C6 census incomplete, missing {missing}")
+    bank, equivalence = {}, {}
+    for i in range(n):
+        name, rec, eq = parts[("mut", i)]
+        bank[name] = rec
+        if eq is not None:
+            equivalence[name] = eq
+    flags = {}
+    for j in range(nf):
+        m, caught = parts[("flag", j)]
+        flags[m] = caught
+    if len(bank) != n or len(flags) != nf:
+        raise RuntimeError("C6 census: duplicate mutant or flag names")
+    return c6_summary(results, bank, flags, full, t0, t_end, equivalence=equivalence)
+
+
+_SAY_LOCK = []
+
+
+def say(msg):
+    """print() from several threads without interleaving: one locked write per line."""
+    if not _SAY_LOCK:
+        import threading
+        _SAY_LOCK.append(threading.Lock())
+    with _SAY_LOCK[0]:
+        sys.stdout.write(msg if msg.endswith("\n") else msg + "\n")
+        sys.stdout.flush()
+
+
+def low_priority():
+    """Pool initializer: run this worker (and the node bridges it starts, which inherit the class)
+    below normal priority, so the Bend checks running beside the pool get the CPU first. Only the
+    scheduling changes, never a result; if the OS refuses, the worker just runs at normal priority."""
+    try:
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+            k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            # declared types: an undeclared restype truncates the pseudo-handle (-1) on 64-bit Windows
+            k32.GetCurrentProcess.restype = wintypes.HANDLE
+            k32.SetPriorityClass.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+            k32.SetPriorityClass.restype = wintypes.BOOL
+            k32.SetPriorityClass(k32.GetCurrentProcess(), 0x4000)   # BELOW_NORMAL_PRIORITY_CLASS
+        else:
+            os.nice(5)
+    except Exception:
+        pass
+
+
+def run_pool(tasks, jobs, on_result, low_prio=False):
+    """Run (function, args, tag) tasks in a spawn process pool of min(jobs, len(tasks)) workers,
+    submitted in list order (put the long ones first). on_result(tag, result) runs in the calling
+    thread as each task completes. A worker exception, or a worker that dies, kills the pool and
+    is re-raised: the gate fails loudly rather than lose a result. low_prio: every worker runs
+    below normal priority (run.py sets it when the Bend checks run beside the pool)."""
+    import multiprocessing
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    if not tasks:
+        return
+    pool = ProcessPoolExecutor(max_workers=min(jobs, len(tasks)), mp_context=multiprocessing.get_context("spawn"),
+                               initializer=low_priority if low_prio else None)
+    try:
+        futs = {pool.submit(fn, *args): tag for fn, args, tag in tasks}
+        for fut in as_completed(futs):
+            tag = futs[fut]
+            try:
+                res = fut.result()
+            except BaseException as e:
+                say(f"[FAIL] worker task {tag} raised {e.__class__.__name__}: {e}")
+                raise
+            on_result(tag, res)
+    except BaseException:
+        for p in list((getattr(pool, "_processes", None) or {}).values()):
+            try:
+                p.terminate()
+            except Exception:
+                pass
+        pool.shutdown(wait=False, cancel_futures=True)
+        raise
+    pool.shutdown(wait=True)
+
+
+def main(full=False, jobs=1):
     results = {}
-    bridge = Bridge()
-    ok = c5(bridge, results)
-    bridge.close()
-    ok &= c2(results)
-    c3(results)
-    ok &= c6(results, full=full)
+    if jobs > 1:
+        # C5, C2, C3 and the census in one pool; the results keep the serial key order
+        t0 = time.perf_counter()
+        parts, checks = {}, {}
+
+        def on_result(tag, res):
+            if tag[0] == "chk":
+                which, rec, ok_, text = res
+                checks[which] = (rec, ok_)
+                say(text)
+            else:
+                c6_progress(parts, tag, res)
+        run_pool(mutant_tasks(full) + [(check_task, (w,), ("chk", w)) for w in ("C2", "C5", "C3")] + flag_tasks(),
+                 jobs, on_result)
+        ok = True
+        for w in ("C5", "C2", "C3"):
+            results[w] = checks[w][0]
+            if w != "C3":
+                ok &= checks[w][1]
+        ok &= c6_assemble(results, parts, full, t0)
+    else:
+        bridge = Bridge()
+        ok = c5(bridge, results)
+        bridge.close()
+        ok &= c2(results)
+        c3(results)
+        ok &= c6(results, full=full)
     results["all_ok"] = bool(ok)
     with open(os.path.join(HERE, "recheck.json"), "w", encoding="utf-8") as f:
         json.dump(results, f, indent=1, default=str)
@@ -368,4 +694,11 @@ def main(full=False):
 
 
 if __name__ == "__main__":
-    sys.exit(0 if main(full="--full" in sys.argv[1:]) else 1)
+    import argparse
+    _ap = argparse.ArgumentParser(prog="recheck.py")
+    _ap.add_argument("--full", action="store_true")
+    _ap.add_argument("--jobs", type=int, default=default_jobs(), help="worker processes (default: cpu_count - 4; 1 = the serial path)")
+    _a = _ap.parse_args()
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(line_buffering=True)
+    sys.exit(0 if main(full=_a.full, jobs=max(1, _a.jobs)) else 1)

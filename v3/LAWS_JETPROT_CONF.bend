@@ -1,7 +1,8 @@
 # LAWS_JETPROT_CONF.bend - conformance of the configuration instances (P11): the 28 cells of the
 # published Table 1 (R-5; 15 printed, 13 by ditto mark) and the 21 assumed cells (A-4), transcribed a
 # SECOND time, independently of table1_pub/table1 in jetprot.bend; instance 2, the blind row (A-25),
-# instance 3 and the masks (A-21), and the DMS wiring.
+# instance 3 and the masks (A-21), and the DMS wiring. Revision 4: the secondary stop response
+# (instance 4 and the secondary table of every instance, A-35).
 # Proven in PROOF_JETPROT_CONF.bend by computation, one law per cell.
 
 import Base
@@ -404,7 +405,8 @@ law inst3_uses_table1:
   for +t: S.Trig
   {Spec.lvl_eq(S.table(S.Inst3{}, p, t), S.table1(p, t)) == True{} : Bool}
 
-# which checks each instance enables (F3c): the two published instances run both, the third none
+# which checks each instance enables (F3c): instances 1 and 2 run both, instance 3 none (instance 4
+# runs both: inst4_mask, below)
 law mask_inst1_checks_on:
   {S.mask_of(S.Inst1{}) == S.Mask{True{}, True{}} : S.Mask}
 
@@ -420,18 +422,23 @@ law blind_masked_no_response:
   {Spec.lvl_eq(S.masked_table(S.Inst3{}, p, S.Blind{}), S.LNone{}) == True{} : Bool}
 
 # P13 fast_ptn: the Fast trigger reaches the PTN in every phase, from any state, through
-# either configuration instance (A-4: the cells are assumed, the mechanism is R-7)
+# every configuration instance (Inst1..Inst4), whatever stop is in force (A-4: the cells are
+# assumed, the mechanism is R-7; revision 4: under a stop, through the secondary table)
 law fast_ptn:
   for +i: S.Inst
   for +s: S.St
   {S.is_ptn(S.level_of(S.fin_of(S.step_c(i, s, S.XAlarm{S.Fast{}})))) == True{} : Bool}
 
 # C1. The concrete layer: `concretize` is exactly the configuration -- value by value -- and the
-# constructor wiring, for every instance, program phase, waveform flag and plant event (924 cells). The expectation it is
+# constructor wiring, for every instance, program phase, waveform flag, level in force (primary or
+# secondary table, revision 4) and plant event (5 376 cells). The expectation it is
 # compared against (enum_jetprot.bend: m_table1/m_table2/m_trig/m_win) is a fourth, independent
 # transcription of R-5 + A-4 + A-25, of the DMS wiring and of the masks (A-21), so a wrong table
 # cell, a wrong enable window, a table read on the waveform phase (F1a) or an ignored mask is caught
-# here, not only a mis-wired column or a swapped command constructor (audit #5 section 4).
+# here, not only a mis-wired column or a swapped command constructor (audit #5 section 4). Which
+# phase the table is read at is itself HYP A-24: this law pins OUR reading (the programme phase,
+# which keeps advancing during a soft stop, A-30); the waveform phase is only the previous reading,
+# and [N1] describes, for the shape controller, a configuration frozen at the primary stop.
 law concretize_is_the_table:
   {E.check_concretize() == True{} : Bool}
 
@@ -445,3 +452,48 @@ law step_c_is_the_concrete_step:
   for +s: S.St
   for +c: S.CEv
   {S.step_c(i, s, c) == S.step_o(S.Ord1{}, s, S.concretize(i, S.fin_of(s), c)) : S.St}
+
+# --- revision 4 (2026-09-22): the secondary stop response, instance data of the concrete layer.
+# Mechanism: [S1] R-6 ("two levels of stop response, primary, and secondary"); content: not
+# published. Instances 1-3 keep the reading of revisions 1-3, instance 4 is illustrative (A-35). ---
+
+# instance 4 reads the published matrix (instance 1) cell by cell ...
+law inst4_table:
+  for +p: S.Phase
+  for +t: S.Trig
+  {Spec.lvl_eq(S.table(S.Inst4{}, p, t), S.table1(p, t)) == True{} : Bool}
+
+# ... with both reliability checks on
+law inst4_mask:
+  {S.mask_of(S.Inst4{}) == S.Mask{True{}, True{}} : S.Mask}
+
+# the secondary table of instances 1-3 is their masked primary entry (the legacy reading: a second
+# alarm reads the primary table again and the abstract step keeps the maximum, A-2, A-16, A-24)
+law sec_legacy:
+  for +p: S.Phase
+  for +t: S.Trig
+  {Bool.and(Spec.lvl_eq(S.sec_table(S.Inst1{}, p, t), S.masked_table(S.Inst1{}, p, t)),
+   Bool.and(Spec.lvl_eq(S.sec_table(S.Inst2{}, p, t), S.masked_table(S.Inst2{}, p, t)),
+            Spec.lvl_eq(S.sec_table(S.Inst3{}, p, t), S.masked_table(S.Inst3{}, p, t)))) == True{} : Bool}
+
+# the secondary table of instance 4 is the illustrative rule (A-35): the PTN wherever the primary
+# entry asks for any response, no response elsewhere (against the enumerator's own m_sec)
+law sec_inst4:
+  for +p: S.Phase
+  for +t: S.Trig
+  {Spec.lvl_eq(S.sec_table(S.Inst4{}, p, t), E.m_sec(S.Inst4{}, p, t)) == True{} : Bool}
+
+# no secondary entry is less urgent than the primary one, under either urgency order
+law sec_monotone:
+  for +o: S.Ord
+  for +i: S.Inst
+  for +p: S.Phase
+  for +t: S.Trig
+  {Spec.lvl_le(o, S.masked_table(i, p, t), S.sec_table(i, p, t)) == True{} : Bool}
+
+# a PTN primary entry stays a PTN in the secondary table (a PIW never follows a primary PTN, [N1] p.14)
+law sec_primary_ptn:
+  for +i: S.Inst
+  for +p: S.Phase
+  for +t: S.Trig
+  {S.implies(S.is_ptn(S.masked_table(i, p, t)), S.is_ptn(S.sec_table(i, p, t))) == True{} : Bool}

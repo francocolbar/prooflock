@@ -1,10 +1,16 @@
 # Verified reference models for machine-protection logic: a case study on the JET wall-protection chain
 
-> **Note (2026-09-21).** The numbers in this draft correspond to the version of 2026-09-19 (2 688 states, 64 + 117
-> laws, 61/62 mutants). The revision of blocker 4 (`docs/STATUS_2026-09-21.md`: two views of time, partial
-> power, masks, DMV threshold) changed the model to 10 752 states, 73 + 137 laws, 8 soundness lemmas and 2 bounded
-> response theorems; the current numbers are in `README.md` §3 and in `v3/results.json`. This draft will be rewritten
-> with them before the preprint.
+> **Note (2026-09-21, updated 2026-09-23).** The numbers in this draft correspond to the version of 2026-09-19 (2 688
+> states, 64 + 117 laws, 61/62 mutants). The revision of blocker 4 (`docs/STATUS_2026-09-21.md`: two views of time,
+> partial power, masks, DMV threshold) changed the model to 10 752 states, 75 + 137 laws, 8 soundness lemmas and 2
+> bounded response theorems (222 laws); revision 4 of the assumption register (2026-09-22) then brought the laws to
+> 81 + 143 (234 with the 8 + 2) and the bank to 76 mutants. The current numbers are in `README.md` §3 and in
+> `v3/results.json`. This draft will be rewritten with them before the preprint. On 2026-09-23 some statements below
+> were made precise without touching the numbers: what does not grow with the control is the proof text, not the
+> checking time; a negative test is rejected as a refuted `Bool` at a cell the test supplies, not with a
+> counterexample the checker searches for; the re-check re-evaluates the laws as re-encoded in Python; the mutants are
+> defects of the Python reference model, judged by those Python laws; and the 26 demand and frame laws (29 with the
+> three V1 laws) came from two adversarial passes (§3.4).
 
 
 **Preprint draft, revision 1 (2026-09-19).** The working language was Spanish; the draft is now kept in English
@@ -13,44 +19,47 @@ at closing. The numbers in this version come from `v3/results.json` and `v3/rech
 
 ## Abstract
 
-We present a method for writing the discrete logic of a machine-protection system as a total, executable model
-whose properties are proved with a proof checker for every sequence of events and for every configuration, and for
-using that model as a reference oracle against the real implementation. The technical idea is to split the state
-into a finite control and counters governed by commands, to decide every property of the control by computation
-over the whole domain —a certificate of 104 832 cells per urgency order that the checker evaluates in seconds— and
-to lift the result to universal laws by reflection, so that the proof effort does not grow with the size of the
-control. We apply it to a reconstruction, from open publications, of the *Stop Selector* of the JET Real-Time
-Protection Sequencer, its interface with the Pulse Termination Network and the arming of the disruption mitigation
-system: 2 688 control states, 24 event variants, 64 proved laws —including the theorem that no trace leaves the safe
-set, for any configuration matrix and for both possible urgency orders— plus 117 laws of conformance with the
-published configuration.
+We present a method for writing the discrete logic of a machine-protection system as a total, executable model whose
+properties are proved with a proof checker for every sequence of events and for every configuration, and for using
+that model as a reference oracle against the real implementation. The technical idea is to split the state into a
+finite control and counters governed by commands, to decide every property of the control by computation over the
+whole domain —a certificate of 104 832 cells per urgency order that the checker evaluates in seconds— and to lift the
+result to universal laws by reflection, so that the proof text does not grow with the size of the control (the
+checking time does, with the number of cells). We apply it to a reconstruction, from open publications, of the *Stop
+Selector* of the JET Real-Time Protection Sequencer, its interface with the Pulse Termination Network and the arming
+of the disruption mitigation system: 2 688 control states, 24 event variants, 64 proved laws —including the theorem
+that no trace leaves the safe set, for any configuration matrix and for both possible urgency orders— plus 117 laws of
+conformance with the published configuration.
 
-The result we consider most transferable is not the case study but a negative methodological finding. A set of
-safety laws —properties of the form "nothing bad happens"— **is satisfied by the model that does nothing**, and no
-amount of laws or of certified cells reveals that. An adversarial review built that degenerate model against our
-first version and made it pass, together with the vacuity gate we had written precisely to detect it. The answer was
-29 demand and frame laws, and two measures that do see the difference: the **tightness** of the law set (how many of
-the 2 688 next states they admit, on average: 15 before, 1.1 after) and an **adversarial mutant bank** written by
-reviewers whose brief was to break it (21 of 37 defects detected before, 61 of 62 after; the only survivor is
-provably equivalent). A mutation score against a bank written alongside the laws gave 17 of 17 from the start and
-distinguished nothing.
+The result we consider most transferable is not the case study but a negative methodological finding. A set of safety
+laws —properties of the form "nothing bad happens"— **is satisfied by the model that does nothing**, and no amount of
+laws or of certified cells reveals that. An adversarial review built that degenerate model against our first version
+and made it pass, together with the vacuity gate we had written precisely to detect it. The answer, over that review
+and a second adversarial pass, was 26 demand and frame laws (29 with the three V1 laws), and two measures that do see
+the difference: the **tightness** of the law set (how many of the 2 688 next states they admit, on average: 15 before,
+1.1 after) and an **adversarial mutant bank** written by reviewers whose brief was to break it (defects of the Python
+reference model, judged by the laws re-encoded in Python; 21 of 37 defects detected before, 61 of 62 after; the only
+survivor is equivalent by exhaustive comparison in Python, not by a checked proof). A mutation score against a bank
+written alongside the laws gave 17 of 17 from the start and distinguished nothing.
 
-The evidence is completed by ten negative tests that the checker rejects with a counterexample —including one that
-asserts the false certificate, to show that it is computed and not skipped—, an independent cell-by-cell re-check of
-the certificate from another language, and differential testing against an implementation with six planted defects.
-The modelled function is investment protection, not a nuclear safety function; the evidence is about a
-specification, not about a system, and supports no SIL claim. We discuss what the trace theorem does and does not
-establish in terms of IEC 61508. The specifications, the models and the proofs were written by an AI system directed
-and audited by a human author, with the checker as the judge of every claim under law; the five rounds of adversarial
-review were also automated and do **not** constitute independent assessment.
+The evidence is completed by ten negative tests that the checker rejects by refuting a `Bool` at a cell the test
+supplies —including one that asserts the false certificate, to show that it is computed and not skipped—, a
+cell-by-cell re-check of the certificate in another language (a re-execution, not an independent implementation), and
+differential testing against an implementation with six planted defects. The modelled function is investment
+protection, not a nuclear safety function; the evidence is about a specification, not about a system, and supports no
+SIL claim. We discuss what the trace theorem does and does not establish in terms of IEC 61508. The specifications,
+the models and the proofs were written by an AI system directed and audited by a human author, with the checker as the
+judge of every claim under law; the five rounds of adversarial review were also automated and do **not** constitute
+independent assessment.
 
 ## 1. Introduction
 
 *(To be written in the final version; here the argument.)* The machine-protection systems of the large fusion
 experiments (JET, ASDEX Upgrade, KSTAR, ITER) combine a hard-wired layer of fixed sequence with a programmable layer
 whose response logic is configured per pulse. The published evidence of their validation consists of case-based
-behavioural tests: [S3] describes 71 *pulse schedules* as tests of the JET RTPS, and [S6] documents 5 + 4 + 7
-disruptions missed in 2011–2012 due to inhibitions, misconfigured windows and current thresholds. The combinatorics of
+behavioural tests: [S3] describes 71 *pulse schedules* as tests of the JET RTPS, and [S6] documents 5 + 4
+disruptions missed in 2011–2012 because of inhibits and a wrongly set valve window, and 7 more detected only below
+the valve's minimum current because the first thermal quench went undetected. The combinatorics of
 phases, triggers, arrival order, communication faults, watchdog and counters exceeds any case-based test set by orders
 of magnitude, and the matrix changes per pulse. Fusion power plants and the nuclear industry in general will have to
 present evidence of the systematic capability of this software to a regulator; the question is what form that
@@ -94,18 +103,18 @@ a literal transcription of the matrix, and that `step_c` uses it with the correc
 ### 2.4 What the checker judges and what another implementation judges
 
 Everything under law is decided by the checker. What cannot be under law —that the laws are not vacuous, that the
-certificate is computed, that the model matches the prose, that the real implementation matches the model— is
-decided by a second implementation in another language: cell-by-cell re-check of the 209 664 cells of the certificate,
-re-evaluation of every law over the next states produced by the verified model, abstract and concrete reachability,
-count of cells where the hypothesis of each law holds, the tightness metric, the mutant bank, and differential
-testing against a production implementation with planted defects.
+certificate is computed, that the model matches the prose, that the real implementation matches the model— is decided
+by a second implementation in another language: cell-by-cell re-check of the 209 664 cells of the certificate,
+re-evaluation of the laws, re-encoded in Python, over the next states produced by the verified model, abstract and
+concrete reachability, count of cells where the hypothesis of each law holds, the tightness metric, the mutant bank,
+and differential testing against a production implementation with planted defects.
 
 **A caveat about that second implementation, because we described it wrongly.** Ours was written after the verified
 model and with it in view: it is a **re-execution in another language**, not an independent N-version implementation,
 and that is how what its agreement demonstrates must be read (it protects against evaluator errors, not against a
 shared misunderstanding of the specification). An audit detected this from textual evidence —our "independent" model
-contained a law that the design document does not mention— and produced, that one indeed, an independent
-transcription from the document, which agrees on every reachable cell.
+contained a law that the design document does not mention— and wrote a transcription from the document (the same model
+family, not kept in the repository) that agreed on every reachable cell.
 
 ## 3. Case study: the JET wall-protection chain
 
@@ -114,12 +123,12 @@ transcription from the document, which agrees on every reachable cell.
 [S1] publishes the *Stop Selector* of the RTPS: seven phases, seven triggers, three responses (PTN, RTPS stop, JTT),
 Table 1 (an example configuration, "the primary stops table"), primary/secondary response, local protection, blind
 alarms and watchdog. [S2] adds the latching of the PTN output, the DMS sequence (switch off heating → acknowledgement
-or timeout → inject), the escalation hierarchy and the enable windows. [S6] adds the rule "the DMV can be connected to
-any stop sent to the PTN", the DMV window and thresholds, the timings (NBI 2 ms, RF 38 ms, 50 ms in total, no RF
-acknowledgement) and the record of missed disruptions. The Stop Selector is modelled with its interface to the PTN and
-the arming of the DMS; **not** the Stop Manager (the override waveforms to the five actuators), nor the CISS/PSACS
-safety layers. Sixteen textual requirements (R-0…R-15) and twenty-three declared hypotheses (A-1…A-23) with their
-direction of conservatism are in the supplementary material.
+or timeout → inject), the escalation hierarchy and the enable windows. [S6] adds the rule that "the triggering of the
+DMV can be attached to any of the stops sent to the Plasma Termination Network (PTN)", the DMV window and thresholds,
+the timings (NBI 2 ms, RF 38 ms, 50 ms in total, no RF acknowledgement) and the record of missed disruptions. The Stop
+Selector is modelled with its interface to the PTN and the arming of the DMS; **not** the Stop Manager (the override
+waveforms to the five actuators), nor the CISS/PSACS safety layers. Sixteen textual requirements (R-0…R-15) and
+twenty-three declared hypotheses (A-1…A-23) with their direction of conservatism are in the supplementary material.
 
 ### 3.2 Model and laws
 
@@ -128,11 +137,12 @@ window, with plasma conditions and no stop in progress; a unit in ramp-down is u
 and never under PTN; a JTT in progress implies termination phase; the DMS is only armed or fired under PTN; the wait
 for the acknowledgement and the cycles without heartbeat are bounded. Twenty-one step laws say what cannot happen
 —stops do not degrade, the step that reaches the PTN de-energises, no order switches anything on with a stop in
-progress, the DMS is armed only on a demand, under PTN the programme does not advance— and twenty-nine demand and
-frame laws say what has to happen: a stop request is honoured, a soft stop ramps the heating, the watchdog latches
-regardless of how the DMS is wired, a heartbeat always resets its counter, the end of pulse is accepted when
-appropriate, and each command touches its own and nothing else. The theorem `traces_safe` covers every trace over the
-abstract alphabet —that is, for any configuration— and its concrete corollary, the two certified instances.
+progress, the DMS is armed only on a demand, under PTN the programme does not advance— and twenty-six demand and frame
+laws (twenty-nine with the three V1 laws, which make the certificate's reduced verdict domain a theorem) say what has
+to happen: a stop request is honoured, a soft stop ramps the heating, the watchdog latches regardless of how the DMS
+is wired, a heartbeat always resets its counter, the end of pulse is accepted when appropriate, and each command
+touches its own and nothing else. The theorem `traces_safe` covers every trace over the abstract alphabet —that is,
+for any configuration— and its concrete corollary, the two certified instances.
 
 ### 3.3 Results
 
@@ -141,11 +151,11 @@ abstract alphabet —that is, for any configuration— and its concrete corollar
 | Certificates (`finite_check`, `finite_check_alt`, `corollaries_check`) | 104 832 cells per order + 2 688 states; 14–19 s and 0.3 s in the checker |
 | Laws by reflection and induction | 64 in `PROOF_JETPROT.bend` (1 034 lines of code), 143 s |
 | Configuration conformance | 117 laws, `{==}` per cell, 0.3 s |
-| Negative tests | 10/10 rejected with counterexample; the gate requires that the checker refute a `Bool` **and** name the law |
-| Independent re-check | 209 664 cells Bend = Python; 0 mismatches; concrete reachability 921 states, all in the invariant |
+| Negative tests | 10/10 rejected, each as a refuted `Bool` at a cell the test supplies (not a searched counterexample); the gate requires that the checker refute a `Bool` **and** name the law |
+| Re-check in Python (a re-execution) | 209 664 cells Bend = Python; 0 mismatches; concrete reachability 921 states, all in the invariant |
 | Vacuity and **tightness** | no vacuous law; 374/400 reachable cells with a unique successor (93.5 %), 1.1 admissible out of 2 688 |
 | Sensitivity | 2 688 cells differ between the two urgency orders, 168 reachable; all laws hold in both |
-| **Adversarial mutation** | **61/62**; the only survivor differs from the model in 0 cells (equivalent). The bank written alongside the laws: 17/17, reported as the weak measure |
+| **Adversarial mutation** | **61/62** defects of the Python reference model, judged by the laws re-encoded in Python; the only survivor differs from the model in 0 cells (equivalent). The bank written alongside the laws: 17/17, reported as the weak measure |
 | Differential testing | 6 defects × 2 instances × 2 generators: 14/16 defective configurations detected, 0 false positives; the guided generator finds them all with traces of 2–10 events, the random one misses several in 3 000 |
 | Full gate | `py -3.14 v3/run.py` → `all gates and checks ok: True`, ≈ 5–6 min |
 
@@ -201,14 +211,14 @@ move it measurably. The reflection ladder did not change in either of the two ro
 
 See `v3/docs/phase3-safety.md` §4: no real time, no unbounded liveness (since 2026-09-21 bounded response in
 watchdog and DMS ticks is proved over traces: `LAWS_JETPROT_LIVE.bend`), no hardware faults, no lost or malformed
-messages, no plant model behind the acknowledgement, no independence between layers, no secondary matrix, no DMV
-current threshold, no bypass of PTN inputs. **A model that ignores every event also satisfies the trace theorem.**
+messages, no plant model behind the acknowledgement, no independence between layers, JET's secondary table only as
+an illustrative instance (A-35), the DMV enabling condition only as a Boolean verdict (A-22), no bypass of PTN inputs. **A model that ignores every event also satisfies the trace theorem.**
 An earlier version of this work claimed that the vacuity gate and the conformance laws already distinguished it from
-such a model; that was false, and it is the finding of §3.4. What distinguishes it are the 29 demand and frame laws,
-the tightness metric and the adversarial mutant bank. Comparison with published practice ([S3]: 71 behavioural tests
-+ commissioning + operating experience): the tests give evidence about the real system; the model gives coverage over
-the logic, per configuration, in minutes. It does not replace commissioning, FAT/SAT, timing analysis or independent
-assessment.
+such a model; that was false, and it is the finding of §3.4. What distinguishes it are the 26 demand and frame laws
+(29 with the three V1 laws), the tightness metric and the adversarial mutant bank. Comparison with published practice
+([S3]: 71 behavioural tests + commissioning + operating experience): the tests give evidence about the real system;
+the model gives coverage over the logic, per configuration, in minutes. It does not replace commissioning, FAT/SAT,
+timing analysis or independent assessment.
 
 ## 6. Authorship and how it was done
 
@@ -225,7 +235,7 @@ toolchain.
 ## 7. Future work
 
 Commanded vs. reported state of the units (to verify the R-11 acknowledgement as a sequence); well-formedness laws
-for configurations and certification of the rule instead of the instance; the DMV current threshold as a verdict;
+for configurations and certification of the rule instead of the instance;
 cross-check of the certificate and of the two response bounds in nuXmv or TLA+/Apalache;
 a second case study outside fusion (research reactor or detritiation plant) with the same method.
 

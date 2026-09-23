@@ -2136,9 +2136,749 @@
     "dms_armed_by": [
      "Fast"
     ]
+   },
+   "4": {
+    "states": 744,
+    "max_hb": 2,
+    "max_tack": 1,
+    "all_inv_all": true,
+    "phase_level_pairs": [
+     [
+      "Breakdown",
+      "LNone"
+     ],
+     [
+      "Breakdown",
+      "LPtn"
+     ],
+     [
+      "Heating1",
+      "LNone"
+     ],
+     [
+      "Heating1",
+      "LPtn"
+     ],
+     [
+      "Heating1",
+      "LRtps"
+     ],
+     [
+      "Heating2",
+      "LJtt"
+     ],
+     [
+      "Heating2",
+      "LNone"
+     ],
+     [
+      "Heating2",
+      "LPtn"
+     ],
+     [
+      "Heating2",
+      "LRtps"
+     ],
+     [
+      "IpRise",
+      "LNone"
+     ],
+     [
+      "IpRise",
+      "LPtn"
+     ],
+     [
+      "Limiter",
+      "LNone"
+     ],
+     [
+      "Limiter",
+      "LPtn"
+     ],
+     [
+      "Termination",
+      "LJtt"
+     ],
+     [
+      "Termination",
+      "LNone"
+     ],
+     [
+      "Termination",
+      "LPtn"
+     ],
+     [
+      "Termination",
+      "LRtps"
+     ],
+     [
+      "Xpoint",
+      "LNone"
+     ],
+     [
+      "Xpoint",
+      "LPtn"
+     ]
+    ],
+    "dms_reached": [
+     "DmsArmed",
+     "DmsFired",
+     "DmsIdle"
+    ],
+    "alarm_cells_exercised": [
+     [
+      "Breakdown",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Breakdown",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ],
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating1",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ],
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ],
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LJtt",
+        false
+       ],
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ],
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Heating2",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ],
+       [
+        "Stop",
+        "LRtps",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "IpRise",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Limiter",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Termination",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Blind",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "BothHs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Dhs",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Fast",
+      [
+       [
+        "Stop",
+        "LPtn",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Mchs",
+      [
+       [
+        "Stop",
+        "LNone",
+        false
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Mhd",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "MhdB",
+      [
+       [
+        "Stop",
+        "LNone",
+        true
+       ]
+      ]
+     ],
+     [
+      "Xpoint",
+      "Slow",
+      [
+       [
+        "Stop",
+        "LPtn",
+        false
+       ]
+      ]
+     ]
+    ],
+    "dms_armed_by": [
+     "Fast"
+    ]
    }
   },
-  "seconds": 26.7,
+  "seconds": 32.5,
   "ok": true
  },
  "C2": {
@@ -2488,6 +3228,36 @@
     "reachable_cells": 820,
     "vacuous": false,
     "below_threshold": false
+   },
+   "P1a_ptn_latched": {
+    "cert_cells": 104832,
+    "reachable_cells": 6552,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "P1b_stop_never_cleared": {
+    "cert_cells": 314496,
+    "reachable_cells": 11934,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D1a_ptn_honoured": {
+    "cert_cells": 53760,
+    "reachable_cells": 1860,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "D1b_primary_honoured": {
+    "cert_cells": 10752,
+    "reachable_cells": 264,
+    "vacuous": false,
+    "below_threshold": false
+   },
+   "PIW_after_ptn_is_noop": {
+    "cert_cells": 16128,
+    "reachable_cells": 1008,
+    "vacuous": false,
+    "below_threshold": false
    }
   },
   "corollaries": {
@@ -2518,9 +3288,9 @@
    "pinned_fraction": 0.993,
    "mean_admissible_successors": 1.01,
    "of_states": 10752,
-   "counter_commands_pinned": 212,
-   "counter_commands_pinned_fraction": 0.53,
-   "mean_admissible_command_pairs": 1.47,
+   "counter_commands_pinned": 243,
+   "counter_commands_pinned_fraction": 0.608,
+   "mean_admissible_command_pairs": 1.39,
    "of_command_pairs": 9
   },
   "identity_events_on_reachable": [
@@ -2554,7 +3324,7 @@
   "laws_that_refute_nothing_in_the_sample": [
    "D3_advance_to_termination_ramps"
   ],
-  "seconds": 83.7,
+  "seconds": 111.0,
   "ok": true
  },
  "C3": {
@@ -3005,6 +3775,7 @@
     "caught_by_all": [
      "P10_no_spurious_stop",
      "P1_latched",
+     "P1b_stop_never_cleared",
      "pres",
      "pres_fin/pres_i5/pres_i6",
      "traces_safe_concrete"
@@ -3033,7 +3804,8 @@
      "D6_hb_frame"
     ],
     "caught_by_all": [
-     "D6_hb_frame"
+     "D6_hb_frame",
+     "PIW_after_ptn_is_noop"
     ]
    },
    "M10_advance_resets_hb": {
@@ -3130,7 +3902,8 @@
      "C1_concretize_is_the_configuration"
     ],
     "caught_by_all": [
-     "C1_concretize_is_the_configuration"
+     "C1_concretize_is_the_configuration",
+     "inst4_second_alarm_ptn"
     ]
    },
    "M18_concretize_dhs_as_mchs": {
@@ -3140,7 +3913,8 @@
      "C1_concretize_is_the_configuration"
     ],
     "caught_by_all": [
-     "C1_concretize_is_the_configuration"
+     "C1_concretize_is_the_configuration",
+     "inst4_second_alarm_ptn"
     ]
    },
    "M19_concretize_heaton_to_heatoff": {
@@ -3221,10 +3995,12 @@
     "plausibility": 5,
     "description": "Stop{LPtn, False} is the identity: PTN latches only when the stop is wired to the DMS",
     "caught_by": [
-     "D1_stop_honoured"
+     "inst4_second_alarm_ptn"
     ],
     "caught_by_all": [
-     "D1_stop_honoured"
+     "D1_stop_honoured",
+     "D1a_ptn_honoured",
+     "inst4_second_alarm_ptn"
     ]
    },
    "M27_watchdog_never_latches_ptn": {
@@ -3280,6 +4056,7 @@
      "P2_ptn_deenergizes"
     ],
     "caught_by_all": [
+     "D1a_ptn_honoured",
      "P2_ptn_deenergizes",
      "pres",
      "pres_fin/pres_i5/pres_i6",
@@ -3326,6 +4103,7 @@
     ],
     "caught_by_all": [
      "D1_stop_honoured",
+     "D1b_primary_honoured",
      "D2_soft_stop_ramps",
      "E3_stop_phase_exact",
      "F1e_jtt_exact"
@@ -3353,6 +4131,7 @@
      "P16_dms_armed_on_demand"
     ],
     "caught_by_all": [
+     "D1a_ptn_honoured",
      "P16_dms_armed_on_demand"
     ]
    },
@@ -3420,10 +4199,11 @@
     "plausibility": 5,
     "description": "step_c always uses instance 1's alarm matrix",
     "caught_by": [
-     "C3_step_c_is_the_concrete_step"
+     "inst4_second_alarm_ptn"
     ],
     "caught_by_all": [
-     "C3_step_c_is_the_concrete_step"
+     "C3_step_c_is_the_concrete_step",
+     "inst4_second_alarm_ptn"
     ]
    },
    "N08_plasma_loss_reduces": {
@@ -3479,7 +4259,8 @@
      "E8_tack_reset_frame"
     ],
     "caught_by_all": [
-     "E8_tack_reset_frame"
+     "E8_tack_reset_frame",
+     "PIW_after_ptn_is_noop"
     ]
    },
    "N13_instance2_window_off_by_one": {
@@ -3519,6 +4300,7 @@
      "P2_ptn_deenergizes"
     ],
     "caught_by_all": [
+     "D1a_ptn_honoured",
      "P2_ptn_deenergizes",
      "pres",
      "pres_fin/pres_i5/pres_i6",
@@ -3637,7 +4419,7 @@
    },
    "M63_hb_max_4": {
     "plausibility": 5,
-    "description": "HB_MAX = 4: the watchdog tolerates one missed heartbeat more than A-11 allows",
+    "description": "HB_MAX = 4: the watchdog tolerates one missed heartbeat more than A-12 allows",
     "caught_by": [
      "traces_safe_concrete"
     ],
@@ -3649,7 +4431,7 @@
    },
    "M64_ack_max_3": {
     "plausibility": 5,
-    "description": "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-13 allows",
+    "description": "ACK_MAX = 3: the acknowledgement timeout is one tick later than A-11 allows",
     "caught_by": [
      "traces_safe_concrete"
     ],
@@ -3661,7 +4443,7 @@
    },
    "M65_init_plasma_true": {
     "plausibility": 4,
-    "description": "the initial state has plasma_ok = True (R-5: no plasma at Breakdown)",
+    "description": "the initial state has plasma_ok = True (the model starts at Breakdown, A-5, A-12, before any Plasma event: no plasma yet)",
     "caught_by": [
      "S0_init_is_spec"
     ],
@@ -3685,7 +4467,7 @@
    },
    "M67_heat_win_xpoint": {
     "plausibility": 4,
-    "description": "the heating window also admits Xpoint (A-6: Heating1 and Heating2 only)",
+    "description": "the heating window also admits Xpoint (A-5, A-27: Heating1 and Heating2 only)",
     "caught_by": [
      "E4_advance_units"
     ],
@@ -3700,7 +4482,7 @@
    },
    "M68_dms_window_no_term": {
     "plausibility": 4,
-    "description": "the DMS arming window drops Termination (R-13 / [S6] include it)",
+    "description": "the DMS arming window drops Termination (the model's window includes it, A-10 / R-14; [S6] closes it \"generally\" at the end of the post-heating phase)",
     "caught_by": [
      "C1_concretize_is_the_configuration"
     ],
@@ -3760,10 +4542,41 @@
     "caught_by_all": [
      "C1_concretize_is_the_configuration"
     ]
+   },
+   "W01_inst4_secondary_ignored": {
+    "plausibility": 5,
+    "description": "concretize reads the primary table also under a stop: instance 4's secondary table is never read",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration",
+     "inst4_second_alarm_ptn"
+    ]
+   },
+   "W02_secondary_read_without_stop": {
+    "plausibility": 4,
+    "description": "concretize reads the secondary table also when no stop is in force",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
+   },
+   "W03_secondary_read_at_wave_phase": {
+    "plausibility": 4,
+    "description": "under a stop, the secondary table is read at the waveform phase instead of the programme phase",
+    "caught_by": [
+     "C1_concretize_is_the_configuration"
+    ],
+    "caught_by_all": [
+     "C1_concretize_is_the_configuration"
+    ]
    }
   },
-  "killed": 72,
-  "total": 73,
+  "killed": 75,
+  "total": 76,
   "by_batch": {
    "M01-M37 (review 1)": {
     "killed": 36,
@@ -3776,6 +4589,10 @@
    "M63-M73 (constants and oracle)": {
     "killed": 11,
     "total": 11
+   },
+   "W01-W03 (revision 4, secondary)": {
+    "killed": 3,
+    "total": 3
    }
   },
   "survivors": [
@@ -3784,10 +4601,20 @@
   "known_equivalent": [
    "M06_dms_arms_on_second_demand"
   ],
+  "equivalence": {
+   "M06_dms_arms_on_second_demand": {
+    "cells": 924672,
+    "differing": 0,
+    "concrete_cells": 12042240,
+    "concrete_differing": 0,
+    "concretize_cells": 1032192,
+    "concretize_differing": 0
+   }
+  },
   "flags_killed": 17,
   "flags_total": 17,
   "flag_survivors": [],
-  "seconds": 3795.3,
+  "seconds": 1193.0,
   "ok": true,
   "laws_per_kill": {
    "per_mutant": {
@@ -3796,9 +4623,9 @@
     "M03_advance_term_deenergize": 2,
     "M04_soft_stop_deenergize": 1,
     "M05_heatoff_keeps_reduced": 1,
-    "M07_plasma_true_clears_stop": 5,
+    "M07_plasma_true_clears_stop": 6,
     "M08_plasma_true_rearms_heat": 7,
-    "M09_stop_lnone_resets_hb": 1,
+    "M09_stop_lnone_resets_hb": 2,
     "M10_advance_resets_hb": 2,
     "M11_heaton_resets_hb": 2,
     "M12_reset_rejects_fired": 1,
@@ -3806,8 +4633,8 @@
     "M14_counters_swapped": 12,
     "M15_ack_max_off_by_one": 2,
     "M16_hb_verdict_off_by_one_other_way": 2,
-    "M17_concretize_mchs_as_slow": 1,
-    "M18_concretize_dhs_as_mchs": 1,
+    "M17_concretize_mchs_as_slow": 2,
+    "M18_concretize_dhs_as_mchs": 2,
     "M19_concretize_heaton_to_heatoff": 1,
     "M20_concretize_tick_arms_dms": 1,
     "M21_heatoff_hits_both_units": 1,
@@ -3815,34 +4642,34 @@
     "M23_advance_skips_a_phase": 2,
     "M24_rtps_jumps_to_termination": 3,
     "M25_heatack_never_fires": 2,
-    "M26_stop_ptn_without_dms_is_noop": 1,
+    "M26_stop_ptn_without_dms_is_noop": 3,
     "M27_watchdog_never_latches_ptn": 4,
     "M28_plasma_false_keeps_flag": 1,
     "M29_heaton_ignores_plasma": 4,
     "M30_commfault_ignores_dms_flag": 1,
-    "M31_ptn_keeps_reduced": 4,
+    "M31_ptn_keeps_reduced": 5,
     "M32_tack_counts_while_idle": 3,
     "M33_dms_arms_on_second_demand_v2": 1,
     "M34_watchdog_acts_only_if_wired_to_dms": 1,
-    "M35_soft_stop_is_noop": 4,
+    "M35_soft_stop_is_noop": 5,
     "M36_heatack_fires_from_idle": 6,
-    "M37_no_rearm_after_commfault_ptn": 1,
+    "M37_no_rearm_after_commfault_ptn": 2,
     "N01_advance_nonheat_keeps_power": 1,
     "N02_hb_counts_ignoring_verdict": 1,
     "N03_tack_counts_while_fired": 1,
     "N04_heartbeat_ignored_under_ptn": 1,
     "N05_concretize_against_next_phase": 1,
     "N06_concrete_layer_order2": 1,
-    "N07_concrete_layer_ignores_instance": 1,
+    "N07_concrete_layer_ignores_instance": 2,
     "N08_plasma_loss_reduces": 6,
     "N09_heaton_needs_healthy_watchdog": 1,
     "N10_commfault_dropped_when_hb_late": 1,
     "N11_advance_restarts_ack_timer": 2,
-    "N12_stop_lnone_restarts_ack_timer": 1,
+    "N12_stop_lnone_restarts_ack_timer": 2,
     "N13_instance2_window_off_by_one": 1,
     "N14_dms_req_ignores_phase_window": 1,
     "N15_arm_goes_straight_to_fired": 1,
-    "N16_ptn_deenergizes_nb_only": 4,
+    "N16_ptn_deenergizes_nb_only": 5,
     "N17_heatack_also_latches_ptn": 3,
     "N18_heartbeat_restarts_ack_timer": 3,
     "N19_plasma_true_resets_hb": 1,
@@ -3862,15 +4689,18 @@
     "M70_heatack_ignored_in_term": 1,
     "M71_reset_fired_needs_plasma_false": 1,
     "M72_inv_all_hb_le": 1,
-    "M73_table_one_cell": 1
+    "M73_table_one_cell": 1,
+    "W01_inst4_secondary_ignored": 2,
+    "W02_secondary_read_without_stop": 1,
+    "W03_secondary_read_at_wave_phase": 1
    },
    "histogram": {
-    "1": 36,
-    "2": 11,
-    "3": 9,
-    "4": 6,
-    "5": 4,
-    "6": 4,
+    "1": 31,
+    "2": 18,
+    "3": 10,
+    "4": 3,
+    "5": 6,
+    "6": 5,
     "7": 1,
     "12": 1
    },
@@ -3878,20 +4708,15 @@
     "M01_tick_ack_before_watchdog",
     "M04_soft_stop_deenergize",
     "M05_heatoff_keeps_reduced",
-    "M09_stop_lnone_resets_hb",
     "M12_reset_rejects_fired",
-    "M17_concretize_mchs_as_slow",
-    "M18_concretize_dhs_as_mchs",
     "M19_concretize_heaton_to_heatoff",
     "M20_concretize_tick_arms_dms",
     "M21_heatoff_hits_both_units",
     "M22_local_reduces_both_units",
-    "M26_stop_ptn_without_dms_is_noop",
     "M28_plasma_false_keeps_flag",
     "M30_commfault_ignores_dms_flag",
     "M33_dms_arms_on_second_demand_v2",
     "M34_watchdog_acts_only_if_wired_to_dms",
-    "M37_no_rearm_after_commfault_ptn",
     "M68_dms_window_no_term",
     "M70_heatack_ignored_in_term",
     "M71_reset_fired_needs_plasma_false",
@@ -3903,23 +4728,23 @@
     "N04_heartbeat_ignored_under_ptn",
     "N05_concretize_against_next_phase",
     "N06_concrete_layer_order2",
-    "N07_concrete_layer_ignores_instance",
     "N09_heaton_needs_healthy_watchdog",
     "N10_commfault_dropped_when_hb_late",
-    "N12_stop_lnone_restarts_ack_timer",
     "N13_instance2_window_off_by_one",
     "N14_dms_req_ignores_phase_window",
     "N15_arm_goes_straight_to_fired",
-    "N19_plasma_true_resets_hb"
+    "N19_plasma_true_resets_hb",
+    "W02_secondary_read_without_stop",
+    "W03_secondary_read_at_wave_phase"
    ]
   }
  },
  "all_ok": true,
  "provenance": {
-  "timestamp_utc": "2026-09-22T02:12:43Z",
+  "timestamp_utc": "2026-09-23T15:52:44Z",
   "bend": {
-   "version": "bend 2.0.24",
-   "commit": "e52cda47a58967aa65d1eb26efe8f42a0b0407df",
+   "version": "bend 2.0.25",
+   "commit": "c65bcb788dbfb298bb434c1d858b47c193841dc0",
    "src": "C:\\Users\\franc/.bend-src"
   },
   "bun": "1.3.11",
@@ -3928,23 +4753,26 @@
   "hypothesis": "6.168.0",
   "seed": 20260921,
   "max_examples": 3000,
+  "jobs": 12,
   "sha256": {
-   "v3/LAWS_JETPROT.bend": "80d89862c77ab44e1c3823a895138023025eecf74e8c6b7cd75c97d45e227729",
-   "v3/LAWS_JETPROT_CONF.bend": "ad0e9bb4e95f917c6d7bcaacffe5070f3f9631165304a103d29283cc413ee59f",
-   "v3/LAWS_JETPROT_LIVE.bend": "e92795bcefbe08772691f73aa9a7b076b0fa78c2e53e61491d958bc0bbc66217",
-   "v3/LAWS_JETPROT_SOUND.bend": "61ced91c9b1e964d8e9f4ab8c271c3366006d7d9b4c9d95beee440a2da48ca4b",
-   "v3/PROOF_JETPROT.bend": "e5df856e87829e3335608e1d9d31b1c40c2b83a6d8117ebb8c40b3a2af166387",
-   "v3/PROOF_JETPROT_CONF.bend": "28e98a49f2203851cf28c24ceae7f6fd1ebae93fdecb2b19deff4a59a0dfd05d",
+   "v3/LAWS_JETPROT.bend": "11998873c0de0c6cba57db7d28902033492c3ac711d2a7cd212332a969abc7a4",
+   "v3/LAWS_JETPROT_CONF.bend": "e1082de28ff891dbbd609fbd7bf1660cc21d09a3f2ea8102e89b33e6b6c1f34c",
+   "v3/LAWS_JETPROT_LIVE.bend": "d05aaffe4cd541aba881a91050210ac7553d83cd637178ec73c494dcd95fdbee",
+   "v3/LAWS_JETPROT_SOUND.bend": "c2d9834096bdab185fe732719dc6ffec805cdd1a856785b3f1f84e3fbda41510",
+   "v3/PROOF_JETPROT.bend": "816d4f78185f664ca8d888da624fcc2581013c65973b1a60192e162c7e178819",
+   "v3/PROOF_JETPROT_CONF.bend": "a8fb459de608d697849cf9baf8026c66e42abc5abcf3e3ccc0104620f9c7377b",
    "v3/PROOF_JETPROT_COR.bend": "7f87cb771cfacd33a0b98e0c0d16d1dc892bbb8ced6c7e96782bdc4eabeaff5e",
    "v3/PROOF_JETPROT_FIN.bend": "f4374d0ac5a637dae2a79a374b9b8a5f2ebb24ac8fb8a6afc95af9835b5e5c3a",
    "v3/PROOF_JETPROT_FIN_ALT.bend": "d0395fdb67b3e33c92888cf82b39354576d59c56b73dfb2b6d2bb857e0d801b1",
-   "v3/PROOF_JETPROT_LIVE.bend": "54bf05d3c46b649fdb20442623a21d74e01a06220636936b451cc049f70d3ef7",
+   "v3/PROOF_JETPROT_LIVE.bend": "658d741a54257011e1edd86259f6bee96ca4abde726ddc55948e9c07fc32a518",
    "v3/PROOF_JETPROT_LIVE_CORE.bend": "ce7458e3ef412964c7d13226c724b8d85e25bd201c6607d936e2caec43f5bafa",
    "v3/PROOF_JETPROT_SOUND.bend": "ea37e691b3d6a47e6afc9f450bc958eb669fd3bd40ca4c84c3e45a7e4e44148b",
-   "v3/enum_jetprot.bend": "f41e1302c290e1b6546e72e460252e066866d267ef9b5163175a160df047dc19",
-   "v3/jetprot.bend": "fffb23d9a1e71ef7a1da55a58d480b69b596503bf1dcd4e4f454026c58e60463",
-   "v3/spec_jetprot.bend": "79b79cfdeaa09643044c806d795460fc06f72c1e9262ed3777962cbbfd0f9245",
+   "v3/enum_jetprot.bend": "0cbd9d03432b33e38b3fdd77fe9ea00be806edd93501759440c65ce4e8cd1bf1",
+   "v3/jetprot.bend": "98c0813877c8f947494680c8800e096caadd0ac3f583ecb4861fe7bcfed82563",
+   "v3/spec_jetprot.bend": "6d08aa5fbadbbba3e58bf94f1e2a36186c66ea90a32187b9576d81f44d848f14",
    "v3/tests/jetprot_bug10_soft_stop_trips.bend": "545afb73000a0fd12f36f9bda4b9051c63427c33ed2dd667fc10f550c37e6b6c",
+   "v3/tests/jetprot_bug11_piw_overrides_ptn.bend": "c597216fe6e2275c20fb7671fc3252c55cd9b75f9fe6c64804a1e0e7de90e502",
+   "v3/tests/jetprot_bug12_secondary_ignored.bend": "ece11918316ab7fc81781bb2d11bde7948cfad153018030e8ac1a794009e5320",
    "v3/tests/jetprot_bug1_deescalation.bend": "172f0572c27b6dcfbaef08823386aa971c490d2bf0502c5196ff24ef75ac4bea",
    "v3/tests/jetprot_bug2_jtt_no_ramp.bend": "b9cbdce247b0e271f821ccbff5cf2786255a7b76587fd5a5c39baffe9f74333a",
    "v3/tests/jetprot_bug3_commfault_no_deenergize.bend": "5523f31bec00dcdcf56a9406bb03339cda909d054989de4925007f222c9d1eff",
@@ -3954,18 +4782,19 @@
    "v3/tests/jetprot_bug7_rtps_keeps_full_power.bend": "3ef841fcf098cc9f6469e076a9ea57cec42d6789c5414d63cfecdaea98509104",
    "v3/tests/jetprot_bug8_certificate_false.bend": "03c9259e4ebd7070d82f544b3ee1ecec032acb76b94114894d1f86d3ff469e2a",
    "v3/tests/jetprot_bug9_stop_is_noop.bend": "a04d0e3899f0a6fd1872fe973c18319f38c9770e413a02d74e29aef550c6335b",
-   "v3/tests/laws_jetprot_smoke.bend": "c6e7966b3ec41664a11e7689b75ecac6113be57aaaf97cdb7e70dd0e81e32a90",
-   "v3/pymodel/jetprot_laws.py": "203ea368d4c670da435606ca87c1188f22027855253735c447b5ecb64b3669d0",
-   "v3/pymodel/jetprot_ref.py": "eb496af219e539ae03a12e6e87b6713b577e5be168b4de1fdd10c91bf634a3df",
-   "v3/pymodel/mutants.py": "6c4c49a01d1f707232113581a34711486923a058f7c102047cb5120cd9ad78c8",
-   "v3/pymodel/spec_consts.py": "73bb0a6ad29ba6faba1175e1a6e6b5e1875e1077bd43da787b6676e8a5fea2e6",
-   "v3/prod/jetprot_prod.py": "dfd04bcd5f5d5430dee278914082076828258c0c438191d072444648bb74aa62",
-   "v3/bridge.mjs": "cca9b20eb6fad2b3887f4334b1a5a3092f61c504dd3a114d99c0ee6d58abd24a",
+   "v3/tests/laws_jetprot_smoke.bend": "5f246a717694c2ac6cec28a5482d4ccc36b79cb6f7740ca93b304be6d593fe3f",
+   "v3/pymodel/jetprot_laws.py": "84ef0e6bce5e1656e53cc8759717e76e380b42041e86320e6df4e048a55427a8",
+   "v3/pymodel/jetprot_ref.py": "92f36633c9c8bd9da9f08bb02f7adc2582d68bbc5a7085c1dd55b28638941262",
+   "v3/pymodel/mutants.py": "8d23ca061f3e743a1114a115394775f5f707919501a48f27b824e53b19e543e0",
+   "v3/pymodel/spec_consts.py": "86e6077b959c6d5272c3b281ffa3cda36228b1678734770fc29f2c005d7d13e6",
+   "v3/prod/jetprot_prod.py": "f147928eb9f79d1246c8b2a1f34feba718c77433d4d89b02073c04b435f9afbd",
+   "v3/bridge.mjs": "b56db8da650cc6cf1ed6176b27929f703e4ab41963e1389d3b587650d13a9b35",
    "v3/bridge_client.py": "8922e474b86e156264710fbd03b2648e1d7e77854406eaec767ad71a444cbe8b",
-   "v3/recheck.py": "8af39ee19434efcc3bc6a5004d7dedab750627988b18cacf715b23847b4a74e1",
-   "v3/run.py": "41c49c85b05ea8b7ee73932db64de1dad81cae133110b2cf99a6b2b1d67ef936",
-   "env/bend.sh": "943bfc9e5304f97dcfa6f3dcd5ab77179f4e5b6f2e5cfc53c4d84ea7a9bb7e06",
-   "env/check_env.sh": "2a80cfcb4324a5d40dd53eca333413e8a0496b90ae0b52a12b8300f81c1fa1b2"
+   "v3/recheck.py": "3196dfd3456cdad1c480118a994e8222738725cf0542afd9a3e8f8f2dfd0c2bd",
+   "v3/run.py": "56d7a1fda2127aa232cde25f303f1cc0b1d32d4980e812f1e9c247a65973aad9",
+   "v3/compare_runs.py": "6eab56c641cda401590b3fb8e8c315a948d8f66357c60356b92894bedc23f124",
+   "env/bend.sh": "b2f35c8902907e3a1b8c44f7cf2ad813bac1e5313f871b72b20875818b2f0fb0",
+   "env/check_env.sh": "2e62462876d0bb5c7f35f94da27acdc79412110495db348918b6cb3151f0def0"
   },
   "host": {
    "os": "Windows-11-10.0.26200-SP0",

@@ -24,8 +24,18 @@
 #       a pulse event, so `Inhibited` is gone (A-26).
 #   F3  the reliability checks of R-13 pass through the instance's masks: a communication
 #       fault carries `en` (A-21), a blind stop alarm is a table trigger `Blind` (A-25).
-#   IP  the DMV current threshold of R-14 is state (`ip`, input `Ip{ok}`) and gates the ARMING
-#       of the DMS (A-22 retired).
+#   IP  the DMV enabling condition of R-14 is state (`ip`, input `Ip{ok}`) and gates the ARMING
+#       of the DMS (A-22 redefined: ip is a Boolean arming verdict, plasma current or, per [S7],
+#       current OR stored energy above threshold).
+#
+# Revision 4 (2026-09-22): the secondary stop response ([S1] R-6: "two levels of stop response,
+# primary, and secondary") is instance data of the CONCRETE layer. An alarm that arrives while a
+# stop is already in force reads the instance's secondary table `sec_table(i, prog, t)` instead
+# of the primary one; the abstract step (and so Ord, P1, D1, the certificates, LIVE and SOUND)
+# is unchanged. Inst1..Inst3 keep the reading of revisions 1-3 (secondary = the masked primary
+# entry, combined by the maximum: A-2, A-16, A-24); the new Inst4 carries an ILLUSTRATIVE
+# PTN-preferred secondary (A-35). The stop configuration is NOT frozen at the primary stop:
+# both tables are read at the advancing programme phase (A-24, A-30).
 
 import Base
 
@@ -76,7 +86,7 @@ type Ord is Data:
   Ord2{}
 
 # the finite control state: program phase, termination-waveform flag, response level, DMS,
-# plasma conditions, DMV current threshold, the two units
+# plasma conditions, DMV arming verdict (A-22), the two units
 type Fin is Data:
   Fin{prog: Phase, jtt: Bool, level: Level, dms: Dms, plasma: Bool, ip: Bool, nb: Heat, rf: Heat}
 
@@ -134,11 +144,14 @@ type CEv is Data:
 
 # configuration instances: Inst1 = Table 1 of [S1] as published (+ A-4), both checks on;
 # Inst2 = the same with the MHD triggers routed to PTN from X-point on ([S6]/[S7]);
-# Inst3 = Table 1 with both reliability checks masked out (the A-21 configuration)
+# Inst3 = Table 1 with both reliability checks masked out (the A-21 configuration);
+# Inst4 = Inst1 (Table 1 + A-4, both checks on) with an ILLUSTRATIVE secondary table (A-35):
+# PTN wherever the primary entry is not None; not JET's table, which is unpublished
 type Inst is Data:
   Inst1{}
   Inst2{}
   Inst3{}
+  Inst4{}
 
 # the reliability checks an instance enables (R-13, A-21): communication fault, blind alarms
 type Mask is Data:
@@ -470,7 +483,7 @@ def to_ptn(f: Fin) -> Fin:
     case Fin{p, j, l, d, pl, ip, nb, rf}:
       Fin{p, j, LPtn{}, d, pl, ip, deenergize(nb), deenergize(rf)}
 
-# arm the DMS from Idle only (A-11), and only above the DMV current threshold (R-14)
+# arm the DMS from Idle only (A-11), and only with the DMV arming verdict (R-14, A-22)
 def arm_dms(f: Fin) -> Fin:
   match f:
     case Fin{p, j, l, DmsIdle{}, pl, True{}, nb, rf}:
@@ -503,9 +516,9 @@ def soft_if(gt: Bool, req: Level, f: Fin) -> Fin:
 # The rules
 # ---------------------------------------------------------------------------
 
-# rule 1: a stop request. PTN always wins (and arms the DMS if configured and the current is
-# above the threshold, also when the level already was PTN); a soft request applies only if
-# more urgent than the current one
+# rule 1: a stop request. PTN always wins (and arms the DMS if configured and the DMV arming
+# verdict holds, also when the level already was PTN); a soft request applies only if more
+# urgent than the current one (HYP A-1/A-2: our policy between the two soft levels)
 def stop_fin(o: Ord, f: Fin, req: Level, d: Bool) -> Fin:
   match req:
     case LPtn{}:
@@ -562,7 +575,8 @@ def plasma_fin(f: Fin, ok: Bool) -> Fin:
       +bad = Bool.not(ok2)
       Fin{p, j, l, d, ok2, ip, close_if(bad, nb), close_if(bad, rf)}
 
-# rule 5b: the DMV current threshold verdict is an input (R-14)
+# rule 5b: the DMV arming verdict is an input (R-14; plasma current, or per [S7] current OR
+# stored energy, above threshold: A-22)
 def ip_fin(f: Fin, ok: Bool) -> Fin:
   match f:
     case Fin{p, j, l, d, pl, ip, nb, rf}:
@@ -725,7 +739,7 @@ def upd_hb(f: Fin, e: Ev, bh: Bool) -> Upd:
     case _:
       CKeep{}
 
-# does this demand arm the DMS now (wired, above the threshold, from Idle)?
+# does this demand arm the DMS now (wired, with the DMV arming verdict, from Idle)?
 def arms_now(d: Bool, f: Fin) -> Bool:
   +f2 = f
   Bool.and(d, Bool.and(ip_of(f2), is_idle(dms_of(f2))))
@@ -879,6 +893,8 @@ def table(i: Inst, p: Phase, t: Trig) -> Level:
       table2(p, t)
     case Inst3{}:
       table1(p, t)
+    case Inst4{}:
+      table1(p, t)
 
 # the reliability checks each instance enables (R-13, A-21)
 def mask_of(i: Inst) -> Mask:
@@ -889,6 +905,8 @@ def mask_of(i: Inst) -> Mask:
       Mask{True{}, True{}}
     case Inst3{}:
       Mask{False{}, False{}}
+    case Inst4{}:
+      Mask{True{}, True{}}
 
 def comm_of(m: Mask) -> Bool:
   match m:
@@ -914,6 +932,40 @@ def masked_table(+i: Inst, p: Phase, t: Trig) -> Level:
       blind_pick(blind_of(mask_of(i)), i, p)
     case t2:
       table(i, p, t2)
+
+# the secondary stop response (revision 4; [S1] R-6): what an alarm asks for while a stop is
+# already in force. Instance data. Inst1..Inst3: the masked primary entry again, the reading of
+# revisions 1-3 (the abstract step then keeps the more urgent of the two, A-2, A-16).
+# Inst4, ILLUSTRATIVE (A-35): the PTN wherever the primary entry asks for any response ([N1]
+# Fig. 7 caption: "The preferred secondary plasma stop is the PTN slow stop", a usage statistic,
+# not JET's table). Its DMS bit is still dms_req: a PTN secondary for Slow/MCHS/DHS/BothHs (the
+# triggers whose primary entry is a soft stop in some phase) does not arm the DMS.
+def sec_ptn(l: Level) -> Level:
+  match l:
+    case LNone{}:
+      LNone{}
+    case _:
+      LPtn{}
+
+def sec_table(i: Inst, p: Phase, t: Trig) -> Level:
+  match i:
+    case Inst1{}:
+      masked_table(Inst1{}, p, t)
+    case Inst2{}:
+      masked_table(Inst2{}, p, t)
+    case Inst3{}:
+      masked_table(Inst3{}, p, t)
+    case Inst4{}:
+      sec_ptn(masked_table(Inst4{}, p, t))
+
+# the response a concrete alarm asks for: the primary table when no stop is in force (`none`),
+# the instance's secondary table otherwise; both read at the PROGRAM phase (A-24, A-30)
+def alarm_go(none: Bool, +i: Inst, +p: Phase, +t: Trig) -> Level:
+  match none:
+    case True{}:
+      masked_table(i, p, t)
+    case False{}:
+      sec_table(i, p, t)
 
 # which triggers are wired to the DMS (A-10): the disruption precursors and the fast
 # termination, inside the DMV enable window of R-14 (X-point .. Termination), read on the
@@ -950,8 +1002,9 @@ def dms_on_commfault() -> Bool:
 def dms_on_watchdog() -> Bool:
   False{}
 
-# the abstract event of a concrete one, through the instance: Table 1 is indexed by the
-# PROGRAM phase (A-24), the DMS window by the waveform phase, the checks by the masks
+# the abstract event of a concrete one, through the instance: Table 1 (primary, or the
+# secondary table when a stop is in force: revision 4) is indexed by the PROGRAM phase (A-24),
+# the DMS window by the waveform phase, the checks by the masks
 def concretize(+i: Inst, f: Fin, c: CEv) -> Ev:
   match c:
     case XAdvance{}:
@@ -959,7 +1012,7 @@ def concretize(+i: Inst, f: Fin, c: CEv) -> Ev:
     case XAlarm{t}:
       +t2 = t
       +f2 = f
-      Stop{masked_table(i, prog_of(f2), t2), dms_req(wave_of(f2), t2)}
+      Stop{alarm_go(is_none(level_of(f2)), i, prog_of(f2), t2), dms_req(wave_of(f2), t2)}
     case XLocal{u}:
       Local{u}
     case XHeatOn{u}:

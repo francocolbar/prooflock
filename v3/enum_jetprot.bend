@@ -17,6 +17,9 @@
 # Revision 2026-09-21 (blocker 4): eight control fields (7 x 2 x 4 x 3 x 2 x 2 x 4 x 4), the
 # events Ip{ok} and CommFault{dms, en}, the property group g_f (F1/F2/F3/IP), and the
 # concrete-layer check over three instances x program phase x waveform flag.
+# Revision 4 (2026-09-22): the group g_j of the named PTN/primary-stop laws; the concrete-layer
+# check gains the fourth instance, the secondary table (m_sec) and a level axis (whether a stop
+# is in force).
 
 import Base
 import ./jetprot.bend as S
@@ -59,11 +62,20 @@ def g_e(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Boo
   Bool.and(Spec.pr_e5(f, e, bh), Bool.and(Spec.pr_e6(f, e, bh), Bool.and(Spec.pr_e7(f, e, bt, bh),
   Bool.and(Spec.pr_e8(f, e, bt, bh), Spec.pr_e11(f, e, f2))))))))
 
-# F1b, F1d, F1e, F2a, F2d, F3b, F4, IP1, IP3, IP4 (blocker 4: fidelity and the frames it needed)
+# P1a, P1b, D1a, D1b, PIW-after-PTN (revision 4): what P1 and D1 say about the PTN and the primary
+# stop ([N1]), named (D1a, P1b and PIW-after-PTN add our formalisation: A-9, A-14);
+# P1a..D1b are DERIVED from P1, D1, P2 and the frame laws; PIW-after-PTN also pins both counter
+# commands of a non-PTN Stop under a latched PTN, which no earlier law did
+def g_j(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
+  Bool.and(Spec.pr_p1a(f, e, f2), Bool.and(Spec.pr_p1b(f, e, f2), Bool.and(Spec.pr_d1a(e, f2),
+  Bool.and(Spec.pr_d1b(f, e, f2), Spec.pr_piw_noop(f, e, bt, bh, f2)))))
+
+# F1b, F1d, F1e, F2a, F2d, F3b, F4, IP1, IP3, IP4 (blocker 4: fidelity and the frames it needed),
+# then the group g_j of the named PTN/primary-stop laws (revision 4)
 def g_f(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
   Bool.and(Spec.pr_f1b(f, e, f2), Bool.and(Spec.pr_f1d(f, e, f2), Bool.and(Spec.pr_f1e(o, f, e, f2), Bool.and(Spec.pr_f2a(f, e, f2),
   Bool.and(Spec.pr_f2d(f, e, f2), Bool.and(Spec.pr_f3b(f, e, bt, bh, f2), Bool.and(Spec.pr_f4(f, e, f2),
-  Bool.and(Spec.pr_ip1(f, f2), Bool.and(Spec.pr_ip3(e, f2), Spec.pr_ip4(f, e, f2))))))))))
+  Bool.and(Spec.pr_ip1(f, f2), Bool.and(Spec.pr_ip3(e, f2), Bool.and(Spec.pr_ip4(f, e, f2), g_j(f, e, bt, bh, f2)))))))))))
 
 def prop_at(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
   Bool.and(g_pres(f, e, bt, bh, f2), Bool.and(g_a(o, f, e, f2), Bool.and(g_b(f, e, bt, bh, f2),
@@ -223,8 +235,11 @@ def check_cor() -> Bool:
 # the constructor wiring. Nothing in the certificate above constrains it, so a mis-wired column
 # (XAlarm{Dhs} reading the MCHS column), a mis-wired constructor (XHeatOn -> HeatOff), a table
 # read on the WAVEFORM phase instead of the program phase (F1a), or an ignored mask (F3) would
-# be invisible to every law. 3 instances x 7 program phases x 2 waveform flags x 22 concrete
-# events = 924 cells.
+# be invisible to every law. Which phase the table is read at is HYP A-24 (our reading: the
+# programme phase, advancing also during a soft stop, A-30); m_alarm below pins that reading.
+# Revision 4: an alarm with a stop in force reads the instance's SECONDARY table (m_sec), so the
+# check also runs over the level in force. 4 instances x 7 program phases x 2 waveform flags x
+# 4 levels x 24 concrete events = 5 376 cells.
 # ---------------------------------------------------------------------------
 
 def ev_tag(e: S.Ev) -> Nat:
@@ -303,8 +318,9 @@ def ev_eq(+a: S.Ev, +b: S.Ev) -> Bool:
 # The configuration, transcribed a FOURTH time as its own function, so that the concrete-layer
 # check stops being self-referential: conc_expected used to build its expectation from the very
 # S.table / S.dms_req that concretize calls, so it detected a mis-wired constructor or column but
-# NOT a wrong table value and NOT a wrong DMS window (audit #5 section 4). The matrix below is
-# the 7 phases x 8 triggers x 3 instances of R-5 + A-4 + A-25 written out cell by cell, the
+# NOT a wrong table value and NOT a wrong DMS window (audit #5 section 4). Below are two matrices of
+# 7 phases x 8 triggers of R-5 + A-4 + A-25 written out cell by cell (m_table1, read by instances
+# 1, 3 and 4; m_table2, instance 2), the
 # DMS wiring is the trigger set {Fast, Mhd, MhdB} and the window {Xpoint .. Termination} as
 # two independent predicates, and the masks are two predicates on the instance. Nothing here
 # mentions jetprot's own tables or masks.
@@ -541,7 +557,8 @@ def m_table2(p: S.Phase, t: S.Trig) -> S.Level:
     case S.Termination{} S.Blind{}:
       S.LPtn{}
 
-# instance 3 reads the published matrix (instance 1) with both reliability checks masked out
+# instance 3 reads the published matrix (instance 1) with both reliability checks masked out;
+# instance 4 reads it with both checks on (it differs from instance 1 in its secondary table only)
 def m_table(i: S.Inst, p: S.Phase, t: S.Trig) -> S.Level:
   match i:
     case S.Inst1{}:
@@ -549,6 +566,8 @@ def m_table(i: S.Inst, p: S.Phase, t: S.Trig) -> S.Level:
     case S.Inst2{}:
       m_table2(p, t)
     case S.Inst3{}:
+      m_table1(p, t)
+    case S.Inst4{}:
       m_table1(p, t)
 
 # the triggers wired to the DMS (A-10), as a set
@@ -598,6 +617,8 @@ def m_comm(i: S.Inst) -> Bool:
       True{}
     case S.Inst3{}:
       False{}
+    case S.Inst4{}:
+      True{}
 
 def m_blind(i: S.Inst) -> Bool:
   match i:
@@ -607,6 +628,8 @@ def m_blind(i: S.Inst) -> Bool:
       True{}
     case S.Inst3{}:
       False{}
+    case S.Inst4{}:
+      True{}
 
 # the row a blind alarm reads: its table row when enabled, no response when masked
 def m_blind_row(en: Bool, i: S.Inst, p: S.Phase) -> S.Level:
@@ -623,6 +646,51 @@ def m_alarm(+i: S.Inst, p: S.Phase, t: S.Trig) -> S.Level:
     case t2:
       m_table(i, p, t2)
 
+# the secondary stop response (revision 4), from the rule and independently of jetprot's
+# sec_table: instances 1-3 ask again for their primary entry (the reading of revisions 1-3);
+# instance 4 (ILLUSTRATIVE, A-35) asks for the PTN wherever its primary entry asks for anything
+def m_sec_of(l: S.Level) -> S.Level:
+  match l:
+    case S.LNone{}:
+      S.LNone{}
+    case S.LJtt{}:
+      S.LPtn{}
+    case S.LRtps{}:
+      S.LPtn{}
+    case S.LPtn{}:
+      S.LPtn{}
+
+def m_sec(+i: S.Inst, +p: S.Phase, +t: S.Trig) -> S.Level:
+  match i:
+    case S.Inst1{}:
+      m_alarm(S.Inst1{}, p, t)
+    case S.Inst2{}:
+      m_alarm(S.Inst2{}, p, t)
+    case S.Inst3{}:
+      m_alarm(S.Inst3{}, p, t)
+    case S.Inst4{}:
+      m_sec_of(m_alarm(S.Inst4{}, p, t))
+
+# no stop in force (the expectation's own copy of is_none)
+def m_is_none(l: S.Level) -> Bool:
+  match l:
+    case S.LNone{}:
+      True{}
+    case S.LJtt{}:
+      False{}
+    case S.LRtps{}:
+      False{}
+    case S.LPtn{}:
+      False{}
+
+# the request of a concrete alarm: the primary table with no stop in force, the secondary one otherwise
+def m_pick(none: Bool, +i: S.Inst, +p: S.Phase, +t: S.Trig) -> S.Level:
+  match none:
+    case True{}:
+      m_alarm(i, p, t)
+    case False{}:
+      m_sec(i, p, t)
+
 # the waveform phase of a state with program phase p and flag j (the expectation's own copy)
 def m_wave(j: Bool, p: S.Phase) -> S.Phase:
   match j:
@@ -632,12 +700,12 @@ def m_wave(j: Bool, p: S.Phase) -> S.Phase:
       p
 
 # the wiring, restated independently of concretize() AND of table()/dms_req()/mask_of()
-def conc_expected(+i: S.Inst, +p: S.Phase, +j: Bool, c: S.CEv) -> S.Ev:
+def conc_expected(+i: S.Inst, +p: S.Phase, +j: Bool, +l: S.Level, c: S.CEv) -> S.Ev:
   match c:
     case S.XAdvance{}:
       S.Advance{}
     case S.XAlarm{+t}:
-      S.Stop{m_alarm(i, p, t), Bool.and(m_trig(t), m_win(m_wave(j, p)))}
+      S.Stop{m_pick(m_is_none(l), i, p, t), Bool.and(m_trig(t), m_win(m_wave(j, p)))}
     case S.XLocal{u}:
       S.Local{u}
     case S.XHeatOn{u}:
@@ -659,32 +727,37 @@ def conc_expected(+i: S.Inst, +p: S.Phase, +j: Bool, c: S.CEv) -> S.Ev:
     case S.XReset{}:
       S.Reset{}
 
-# the state concretize reads: only the program phase and the waveform flag matter; the
-# other fields are fixed (the law over every Fin is F1a in LAWS_JETPROT.bend)
-def conc_at(+i: S.Inst, +p: S.Phase, +j: Bool, +c: S.CEv) -> Bool:
-  ev_eq(S.concretize(i, S.Fin{p, j, S.LNone{}, S.DmsIdle{}, True{}, True{}, S.Off{}, S.Off{}}, c), conc_expected(i, p, j, c))
+# the state concretize reads: the program phase, the waveform flag and the level in force (which
+# table an alarm reads, revision 4); the other fields are fixed (the law over every Fin is F1a in
+# LAWS_JETPROT.bend)
+def conc_at(+i: S.Inst, +p: S.Phase, +j: Bool, +l: S.Level, +c: S.CEv) -> Bool:
+  ev_eq(S.concretize(i, S.Fin{p, j, l, S.DmsIdle{}, True{}, True{}, S.Off{}, S.Off{}}, c), conc_expected(i, p, j, l, c))
 
-def conc_alarms(+i: S.Inst, +p: S.Phase, +j: Bool) -> Bool:
-  Bool.and(Bool.and(conc_at(i, p, j, S.XAlarm{S.Slow{}}), conc_at(i, p, j, S.XAlarm{S.Fast{}})),
-  Bool.and(Bool.and(conc_at(i, p, j, S.XAlarm{S.Mhd{}}), conc_at(i, p, j, S.XAlarm{S.MhdB{}})),
-  Bool.and(Bool.and(conc_at(i, p, j, S.XAlarm{S.Mchs{}}), conc_at(i, p, j, S.XAlarm{S.Dhs{}})),
-  Bool.and(conc_at(i, p, j, S.XAlarm{S.BothHs{}}), conc_at(i, p, j, S.XAlarm{S.Blind{}})))))
+def conc_alarms(+i: S.Inst, +p: S.Phase, +j: Bool, +l: S.Level) -> Bool:
+  Bool.and(Bool.and(conc_at(i, p, j, l, S.XAlarm{S.Slow{}}), conc_at(i, p, j, l, S.XAlarm{S.Fast{}})),
+  Bool.and(Bool.and(conc_at(i, p, j, l, S.XAlarm{S.Mhd{}}), conc_at(i, p, j, l, S.XAlarm{S.MhdB{}})),
+  Bool.and(Bool.and(conc_at(i, p, j, l, S.XAlarm{S.Mchs{}}), conc_at(i, p, j, l, S.XAlarm{S.Dhs{}})),
+  Bool.and(conc_at(i, p, j, l, S.XAlarm{S.BothHs{}}), conc_at(i, p, j, l, S.XAlarm{S.Blind{}})))))
 
-def conc_rest(+i: S.Inst, +p: S.Phase, +j: Bool) -> Bool:
-  Bool.and(Bool.and(Bool.and(conc_at(i, p, j, S.XAdvance{}), conc_at(i, p, j, S.XHeartbeat{})),
-                    Bool.and(conc_at(i, p, j, S.XTick{}), conc_at(i, p, j, S.XHeatAck{}))),
-  Bool.and(Bool.and(Bool.and(conc_at(i, p, j, S.XReset{}), conc_at(i, p, j, S.XCommFault{})),
-                    Bool.and(conc_at(i, p, j, S.XLocal{S.Nb{}}), conc_at(i, p, j, S.XLocal{S.Rf{}}))),
-  Bool.and(Bool.and(Bool.and(conc_at(i, p, j, S.XHeatOn{S.Nb{}}), conc_at(i, p, j, S.XHeatOn{S.Rf{}})),
-                    Bool.and(conc_at(i, p, j, S.XHeatOff{S.Nb{}}), conc_at(i, p, j, S.XHeatOff{S.Rf{}}))),
-  Bool.and(Bool.and(conc_at(i, p, j, S.XPlasma{True{}}), conc_at(i, p, j, S.XPlasma{False{}})),
-           Bool.and(conc_at(i, p, j, S.XIp{True{}}), conc_at(i, p, j, S.XIp{False{}}))))))
+def conc_rest(+i: S.Inst, +p: S.Phase, +j: Bool, +l: S.Level) -> Bool:
+  Bool.and(Bool.and(Bool.and(conc_at(i, p, j, l, S.XAdvance{}), conc_at(i, p, j, l, S.XHeartbeat{})),
+                    Bool.and(conc_at(i, p, j, l, S.XTick{}), conc_at(i, p, j, l, S.XHeatAck{}))),
+  Bool.and(Bool.and(Bool.and(conc_at(i, p, j, l, S.XReset{}), conc_at(i, p, j, l, S.XCommFault{})),
+                    Bool.and(conc_at(i, p, j, l, S.XLocal{S.Nb{}}), conc_at(i, p, j, l, S.XLocal{S.Rf{}}))),
+  Bool.and(Bool.and(Bool.and(conc_at(i, p, j, l, S.XHeatOn{S.Nb{}}), conc_at(i, p, j, l, S.XHeatOn{S.Rf{}})),
+                    Bool.and(conc_at(i, p, j, l, S.XHeatOff{S.Nb{}}), conc_at(i, p, j, l, S.XHeatOff{S.Rf{}}))),
+  Bool.and(Bool.and(conc_at(i, p, j, l, S.XPlasma{True{}}), conc_at(i, p, j, l, S.XPlasma{False{}})),
+           Bool.and(conc_at(i, p, j, l, S.XIp{True{}}), conc_at(i, p, j, l, S.XIp{False{}}))))))
 
-def conc_cell(+i: S.Inst, +p: S.Phase, +j: Bool) -> Bool:
-  Bool.and(conc_alarms(i, p, j), conc_rest(i, p, j))
+def conc_cell(+i: S.Inst, +p: S.Phase, +j: Bool, +l: S.Level) -> Bool:
+  Bool.and(conc_alarms(i, p, j, l), conc_rest(i, p, j, l))
+
+def conc_lvl(+i: S.Inst, +p: S.Phase, +j: Bool) -> Bool:
+  Bool.and(Bool.and(conc_cell(i, p, j, S.LNone{}), conc_cell(i, p, j, S.LJtt{})),
+           Bool.and(conc_cell(i, p, j, S.LRtps{}), conc_cell(i, p, j, S.LPtn{})))
 
 def conc_phase(+i: S.Inst, +p: S.Phase) -> Bool:
-  Bool.and(conc_cell(i, p, False{}), conc_cell(i, p, True{}))
+  Bool.and(conc_lvl(i, p, False{}), conc_lvl(i, p, True{}))
 
 def conc_inst(+i: S.Inst) -> Bool:
   Bool.and(conc_phase(i, S.Breakdown{}), Bool.and(conc_phase(i, S.IpRise{}), Bool.and(conc_phase(i, S.Limiter{}),
@@ -692,4 +765,4 @@ def conc_inst(+i: S.Inst) -> Bool:
            conc_phase(i, S.Termination{})))))))
 
 def check_concretize() -> Bool:
-  Bool.and(conc_inst(S.Inst1{}), Bool.and(conc_inst(S.Inst2{}), conc_inst(S.Inst3{})))
+  Bool.and(Bool.and(conc_inst(S.Inst1{}), conc_inst(S.Inst2{})), Bool.and(conc_inst(S.Inst3{}), conc_inst(S.Inst4{})))

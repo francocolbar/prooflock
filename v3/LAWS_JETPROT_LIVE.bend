@@ -1,8 +1,10 @@
 # LAWS_JETPROT_LIVE.bend - bounded RESPONSE over traces (docs/STATUS_2026-09-21.md, blocker 5).
 # Every other law of the case says what never happens (traces_safe) or what one step does. These
 # two say that the protection ARRIVES within a bound, for every trace, every configuration and
-# every value of the counters -- and they are universal in hb_max / ack_max: nothing here reads
-# the certificate, so they hold whatever the limits are set to.
+# every value of the counters. They are stated for S.hb_max() / S.ack_max(), closed definitions
+# (3 and 2) that the checker unfolds, so they are checked for those limits only; the induction only
+# compares the limits with tick counts and counters, so the argument should carry over to other
+# limits, but no checked statement quantifies over them.
 #
 #   watchdog_responds : from any state that satisfies the invariant, a trace with no heartbeat and
 #                       no end of pulse that contains at least hb_max ticks ends with the PTN latched.
@@ -14,7 +16,8 @@
 # taken there as template hypotheses (Bend refuses live code that calls an unfilled law, so the
 # facts cannot be open laws; the two closed theorems watchdog_from / dms_from quantify over them).
 # PROOF_JETPROT_LIVE.bend instantiates them with the laws as proven by reflection in
-# PROOF_JETPROT.bend and is the gate: it re-checks the certificates (11-18 min).
+# PROOF_JETPROT.bend and is the gate: it re-checks the certificates (the longest check of the gate;
+# measured times in README section 4).
 
 import Base
 import ./jetprot.bend as S

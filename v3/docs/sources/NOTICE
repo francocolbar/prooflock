@@ -23,4 +23,15 @@ Third-party material in this directory and its licences
 Not copied (linked only, quoted within fair-quotation limits): Edwards et al. 2019 (FED 146, 277-280, DOI
 10.1016/j.fusengdes.2018.12.045; UKAEA preprint CP(19)30), Reux et al. 2013 (FED 88, 1101-1104, DOI
 10.1016/j.fusengdes.2012.12.026; EFDA-JET preprint CP(12)05/22), Jouve et al. 2011 (ICALEPCS WEPMU018, CC BY 3.0),
-Stuart et al. 2021 (FED 168, 112412).
+Stuart et al. 2021 (FED 168, 112412; the UKAEA repository copy states "All rights reserved": cited with short
+quotes only), and, since revision 4 of the hypothesis register (2026-09-22):
+- G. De Tommasi et al., "Plasma Position and Current Control System Enhancements for the JET ITER-like Wall",
+  preprint EFDA-JET-PR(13)06; its legend says it "may not be further circulated": cited with short quotes only,
+  never copied.
+- A. Neto et al., "Shape Controller Upgrades for the JET ITER-like Wall", Proc. ICALEPCS 2011, paper MOPMU035,
+  pp. 514-517; CC BY 3.0.
+- U. Kruezi et al., "A new Disruption Mitigation System for Deuterium-Tritium Operation at JET", preprint
+  CCFE-PR(17)36; the United Kingdom Atomic Energy Authority is the copyright holder: cited with short quotes only.
+- M.-L. Mayoral et al., "On the Challenge of Plasma Heating with the JET Metallic Wall", arXiv:1309.0948: cited
+  with short quotes only.
+Full records: v3/docs/phase3-sources.md, section 2.

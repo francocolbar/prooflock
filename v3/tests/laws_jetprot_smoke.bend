@@ -1,6 +1,6 @@
 # laws_jetprot_smoke.bend - the jetprot certificates at run time, BEFORE proving: the
 # whole domain for both urgency orders, the initial state, the published table cells, and
-# a sample run through both configuration instances.
+# a sample run through every configuration instance (four since revision 4).
 import Base
 import ./../jetprot.bend as S
 import ./../spec_jetprot.bend as Spec
@@ -35,12 +35,13 @@ def sample() -> List<&2, S.CEv>:
 def report() -> String:
   line("inv_init", S.inv_all(S.init())) ++
   line("table cells (sample)", table_cells()) ++
-  line("check_concretize: 3 instances x 7 program phases x 2 waveform flags x 22 plant events", E.check_concretize()) ++
-  line("check_fin(Ord1): 10752 states x 43 columns, preservation + shapes + P1..P21, D, E, F, IP", E.check_fin(S.Ord1{})) ++
+  line("check_concretize: 4 instances x 7 program phases x 2 waveform flags x 4 levels x 24 plant events", E.check_concretize()) ++
+  line("check_fin(Ord1): 10752 states x 43 columns, preservation + shapes + P1..P21, D, E, F, IP, named PTN/primary laws", E.check_fin(S.Ord1{})) ++
   line("check_fin(Ord2): the same under the swapped urgency order (C3)", E.check_fin(S.Ord2{})) ++
   "sample (instance 1): " ++ S.show_st(S.run_c(S.Inst1{}, sample(), S.init())) ++ "\n" ++
   "sample (instance 2): " ++ S.show_st(S.run_c(S.Inst2{}, sample(), S.init())) ++ "\n" ++
   "sample (instance 3): " ++ S.show_st(S.run_c(S.Inst3{}, sample(), S.init())) ++ "\n" ++
+  "sample (instance 4): " ++ S.show_st(S.run_c(S.Inst4{}, sample(), S.init())) ++ "\n" ++
   line("sample end state is safe", S.safe(S.fin_of(S.run_c(S.Inst1{}, sample(), S.init())))) ++
   line("sample end state satisfies inv_all", S.inv_all(S.run_c(S.Inst1{}, sample(), S.init())))
 

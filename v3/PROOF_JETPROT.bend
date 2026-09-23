@@ -8,6 +8,8 @@
 #
 # Revision 2026-09-21 (blocker 4): eight control fields, 10 752 control states x 43 columns
 # (2 x 462 336 cells), seven property groups, fourteen event pairs, 112 slices.
+# Revision 4 (2026-09-22): the group g_j of the named PTN/primary-stop laws (P1a, P1b, D1a, D1b,
+# PIW-after-PTN) closes g_f.
 import Base
 import ./jetprot.bend as S
 import ./spec_jetprot.bend as Spec
@@ -1067,11 +1069,15 @@ def cp_e11(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_e11
 
 # ---------------------------------------------------------------------------
 # The fidelity conjuncts: g_f = and(pr_f1b, and(pr_f1d, and(pr_f1e, and(pr_f2a, and(pr_f2d, and(pr_f3b,
-#   and(pr_f4, and(pr_ip1, and(pr_ip3, pr_ip4)))))))))
+#   and(pr_f4, and(pr_ip1, and(pr_ip3, and(pr_ip4, g_j))))))))))
+# and the group g_j of the named PTN/primary-stop laws (revision 4): g_j = and(pr_p1a, and(pr_p1b, and(pr_d1a, and(pr_d1b, pr_piw_noop))))
 # ---------------------------------------------------------------------------
 
+def tf10(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
+  Bool.and(Spec.pr_ip4(f, e, f2), E.g_j(f, e, bt, bh, f2))
+
 def tf9(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
-  Bool.and(Spec.pr_ip3(e, f2), Spec.pr_ip4(f, e, f2))
+  Bool.and(Spec.pr_ip3(e, f2), tf10(f, e, bt, bh, f2))
 
 def tf8(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
   Bool.and(Spec.pr_ip1(f, f2), tf9(f, e, bt, bh, f2))
@@ -1160,13 +1166,63 @@ def cp_ip1(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_ip1
   +f2 = S.step_fin(o, f, e, bt, bh)
   and_l(Spec.pr_ip1(f, f2), tf9(f, e, bt, bh, f2), cf8(o, f, e, bt, bh))
 
+def cf10(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tf10(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_r(Spec.pr_ip3(e, f2), tf10(f, e, bt, bh, f2), cf9(o, f, e, bt, bh))
+
 def cp_ip3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_ip3(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_l(Spec.pr_ip3(e, f2), Spec.pr_ip4(f, e, f2), cf9(o, f, e, bt, bh))
+  and_l(Spec.pr_ip3(e, f2), tf10(f, e, bt, bh, f2), cf9(o, f, e, bt, bh))
 
 def cp_ip4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_ip4(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
   +f2 = S.step_fin(o, f, e, bt, bh)
-  and_r(Spec.pr_ip3(e, f2), Spec.pr_ip4(f, e, f2), cf9(o, f, e, bt, bh))
+  and_l(Spec.pr_ip4(f, e, f2), E.g_j(f, e, bt, bh, f2), cf10(o, f, e, bt, bh))
+
+# the group g_j of the named PTN/primary-stop laws (revision 4) and its successive tails
+def cg_j(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {E.g_j(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_r(Spec.pr_ip4(f, e, f2), E.g_j(f, e, bt, bh, f2), cf10(o, f, e, bt, bh))
+
+def tj4(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
+  Bool.and(Spec.pr_d1b(f, e, f2), Spec.pr_piw_noop(f, e, bt, bh, f2))
+
+def tj3(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
+  Bool.and(Spec.pr_d1a(e, f2), tj4(f, e, bt, bh, f2))
+
+def tj2(+f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool, +f2: S.Fin) -> Bool:
+  Bool.and(Spec.pr_p1b(f, e, f2), tj3(f, e, bt, bh, f2))
+
+def cj2(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tj2(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_r(Spec.pr_p1a(f, e, f2), tj2(f, e, bt, bh, f2), cg_j(o, f, e, bt, bh))
+
+def cj3(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tj3(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_r(Spec.pr_p1b(f, e, f2), tj3(f, e, bt, bh, f2), cj2(o, f, e, bt, bh))
+
+def cj4(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {tj4(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_r(Spec.pr_d1a(e, f2), tj4(f, e, bt, bh, f2), cj3(o, f, e, bt, bh))
+
+def cp_p1a(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p1a(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_l(Spec.pr_p1a(f, e, f2), tj2(f, e, bt, bh, f2), cg_j(o, f, e, bt, bh))
+
+def cp_p1b(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_p1b(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_l(Spec.pr_p1b(f, e, f2), tj3(f, e, bt, bh, f2), cj2(o, f, e, bt, bh))
+
+def cp_d1a(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d1a(e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_l(Spec.pr_d1a(e, f2), tj4(f, e, bt, bh, f2), cj3(o, f, e, bt, bh))
+
+def cp_d1b(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_d1b(f, e, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_l(Spec.pr_d1b(f, e, f2), Spec.pr_piw_noop(f, e, bt, bh, f2), cj4(o, f, e, bt, bh))
+
+def cp_piw_noop(+o: S.Ord, +f: S.Fin, +e: S.Ev, +bt: Bool, +bh: Bool) -> {Spec.pr_piw_noop(f, e, bt, bh, S.step_fin(o, f, e, bt, bh)) == True{} : Bool}:
+  +f2 = S.step_fin(o, f, e, bt, bh)
+  and_r(Spec.pr_d1b(f, e, f2), Spec.pr_piw_noop(f, e, bt, bh, f2), cj4(o, f, e, bt, bh))
 
 # ---------------------------------------------------------------------------
 # From a cell to the counter bound: a Reset restarts at 0, a Keep inherits the old
@@ -1432,10 +1488,28 @@ def Laws.ip3_ip_is_input(o, f, e, bt, bh):
 def Laws.ip4_ip_frame(o, f, e, bt, bh):
   cp_ip4(o, f, e, bt, bh)
 
+# the named PTN/primary-stop laws of revision 4 (P1a, D1b: JET facts; P1b, D1a, PIW-after-PTN:
+# mixed), decided by the certificate (group g_j)
+def Laws.p1a_ptn_latched(o, f, e, bt, bh):
+  cp_p1a(o, f, e, bt, bh)
+
+def Laws.p1b_stop_never_cleared(o, f, e, bt, bh):
+  cp_p1b(o, f, e, bt, bh)
+
+def Laws.d1a_ptn_honoured(o, f, e, bt, bh):
+  cp_d1a(o, f, e, bt, bh)
+
+def Laws.d1b_primary_honoured(o, f, e, bt, bh):
+  cp_d1b(o, f, e, bt, bh)
+
+def Laws.piw_after_ptn_is_noop(o, f, e, bt, bh):
+  cp_piw_noop(o, f, e, bt, bh)
+
 # ---------------------------------------------------------------------------
 # The three fidelity laws proven directly: F1c by construction of wave_of, F1a by
-# computation on the concrete layer (3 instances x 8 triggers x 7 program phases), IP2
-# through the abstract demand law P16
+# computation on the concrete layer (4 instances x 8 triggers x 7 program phases, for the
+# primary and for the secondary table), IP2 through the abstract demand law P16; and the
+# concrete law of revision 4, inst4_second_alarm_ptn, through D1a
 # ---------------------------------------------------------------------------
 
 # F1c: wave_go(j, p) is Termination or p itself, and phase_le is reflexive on each phase
@@ -1475,8 +1549,9 @@ def Laws.f1c_wave_ahead(f):
     case S.Fin{p, j, l, d, pl, ip, nb, rf}:
       f1c_go(j, p)
 
-# F1a: with the state split into its fields, concretize computes to the Stop on
-# masked_table(i, p, t); each (instance, trigger, program phase) cell is decided by computation
+# F1a: with the state split into its fields (and the level in force), concretize computes to the
+# Stop on masked_table(i, p, t) (no stop in force) or sec_table(i, p, t) (a stop in force); each
+# (instance, program phase, trigger) cell of either table is decided by computation
 def f1a_go(i: S.Inst, p: S.Phase, t: S.Trig) -> {Spec.lvl_eq(S.masked_table(i, p, t), E.m_alarm(i, p, t)) == True{} : Bool}:
   match i p t:
     case S.Inst1{} S.Breakdown{} S.Slow{}:
@@ -1815,24 +1890,1103 @@ def f1a_go(i: S.Inst, p: S.Phase, t: S.Trig) -> {Spec.lvl_eq(S.masked_table(i, p
       {==}
     case S.Inst3{} S.Termination{} S.Blind{}:
       {==}
+    case S.Inst4{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Blind{}:
+      {==}
+
+# F1a under a stop in force: the secondary table, cell by cell against the enumerator's rule
+def f1a_sec(i: S.Inst, p: S.Phase, t: S.Trig) -> {Spec.lvl_eq(S.sec_table(i, p, t), E.m_sec(i, p, t)) == True{} : Bool}:
+  match i p t:
+    case S.Inst1{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst1{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst2{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst3{} S.Termination{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Breakdown{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.IpRise{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Limiter{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Xpoint{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Heating1{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Heating2{} S.Blind{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Slow{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Fast{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Mhd{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.MhdB{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Mchs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Dhs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.BothHs{}:
+      {==}
+    case S.Inst4{} S.Termination{} S.Blind{}:
+      {==}
 
 def Laws.f1a_table_reads_prog(i, f, t):
   match f:
     case S.Fin{p, j, l, d, pl, ip, nb, rf}:
-      f1a_go(i, p, t)
+      match l:
+        case S.LNone{}:
+          f1a_go(i, p, t)
+        case S.LJtt{}:
+          f1a_sec(i, p, t)
+        case S.LRtps{}:
+          f1a_sec(i, p, t)
+        case S.LPtn{}:
+          f1a_sec(i, p, t)
 
-# IP2: step_c on St{f, 0n, 0n} is step_fin(Ord1, f, Stop{masked_table(i, prog, t), dms_req(wave, t)}, True, True)
+# IP2: step_c on St{f, 0n, 0n} is step_fin(Ord1, f, Stop{req, dms_req(wave, t)}, True, True)
 # (both counter verdicts compute to True at 0n), so P16 applies with its hypothesis assembled
-# from the four given facts
-def Laws.ip2_arms_on_demand(i, f, t, h_ip, h_idle, h_ptn, h_req):
-  +req = S.masked_table(i, S.prog_of(f), t)
-  +d = S.dms_req(S.wave_of(f), t)
+# from the four given facts. Revision 4: req is masked_table(i, prog, t) with no stop in force
+# and sec_table(i, prog, t) with one, so the proof splits on the level; under a stop the PTN
+# request carries over because every secondary table keeps a PTN primary entry (sec_ptn_up).
+def sec_ptn_lem(l: S.Level, h: {S.is_ptn(l) == True{} : Bool}) -> {S.is_ptn(S.sec_ptn(l)) == True{} : Bool}:
+  match l:
+    case S.LNone{}:
+      clash_ft({S.is_ptn(S.sec_ptn(S.LNone{})) == True{} : Bool}, h)
+    case S.LJtt{}:
+      clash_ft({S.is_ptn(S.sec_ptn(S.LJtt{})) == True{} : Bool}, h)
+    case S.LRtps{}:
+      clash_ft({S.is_ptn(S.sec_ptn(S.LRtps{})) == True{} : Bool}, h)
+    case S.LPtn{}:
+      {==}
+
+def sec_ptn_up(i: S.Inst, +p: S.Phase, +t: S.Trig, h: {S.is_ptn(S.masked_table(i, p, t)) == True{} : Bool}) -> {S.is_ptn(S.sec_table(i, p, t)) == True{} : Bool}:
+  match i:
+    case S.Inst1{}:
+      h
+    case S.Inst2{}:
+      h
+    case S.Inst3{}:
+      h
+    case S.Inst4{}:
+      sec_ptn_lem(S.masked_table(S.Inst4{}, p, t), h)
+
+# the demand step for a given request req (the primary or the secondary entry), through P16
+def ip2_req(+f: S.Fin, +req: S.Level, +d: Bool,
+            h_ip: {S.ip_of(f) == True{} : Bool}, h_idle: {S.is_idle(S.dms_of(f)) == True{} : Bool},
+            h_ptn: {S.is_ptn(req) == True{} : Bool}, h_req: {d == True{} : Bool})
+            -> {S.is_armed(S.dms_of(S.step_fin(S.Ord1{}, f, S.Stop{req, d}, True{}, True{}))) == True{} : Bool}:
   implies_e(Bool.and(S.is_idle(S.dms_of(f)), Bool.and(S.ip_of(f), Bool.and(S.is_ptn(req), d))),
             S.is_armed(S.dms_of(S.step_fin(S.Ord1{}, f, S.Stop{req, d}, True{}, True{}))),
             Laws.dms_armed_on_demand(S.Ord1{}, f, S.Stop{req, d}, True{}, True{}),
             and_intro(S.is_idle(S.dms_of(f)), Bool.and(S.ip_of(f), Bool.and(S.is_ptn(req), d)), h_idle,
               and_intro(S.ip_of(f), Bool.and(S.is_ptn(req), d), h_ip,
                 and_intro(S.is_ptn(req), d, h_ptn, h_req))))
+
+def Laws.ip2_arms_on_demand(i, f, t, h_ip, h_idle, h_ptn, h_req):
+  match f:
+    case S.Fin{+p, +j, l, +d, +pl, +ip, +nb, +rf}:
+      match l:
+        case S.LNone{}:
+          ip2_req(S.Fin{p, j, S.LNone{}, d, pl, ip, nb, rf}, S.masked_table(i, p, t), S.dms_req(S.wave_go(j, p), t), h_ip, h_idle, h_ptn, h_req)
+        case S.LJtt{}:
+          ip2_req(S.Fin{p, j, S.LJtt{}, d, pl, ip, nb, rf}, S.sec_table(i, p, t), S.dms_req(S.wave_go(j, p), t), h_ip, h_idle, sec_ptn_up(i, p, t, h_ptn), h_req)
+        case S.LRtps{}:
+          ip2_req(S.Fin{p, j, S.LRtps{}, d, pl, ip, nb, rf}, S.sec_table(i, p, t), S.dms_req(S.wave_go(j, p), t), h_ip, h_idle, sec_ptn_up(i, p, t, h_ptn), h_req)
+        case S.LPtn{}:
+          ip2_req(S.Fin{p, j, S.LPtn{}, d, pl, ip, nb, rf}, S.sec_table(i, p, t), S.dms_req(S.wave_go(j, p), t), h_ip, h_idle, sec_ptn_up(i, p, t, h_ptn), h_req)
+
+# inst4_second_alarm_ptn (revision 4): split the state down to the level in force, the program
+# phase and the trigger, so that concretize computes the request. Under a soft stop instance 4
+# asks for sec_table(Inst4, prog, t) = LPtn whenever the primary entry is not None (h_cfg refutes
+# the other cells), and D1a (a PTN request is honoured from any state) gives the PTN level; the
+# DMS bit and the counter verdicts stay symbolic.
+def d1a_level(+f: S.Fin, +d: Bool, +bt: Bool, +bh: Bool) -> {S.is_ptn(S.level_of(S.step_fin(S.Ord1{}, f, S.Stop{S.LPtn{}, d}, bt, bh))) == True{} : Bool}:
+  +f2 = S.step_fin(S.Ord1{}, f, S.Stop{S.LPtn{}, d}, bt, bh)
+  and_l(S.is_ptn(S.level_of(f2)), Bool.and(S.unpowered(S.nb_of(f2)), S.unpowered(S.rf_of(f2))),
+    Laws.d1a_ptn_honoured(S.Ord1{}, f, S.Stop{S.LPtn{}, d}, bt, bh))
+
+def i4_go(l: S.Level, p: S.Phase, t: S.Trig, +j: Bool, +d: S.Dms, +pl: Bool, +ip: Bool, +nb: S.Heat, +rf: S.Heat, +hb: Nat, +tack: Nat,
+          h_soft: {S.is_soft(l) == True{} : Bool}, h_cfg: {S.is_none(S.masked_table(S.Inst4{}, p, t)) == False{} : Bool})
+          -> {S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{p, j, l, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{t})))) == True{} : Bool}:
+  match l p t:
+    case S.LNone{} S.Breakdown{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Breakdown{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.IpRise{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Limiter{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Xpoint{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating1{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Heating2{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LNone{} S.Termination{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LNone{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LJtt{} S.Breakdown{} S.Slow{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Breakdown{} S.Fast{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Breakdown{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Breakdown{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Breakdown{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Breakdown{} S.Dhs{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Breakdown{} S.BothHs{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Breakdown{} S.Blind{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.IpRise{} S.Slow{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.IpRise{} S.Fast{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.IpRise{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.IpRise{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.IpRise{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.IpRise{} S.Dhs{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.IpRise{} S.BothHs{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.IpRise{} S.Blind{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Limiter{} S.Slow{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Limiter{} S.Fast{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Limiter{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Limiter{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Limiter{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Limiter{} S.Dhs{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Limiter{} S.BothHs{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Limiter{} S.Blind{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Xpoint{} S.Slow{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Xpoint{} S.Fast{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Xpoint{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Xpoint{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Xpoint{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Xpoint{} S.Dhs{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Xpoint{} S.BothHs{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Xpoint{} S.Blind{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating1{} S.Slow{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating1{} S.Fast{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating1{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Heating1{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Heating1{} S.Mchs{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Mchs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating1{} S.Dhs{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating1{} S.BothHs{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating1{} S.Blind{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating2{} S.Slow{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating2{} S.Fast{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating2{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Heating2{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Heating2{} S.Mchs{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Mchs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating2{} S.Dhs{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating2{} S.BothHs{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Heating2{} S.Blind{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Termination{} S.Slow{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Termination{} S.Fast{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Termination{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Termination{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LJtt{} S.Termination{} S.Mchs{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Mchs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Termination{} S.Dhs{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Termination{} S.BothHs{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LJtt{} S.Termination{} S.Blind{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LJtt{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Breakdown{} S.Slow{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Breakdown{} S.Fast{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Breakdown{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Breakdown{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Breakdown{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Breakdown{} S.Dhs{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Breakdown{} S.BothHs{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Breakdown{} S.Blind{}:
+      d1a_level(S.Fin{S.Breakdown{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Breakdown{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.IpRise{} S.Slow{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.IpRise{} S.Fast{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.IpRise{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.IpRise{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.IpRise{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.IpRise{} S.Dhs{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.IpRise{} S.BothHs{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.IpRise{} S.Blind{}:
+      d1a_level(S.Fin{S.IpRise{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.IpRise{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Limiter{} S.Slow{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Limiter{} S.Fast{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Limiter{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Limiter{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Limiter{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Limiter{} S.Dhs{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Limiter{} S.BothHs{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Limiter{} S.Blind{}:
+      d1a_level(S.Fin{S.Limiter{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Limiter{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Xpoint{} S.Slow{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Xpoint{} S.Fast{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Xpoint{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Xpoint{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Xpoint{} S.Mchs{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Xpoint{} S.Dhs{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Xpoint{} S.BothHs{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Xpoint{} S.Blind{}:
+      d1a_level(S.Fin{S.Xpoint{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Xpoint{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating1{} S.Slow{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating1{} S.Fast{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating1{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Heating1{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Heating1{} S.Mchs{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Mchs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating1{} S.Dhs{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating1{} S.BothHs{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating1{} S.Blind{}:
+      d1a_level(S.Fin{S.Heating1{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating1{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating2{} S.Slow{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating2{} S.Fast{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating2{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Heating2{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Heating2{} S.Mchs{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Mchs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating2{} S.Dhs{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating2{} S.BothHs{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Heating2{} S.Blind{}:
+      d1a_level(S.Fin{S.Heating2{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Heating2{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Termination{} S.Slow{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Slow{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Termination{} S.Fast{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Fast{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Termination{} S.Mhd{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Termination{} S.MhdB{}:
+      clash_tf({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_cfg)
+    case S.LRtps{} S.Termination{} S.Mchs{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Mchs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Termination{} S.Dhs{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Dhs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Termination{} S.BothHs{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.BothHs{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LRtps{} S.Termination{} S.Blind{}:
+      d1a_level(S.Fin{S.Termination{}, j, S.LRtps{}, d, pl, ip, nb, rf}, S.dms_req(S.wave_go(j, S.Termination{}), S.Blind{}), Nat.is_lt(1n+tack, S.ack_max()), Nat.is_lt(1n+hb, S.hb_max()))
+    case S.LPtn{} S.Breakdown{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Breakdown{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Breakdown{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.IpRise{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.IpRise{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Limiter{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Limiter{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Xpoint{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Xpoint{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating1{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating1{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Heating2{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Heating2{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.Slow{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Slow{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.Fast{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Fast{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.Mhd{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mhd{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.MhdB{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.MhdB{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.Mchs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Mchs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.Dhs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Dhs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.BothHs{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.BothHs{}})))) == True{} : Bool}, h_soft)
+    case S.LPtn{} S.Termination{} S.Blind{}:
+      clash_ft({S.is_ptn(S.level_of(S.fin_of(S.step_c(S.Inst4{}, S.St{S.Fin{S.Termination{}, j, S.LPtn{}, d, pl, ip, nb, rf}, hb, tack}, S.XAlarm{S.Blind{}})))) == True{} : Bool}, h_soft)
+
+def Laws.inst4_second_alarm_ptn(s, t, h_soft, h_cfg):
+  match s:
+    case S.St{S.Fin{p, +j, l, +d, +pl, +ip, +nb, +rf}, +hb, +tack}:
+      i4_go(l, p, t, j, d, pl, ip, nb, rf, hb, tack, h_soft, h_cfg)
 
 # ---------------------------------------------------------------------------
 # V1: the verdict domain. Outside the Tick arm, step_fin, upd_hb and upd_tack do not read

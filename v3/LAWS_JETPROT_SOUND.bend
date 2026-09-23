@@ -2,7 +2,7 @@
 # (docs/STATUS_2026-09-21.md, blocker 1). Every frame law of LAWS_JETPROT.bend concludes
 # `Spec.fin_eq(f, f2) == True{}`, `Spec.unit_eq(u, u2) == True{}` or `Spec.lvl_eq(l, l2) == True{}`:
 # a Bool decided by comparing ranks. Until now nothing tied that Bool to the propositional
-# equality, so a predicate that confused two constructors (Off with Inhibited, say) would have
+# equality, so a predicate that confused two constructors (Reduced with On, say) would have
 # made those laws vacuous without Bend noticing. These laws are the bridge: each says that the
 # predicate answering True{} forces the two values to be the same term. Proven in
 # PROOF_JETPROT_SOUND.bend by exhaustive case split, no induction. `lvl_le_sound` is the

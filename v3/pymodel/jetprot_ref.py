@@ -1,5 +1,6 @@
 """jetprot_ref.py - a Python re-execution of the model of docs/phase3-design.md §1 (rules 1-12,
-counter commands, the model invariant), written from the design document. This module is the
+counter commands, the model invariant): a port of the Bend model, not an independent implementation
+written from the design document (docs/phase3-design.md §9a H23). This module is the
 MODEL only: the laws, the state corollaries and the conformance checks live in jetprot_laws.py
 and read spec_consts.py; this file must never import spec_consts (blocker 2). Used by recheck.py for:
   C5  the certificate re-check: every cell of the Bend model (through bridge.mjs) is compared
@@ -11,8 +12,13 @@ Revision 2026-09-21 (blocker 4 of docs/STATUS_2026-09-21.md): the control state 
 program/waveform split of F1 (`prog` indexes Table 1, `jtt` says the termination waveform is
 running), the partial-power unit state `Reduced` of F2 (and lost `Inhibited`, which no pulse event
 produces once a local alarm reduces instead of latching: the pre-pulse disabling of R-10 is
-configuration, A-26), the DMV current threshold `ip` (R-14, formerly A-22) and the configuration
+configuration, A-26), the DMV arming verdict `ip` (R-14, A-22) and the configuration
 masks of F3 (carried by the CommFault event, `en`).
+
+Revision 4 (2026-09-22): the secondary stop response ([S1] R-6) in the concrete layer. An alarm
+that arrives while a stop is in force reads the instance's secondary table (`sec_table`); instances
+1-3 keep the reading of revisions 1-3 (the primary entry again), instance 4 (illustrative, A-35)
+asks for the PTN wherever its primary entry asks for any response. The abstract step is unchanged.
 
 State: a tuple (prog, jtt, level, dms, plasma, ip, nb, rf); indices P, J, L, D, PL, IP, NB, RF.
 Abstract events: tuples
@@ -32,8 +38,8 @@ HB_MAX, ACK_MAX = 3, 2
 RANK = {1: {"LNone": 0, "LJtt": 1, "LRtps": 2, "LPtn": 3}, 2: {"LNone": 0, "LJtt": 2, "LRtps": 1, "LPtn": 3}}
 P, J, L, D, PL, IP, NB, RF = range(8)
 INIT = ("Breakdown", False, "LNone", "DmsIdle", False, False, "Off", "Off")
-# the masks of the three configuration instances: (comm check enabled, blind alarms enabled)
-MASKS = {1: (True, True), 2: (True, True), 3: (False, False)}
+# the masks of the four configuration instances: (comm check enabled, blind alarms enabled)
+MASKS = {1: (True, True), 2: (True, True), 3: (False, False), 4: (True, True)}
 
 MUT = {k: False for k in ["deescalation", "jtt_no_ramp", "commfault_no_deenergize", "dms_on_soft", "rearm_restarts_ack",
                           "rtps_no_ramp", "deenergize_keeps_reduced", "advance_under_ptn", "reset_while_armed",
@@ -103,7 +109,7 @@ def to_ptn(s):
 
 
 def arm(s):
-    """arm the DMS from Idle, only while the plasma current is above the DMV threshold (R-14)"""
+    """arm the DMS from Idle, only with the DMV arming verdict (R-14, A-22)"""
     p, j, l, d, pl, ip, nb, rf = s
     if MUT["dms_never_armed"] or not ip:
         return s
@@ -268,7 +274,7 @@ def table1(p, t):
 def table(inst, p, t):
     if inst == 2 and t in ("Mhd", "MhdB") and PHASES.index(p) >= 3:
         return "LPtn"
-    return table1(p, t)
+    return table1(p, t)         # instances 1, 3 and 4 read Table 1
 
 
 def mask(inst):
@@ -282,16 +288,28 @@ def masked_table(inst, p, t):
     return table(inst, p, t)
 
 
+def sec_table(inst, p, t):
+    """the secondary stop response (revision 4): what an alarm asks for while a stop is in force.
+    Instances 1-3: the masked primary entry again. Instance 4 (ILLUSTRATIVE, A-35): the PTN
+    wherever the primary entry asks for any response."""
+    m = masked_table(inst, p, t)
+    if inst == 4:
+        return "LNone" if m == "LNone" else "LPtn"
+    return m
+
+
 def dms_req(p, t):
     return t in ("Fast", "Mhd", "MhdB") and PHASES.index(p) >= 3
 
 
 def concretize(inst, s, c):
-    """the abstract event of a concrete one, through the instance: Table 1 is indexed by the PROGRAM
-    phase (A-24), the DMS window by the waveform phase, the checks by the instance's masks"""
+    """the abstract event of a concrete one, through the instance: Table 1 (the primary table with no
+    stop in force, the secondary table with one: revision 4) is indexed by the PROGRAM phase (A-24),
+    the DMS window by the waveform phase, the checks by the instance's masks"""
     k = c[0]
     if k == "XAlarm":
-        return ("Stop", masked_table(inst, s[P], c[1]), dms_req(wave(s), c[1]))
+        req = masked_table(inst, s[P], c[1]) if s[L] == "LNone" else sec_table(inst, s[P], c[1])
+        return ("Stop", req, dms_req(wave(s), c[1]))
     if k == "XCommFault":
         return ("CommFault", False, mask(inst)[0])
     if k == "XTick":
